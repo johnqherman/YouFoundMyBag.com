@@ -57,6 +57,25 @@ export default function BagCreated({ bagData, onCreateAnother }: Props) {
             </button>
           </div>
 
+          <div className="bg-amber-900/30 border border-amber-500/50 rounded-xl p-4 mb-6">
+            <div className="flex items-start space-x-3">
+              <span className="text-amber-400 text-xl">⚠️</span>
+              <div className="text-left">
+                <p className="text-amber-200 font-medium mb-2">
+                  Important: Save this information!
+                </p>
+                <p className="text-amber-100 text-sm leading-relaxed">
+                  <strong>
+                    Print the QR code <em>or</em> write down the short link
+                    above.
+                  </strong>{' '}
+                  Either works! If you can’t print the QR code, make sure to
+                  write down the link so a finder can safely contact you.
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div className="space-y-4">
             <button onClick={downloadQR} className="btn-primary w-full">
               📥 Download QR Code

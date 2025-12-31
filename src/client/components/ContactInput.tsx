@@ -239,7 +239,7 @@ export default function ContactInput({
             onChange={(e) => handleDirectDisplayChange(e.target.checked)}
             className="mr-2"
           />
-          Show contact info directly (less private, but faster)
+          Show contact info (less secure)
         </label>
       </div>
     </div>

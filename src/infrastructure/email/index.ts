@@ -46,7 +46,7 @@ Message: "${message}"
 
 ${senderInfo ? `Contact info: ${senderInfo}` : ''}
 
-This message was sent through YouFoundMyBag.com
+Message sent via YouFoundMyBag.com
   `;
 
   for (const contact of emailContacts) {
