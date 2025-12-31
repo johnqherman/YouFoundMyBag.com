@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: system-ui, sans-serif;
+  }
+  body {
+    font-feature-settings: 'kern' 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-2xl shadow-lg transition-colors duration-200 focus:outline-none focus:ring-4 focus:ring-blue-300;
+  }
+
+  .btn-secondary {
+    @apply bg-neutral-800 hover:bg-neutral-700 text-neutral-100 font-semibold py-3 px-6 rounded-2xl shadow-lg transition-colors duration-200 focus:outline-none focus:ring-4 focus:ring-neutral-500;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 bg-neutral-900 border border-neutral-700 rounded-xl text-neutral-100 placeholder-neutral-400 focus:outline-none focus:ring-4 focus:ring-blue-300 focus:border-blue-500;
+  }
+
+  .card {
+    @apply bg-neutral-900 rounded-2xl shadow-lg p-6;
+  }
+
+  .finder-page {
+    @apply bg-white text-black;
+  }
+
+  .finder-btn {
+    @apply bg-black text-white font-bold py-4 px-8 rounded-2xl shadow-lg text-lg transition-colors duration-200 hover:bg-neutral-800 focus:outline-none focus:ring-4 focus:ring-neutral-300;
+  }
+
+  .finder-card {
+    @apply bg-white border-2 border-neutral-200 rounded-2xl shadow-lg p-6;
+  }
+
+  .iti {
+    --iti-border-color: theme('colors.neutral.700') !important;
+    --iti-dialcode-color: theme('colors.neutral.400') !important;
+    --iti-dropdown-bg: theme('colors.neutral.900') !important;
+    --iti-arrow-color: theme('colors.neutral.400') !important;
+    --iti-hover-color: theme('colors.neutral.700') !important;
+    --iti-search-icon-color: theme('colors.neutral.400') !important;
+  }
+
+  .iti__dropdown-content {
+    @apply bg-neutral-900 text-neutral-100 !important;
+    border-color: theme('colors.neutral.700') !important;
+  }
+
+  .iti__country {
+    @apply text-neutral-100 !important;
+  }
+
+  .iti__country:hover,
+  .iti__country.iti__highlight {
+    @apply bg-neutral-700 !important;
+  }
+
+  .iti__country-name,
+  .iti__dial-code {
+    @apply text-neutral-100 !important;
+  }
+
+  .iti__search-input {
+    @apply bg-neutral-900 border-neutral-700 text-neutral-100 placeholder-neutral-400 !important;
+  }
+
+  .iti__search-input:focus {
+    @apply border-blue-500 ring-blue-300 !important;
+  }
+
+  .iti__search-icon svg {
+    stroke: theme('colors.neutral.400') !important;
+  }
+
+  .iti__no-results {
+    @apply text-neutral-400 !important;
+  }
+}

@@ -1,0 +1,196 @@
+import { useState, useEffect } from 'react';
+import { api } from '../utils/api';
+
+interface Props {
+  shortId: string;
+  ownerName?: string;
+  onClose: () => void;
+}
+
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (element: string, options: any) => string;
+      reset: (widgetId?: string) => void;
+    };
+  }
+}
+
+export default function ContactModal({ shortId, ownerName, onClose }: Props) {
+  const [message, setMessage] = useState('');
+  const [senderInfo, setSenderInfo] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    const existingScript = document.querySelector(
+      'script[src="https://challenges.cloudflare.com/turnstile/v0/api.js"]'
+    );
+
+    const renderWidget = () => {
+      if (window.turnstile) {
+        const container = document.getElementById('turnstile-widget');
+        if (container) {
+          container.innerHTML = '';
+        }
+
+        window.turnstile.render('#turnstile-widget', {
+          sitekey:
+            (import.meta as any).env?.VITE_CLOUDFLARE_TURNSTILE_SITE_KEY ||
+            '1x00000000000000000000AA',
+          callback: (token: string) => setTurnstileToken(token),
+        });
+      }
+    };
+
+    if (existingScript) {
+      if (window.turnstile) {
+        renderWidget();
+      } else {
+        existingScript.addEventListener('load', renderWidget);
+      }
+    } else {
+      const script = document.createElement('script');
+      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+      script.async = true;
+      script.onload = renderWidget;
+      document.head.appendChild(script);
+    }
+
+    return () => {
+      if (window.turnstile) {
+        window.turnstile.reset();
+      }
+    };
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!turnstileToken || !message.trim()) {
+      setError('Please complete all fields and security verification');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await api.sendMessage(shortId, {
+        from_message: message.trim(),
+        sender_info: senderInfo.trim() || undefined,
+        turnstile_token: turnstileToken,
+      });
+      setSuccess(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to send message');
+      if (window.turnstile) {
+        window.turnstile.reset();
+        setTurnstileToken(null);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (success) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="bg-white rounded-2xl p-6 w-full max-w-md">
+          <div className="text-center">
+            <div className="text-6xl mb-4">✅</div>
+            <h2 className="text-2xl font-bold text-green-600 mb-4">
+              Message Sent!
+            </h2>
+            <p className="text-neutral-700 mb-6">
+              Your message has been sent to {ownerName || 'the owner'}.
+            </p>
+            <button onClick={onClose} className="finder-btn w-full">
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-2xl p-6 w-full max-w-md">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-bold text-black">
+            Contact {ownerName || 'Owner'}
+          </h2>
+          <button
+            onClick={onClose}
+            className="text-neutral-500 hover:text-neutral-700 text-2xl"
+          >
+            ×
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label
+              htmlFor="message"
+              className="block text-sm font-medium text-black mb-2"
+            >
+              Your message *
+            </label>
+            <textarea
+              id="message"
+              rows={4}
+              placeholder="Hi! I found your bag. Let me know how to return it."
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-black"
+              maxLength={1000}
+              required
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="senderInfo"
+              className="block text-sm font-medium text-black mb-2"
+            >
+              Your contact info (optional)
+            </label>
+            <input
+              id="senderInfo"
+              type="text"
+              placeholder="Your email or phone"
+              value={senderInfo}
+              onChange={(e) => setSenderInfo(e.target.value)}
+              className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-black"
+            />
+          </div>
+
+          <div id="turnstile-widget"></div>
+
+          {error && (
+            <div className="bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded-lg">
+              {error}
+            </div>
+          )}
+
+          <div className="flex space-x-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 py-3 px-4 bg-neutral-200 text-neutral-700 rounded-lg"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading || !turnstileToken}
+              className="flex-1 py-3 px-4 bg-black text-white rounded-lg disabled:opacity-50"
+            >
+              {loading ? 'Sending...' : 'Send Message'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
