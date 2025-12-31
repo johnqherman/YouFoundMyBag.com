@@ -1,4 +1,5 @@
 import { pool, withTransaction } from '../../infrastructure/database/index.js';
+import type { CreateBagRequest } from '../../client/types/index.js';
 
 export interface Bag {
   id: string;
@@ -16,7 +17,10 @@ export interface Contact {
   allow_direct_display: boolean;
 }
 
-export async function createBag(data: any, shortId: string): Promise<Bag> {
+export async function createBag(
+  data: CreateBagRequest,
+  shortId: string
+): Promise<Bag> {
   return withTransaction(async (client) => {
     const bagResult = await client.query(
       'INSERT INTO bags (short_id, display_name, owner_message) VALUES ($1, $2, $3) RETURNING *',
@@ -57,11 +61,17 @@ export async function getFinderPageData(shortId: string) {
     [bag.id]
   );
 
-  const contactOptions = contactsResult.rows.map((contact: any) => ({
-    type: contact.type,
-    label: getContactLabel(contact.type),
-    direct_contact: contact.allow_direct_display ? contact.value : undefined,
-  }));
+  const contactOptions = contactsResult.rows.map(
+    (contact: {
+      type: string;
+      value: string;
+      allow_direct_display: boolean;
+    }) => ({
+      type: contact.type,
+      label: getContactLabel(contact.type),
+      direct_contact: contact.allow_direct_display ? contact.value : undefined,
+    })
+  );
 
   return {
     short_id: bag.short_id,

@@ -2,6 +2,7 @@ import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import { pool } from '../../infrastructure/database/index.js';
 import crypto from 'crypto';
+import type { Request, Response, NextFunction } from 'express';
 
 export const basicRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -51,9 +52,13 @@ export const securityHeaders = helmet({
 });
 
 export function dbRateLimit(maxRequests: number, windowMinutes: number) {
-  return async (req: any, res: any, next: any) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const clientIp = req.ip || req.connection.remoteAddress || 'unknown';
+      const clientIp =
+        req.ip ||
+        (req as Request & { connection?: { remoteAddress?: string } })
+          .connection?.remoteAddress ||
+        'unknown';
       const ipHash = crypto
         .createHash('sha256')
         .update(clientIp)
@@ -71,10 +76,10 @@ export function dbRateLimit(maxRequests: number, windowMinutes: number) {
         });
       }
 
-      next();
+      return next();
     } catch (error) {
       console.error('Rate limit check failed:', error);
-      next();
+      return next();
     }
   };
 }

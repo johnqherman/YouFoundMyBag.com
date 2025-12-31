@@ -85,7 +85,9 @@ export default function FinderPage() {
               <p className="font-medium text-neutral-800 mb-2">
                 Message from {data.display_name || 'owner'}:
               </p>
-              <p className="text-neutral-700 italic">"{data.owner_message}"</p>
+              <p className="text-neutral-700 italic">
+                &quot;{data.owner_message}&quot;
+              </p>
             </div>
           )}
 
@@ -123,7 +125,7 @@ export default function FinderPage() {
 
           <div className="text-center text-neutral-600 text-sm">
             <p>
-              If I don't respond immediately, please keep the bag somewhere
+              If I don&apos;t respond immediately, please keep the bag somewhere
               safe. I really appreciate it.
             </p>
           </div>

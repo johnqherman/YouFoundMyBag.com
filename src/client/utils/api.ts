@@ -28,7 +28,7 @@ class ApiClient {
     const contentType = response.headers.get('content-type');
     const isJson = contentType && contentType.includes('application/json');
 
-    let data: any;
+    let data: T | ApiError;
     try {
       if (isJson) {
         data = await response.json();
@@ -58,7 +58,7 @@ class ApiClient {
       throw new Error(error.message || 'An error occurred');
     }
 
-    return data;
+    return data as T;
   }
 
   async createBag(bagData: CreateBagRequest): Promise<CreateBagResponse> {

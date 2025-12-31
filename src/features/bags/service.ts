@@ -2,8 +2,9 @@ import QRCode from 'qrcode';
 import { config } from '../../infrastructure/config/index.js';
 import { createReadableShortId } from '../../infrastructure/utils/short-id.js';
 import * as repository from './repository.js';
+import type { CreateBagRequest } from '../../client/types/index.js';
 
-export async function createBagWithQR(data: any) {
+export async function createBagWithQR(data: CreateBagRequest) {
   let shortId: string;
   let attempts = 0;
   const maxAttempts = 10;
@@ -18,7 +19,7 @@ export async function createBagWithQR(data: any) {
     if (attempts >= maxAttempts) {
       throw new Error('Failed to generate unique ID');
     }
-  } while (true);
+  } while (attempts < maxAttempts);
 
   const bag = await repository.createBag(data, shortId);
 

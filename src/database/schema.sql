@@ -2,9 +2,9 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE bags (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
-  short_id TEXT UNIQUE NOT NULL,
-  display_name TEXT,
-  owner_message TEXT,
+  short_id VARCHAR(6) UNIQUE NOT NULL,
+  display_name VARCHAR(30),
+  owner_message VARCHAR(150),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -12,10 +12,10 @@ CREATE TABLE bags (
 CREATE TABLE contacts (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
   bag_id UUID REFERENCES bags (id) ON DELETE CASCADE,
-  type TEXT NOT NULL CHECK (
+  type VARCHAR(20) NOT NULL CHECK (
     type IN ('email', 'sms', 'signal', 'whatsapp', 'telegram')
   ),
-  value TEXT NOT NULL,
+  value VARCHAR(254) NOT NULL,
   allow_direct_display BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -23,14 +23,14 @@ CREATE TABLE contacts (
 CREATE TABLE messages (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
   bag_id UUID REFERENCES bags (id) ON DELETE CASCADE,
-  from_message TEXT NOT NULL,
-  sender_info TEXT,
-  ip_hash TEXT,
+  from_message VARCHAR(300) NOT NULL,
+  sender_info VARCHAR(30),
+  ip_hash VARCHAR(64),
   sent_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 CREATE TABLE rate_limits (
-  key TEXT PRIMARY KEY,
+  key VARCHAR(100) PRIMARY KEY,
   count INTEGER DEFAULT 1,
   window_start TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   last_attempt TIMESTAMP WITH TIME ZONE DEFAULT NOW()

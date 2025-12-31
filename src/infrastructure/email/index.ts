@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import { config } from '../config/index.js';
+import type { Contact } from '../../client/types/index.js';
 
 let transporter: nodemailer.Transporter | null = null;
 
@@ -24,7 +25,7 @@ function getTransporter() {
 }
 
 export async function sendContactEmail(
-  contacts: any[],
+  contacts: Contact[],
   message: string,
   senderInfo?: string,
   bagDisplayName?: string

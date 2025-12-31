@@ -12,7 +12,7 @@ export const phoneSchema = z
   .string()
   .min(10)
   .max(20)
-  .regex(/^[\+]?[\d\s\-\(\)\.]+$/);
+  .regex(/^[+]?[\d\s\-().]+$/);
 
 export const telegramSchema = z
   .string()
@@ -39,14 +39,14 @@ export const contactSchema = z
   );
 
 export const createBagSchema = z.object({
-  display_name: z.string().max(50).optional(),
-  owner_message: z.string().max(500).optional(),
+  display_name: z.string().max(30).optional(),
+  owner_message: z.string().max(150).optional(),
   contacts: z.array(contactSchema).min(1).max(5),
 });
 
 export const sendMessageSchema = z.object({
-  from_message: z.string().min(1).max(1000).trim(),
-  sender_info: z.string().max(254).optional(),
+  from_message: z.string().min(1).max(300).trim(),
+  sender_info: z.string().max(30).optional(),
   turnstile_token: z.string().min(1),
 });
 

@@ -10,7 +10,7 @@ interface Props {
 declare global {
   interface Window {
     turnstile?: {
-      render: (element: string, options: any) => string;
+      render: (element: string, options: Record<string, unknown>) => string;
       reset: (widgetId?: string) => void;
     };
   }
@@ -38,7 +38,8 @@ export default function ContactModal({ shortId, ownerName, onClose }: Props) {
 
         window.turnstile.render('#turnstile-widget', {
           sitekey:
-            (import.meta as any).env?.VITE_CLOUDFLARE_TURNSTILE_SITE_KEY ||
+            (import.meta as { env?: Record<string, unknown> }).env
+              ?.VITE_CLOUDFLARE_TURNSTILE_SITE_KEY ||
             '1x00000000000000000000AA',
           callback: (token: string) => setTurnstileToken(token),
         });

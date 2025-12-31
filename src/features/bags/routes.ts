@@ -17,12 +17,12 @@ router.post('/', async (req, res): Promise<void> => {
       success: true,
       data: result,
     });
-  } catch (error: any) {
-    if (error.issues) {
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'issues' in error) {
       res.status(400).json({
         error: 'Validation failed',
         message: 'Invalid input data',
-        details: error.issues,
+        details: (error as { issues: unknown }).issues,
       });
       return;
     }
@@ -30,7 +30,7 @@ router.post('/', async (req, res): Promise<void> => {
     console.error('Failed to create bag:', error);
     res.status(500).json({
       error: 'Internal server error',
-      message: error.message || 'Failed to create bag',
+      message: error instanceof Error ? error.message : 'Failed to create bag',
     });
   }
 });

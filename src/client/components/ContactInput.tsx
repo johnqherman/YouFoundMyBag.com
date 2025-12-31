@@ -21,6 +21,7 @@ export default function ContactInput({
 }: ContactInputProps) {
   const [errors, setErrors] = useState<string[]>([]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const intlTelInputInstanceRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const isMountedRef = useRef(true);

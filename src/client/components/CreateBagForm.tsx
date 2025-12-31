@@ -132,7 +132,13 @@ export default function CreateBagForm({ onSuccess }: Props) {
         ...formData,
         display_name: formData.display_name?.trim() || undefined,
         owner_message: formData.owner_message?.trim() || undefined,
-        contacts: validContacts.map(({ id, ...contact }) => contact),
+        contacts: validContacts.map(
+          ({ type, value, allow_direct_display }) => ({
+            type,
+            value,
+            allow_direct_display,
+          })
+        ),
       };
 
       const result = await api.createBag(requestData);
@@ -149,12 +155,13 @@ export default function CreateBagForm({ onSuccess }: Props) {
     value: string
   ): string | null => {
     switch (type) {
-      case 'email':
+      case 'email': {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(value)) {
           return 'Please enter a valid email address';
         }
         break;
+      }
       case 'sms':
       case 'whatsapp':
       case 'signal':

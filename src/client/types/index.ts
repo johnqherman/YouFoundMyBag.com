@@ -1,18 +1,7 @@
 export interface CreateBagRequest {
   display_name?: string;
   owner_message?: string;
-  contacts: Array<{
-    type: 'email' | 'sms' | 'signal' | 'whatsapp' | 'telegram';
-    value: string;
-    allow_direct_display?: boolean;
-  }>;
-}
-
-export interface ContactWithId {
-  id: string;
-  type: 'email' | 'sms' | 'signal' | 'whatsapp' | 'telegram';
-  value: string;
-  allow_direct_display?: boolean;
+  contacts: Contact[];
 }
 
 export interface CreateBagResponse {
@@ -51,9 +40,28 @@ export interface SendMessageResponse {
   message: string;
 }
 
+export interface Contact {
+  type: 'email' | 'sms' | 'signal' | 'whatsapp' | 'telegram';
+  value: string;
+  allow_direct_display?: boolean;
+}
+
+export interface ContactWithId extends Contact {
+  id: string;
+}
+
+export interface DbContact {
+  id: string;
+  bag_id: string;
+  type: string;
+  value: string;
+  allow_direct_display: boolean;
+  created_at: Date;
+}
+
 export interface ApiError {
   error: string;
   message: string;
-  details?: any;
+  details?: Record<string, unknown>;
   retry_after?: number;
 }

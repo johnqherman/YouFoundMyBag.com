@@ -1,4 +1,4 @@
-import { Pool } from 'pg';
+import { Pool, PoolClient } from 'pg';
 import { config } from '../config/index.js';
 
 export const pool = new Pool({
@@ -10,7 +10,7 @@ export const pool = new Pool({
 });
 
 export async function withTransaction<T>(
-  operation: (client: any) => Promise<T>
+  operation: (client: PoolClient) => Promise<T>
 ): Promise<T> {
   const client = await pool.connect();
   try {

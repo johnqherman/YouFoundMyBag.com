@@ -1,4 +1,6 @@
 import crypto from 'crypto';
+import type { Request } from 'express';
+import type { SendMessageRequest } from '../../client/types/index.js';
 import { sendContactEmail } from '../../infrastructure/email/index.js';
 import {
   getBagId,
@@ -7,8 +9,10 @@ import {
 } from '../bags/repository.js';
 import * as messageRepository from './repository.js';
 
-export function getClientIpHash(req: any): string {
-  const clientIp = req.ip || req.connection.remoteAddress || 'unknown';
+export function getClientIpHash(
+  req: Pick<Request, 'ip'> & { connection?: { remoteAddress?: string } }
+): string {
+  const clientIp = req.ip || req.connection?.remoteAddress || 'unknown';
   return crypto
     .createHash('sha256')
     .update(clientIp)
@@ -50,7 +54,7 @@ export async function verifyTurnstile(
 
 export async function sendMessageToBagOwner(
   shortId: string,
-  messageData: any,
+  messageData: SendMessageRequest,
   ipHash: string
 ) {
   const turnstileValid = await verifyTurnstile(messageData.turnstile_token);

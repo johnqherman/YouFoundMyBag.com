@@ -31,27 +31,28 @@ router.post('/:shortId/message', async (req, res): Promise<void> => {
       success: true,
       message: 'Your message has been sent to the bag owner',
     });
-  } catch (error: any) {
-    if (error.issues) {
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'issues' in error) {
       res.status(400).json({
         error: 'Validation failed',
         message: 'Invalid message data',
-        details: error.issues,
+        details: (error as { issues: unknown }).issues,
       });
       return;
     }
 
     console.error('Failed to send message:', error);
 
-    const statusCode = error.message.includes('verification')
+    const errorMessage = error instanceof Error ? error.message : '';
+    const statusCode = errorMessage.includes('verification')
       ? 400
-      : error.message.includes('not found')
+      : errorMessage.includes('not found')
         ? 404
         : 500;
 
     res.status(statusCode).json({
       error: 'Message failed',
-      message: error.message || 'Failed to send message',
+      message: errorMessage || 'Failed to send message',
     });
   }
 });
