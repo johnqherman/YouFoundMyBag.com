@@ -84,10 +84,7 @@ export async function sendMessageToBagOwner(
     );
     console.log(`Message sent via email relay for bag ${shortId}`);
   } catch (emailError) {
-    console.error(
-      `Failed to send email relay for bag ${shortId}:`,
-      emailError
-    );
+    console.error(`Failed to send email relay for bag ${shortId}:`, emailError);
   }
 
   return message;

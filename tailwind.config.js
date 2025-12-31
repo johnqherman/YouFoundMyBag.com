@@ -4,7 +4,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['system-ui', 'sans-serif'],
+        sans: ['Funnel Sans', 'system-ui', 'sans-serif'],
       },
       colors: {
         neutral: {
