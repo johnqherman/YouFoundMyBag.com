@@ -4,6 +4,7 @@ import type {
   FinderPageData,
   SendMessageRequest,
   SendMessageResponse,
+  StartConversationRequest,
   ApiError,
 } from '../types/index.js';
 
@@ -77,6 +78,19 @@ class ApiClient {
     messageData: SendMessageRequest
   ): Promise<SendMessageResponse> {
     return this.request<SendMessageResponse>(`/bags/${shortId}/message`, {
+      method: 'POST',
+      body: JSON.stringify(messageData),
+    });
+  }
+
+  async startConversation(
+    shortId: string,
+    messageData: StartConversationRequest
+  ): Promise<{
+    success: boolean;
+    data: { conversation_id: string; message: string };
+  }> {
+    return this.request(`/bags/${shortId}/conversations`, {
       method: 'POST',
       body: JSON.stringify(messageData),
     });

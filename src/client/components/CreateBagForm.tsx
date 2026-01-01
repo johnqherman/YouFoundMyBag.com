@@ -7,6 +7,8 @@ import type {
 } from '../types/index';
 import ContactInput from './ContactInput';
 import PhoneInputErrorBoundary from './PhoneInputErrorBoundary';
+import CharacterLimitInput from './CharacterLimitInput';
+import CharacterLimitTextArea from './CharacterLimitTextArea';
 
 interface Props {
   onSuccess: (bagData: CreateBagResponse) => void;
@@ -15,6 +17,7 @@ interface Props {
 interface FormData {
   display_name: string;
   owner_message: string;
+  owner_email: string;
   contacts: ContactWithId[];
 }
 
@@ -22,6 +25,7 @@ export default function CreateBagForm({ onSuccess }: Props) {
   const [formData, setFormData] = useState<FormData>({
     display_name: '',
     owner_message: '',
+    owner_email: '',
     contacts: [
       {
         id: crypto.randomUUID(),
@@ -101,6 +105,17 @@ export default function CreateBagForm({ onSuccess }: Props) {
     setLoading(true);
 
     try {
+      if (!formData.owner_email.trim()) {
+        setError('Your email address is required');
+        return;
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.owner_email.trim())) {
+        setError('Please enter a valid email address');
+        return;
+      }
+
       const validContacts = formData.contacts.filter((contact) =>
         contact.value.trim()
       );
@@ -129,9 +144,9 @@ export default function CreateBagForm({ onSuccess }: Props) {
       }
 
       const requestData: CreateBagRequest = {
-        ...formData,
         display_name: formData.display_name?.trim() || undefined,
         owner_message: formData.owner_message?.trim() || undefined,
+        owner_email: formData.owner_email.trim(),
         contacts: validContacts.map(
           ({ type, value, allow_direct_display }) => ({
             type,
@@ -189,17 +204,38 @@ export default function CreateBagForm({ onSuccess }: Props) {
           >
             Your name (optional)
           </label>
-          <input
-            id="display_name"
-            type="text"
-            placeholder="e.g., John"
-            maxLength={50}
+          <CharacterLimitInput
             value={formData.display_name}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, display_name: e.target.value }))
+            onChange={(value) =>
+              setFormData((prev) => ({ ...prev, display_name: value }))
             }
+            maxLength={30}
+            placeholder="e.g., John"
             className="input-field"
           />
+        </div>
+
+        <div>
+          <label
+            htmlFor="owner_email"
+            className="block text-sm font-medium mb-2"
+          >
+            Your email address *
+          </label>
+          <input
+            type="email"
+            placeholder="your@email.com"
+            value={formData.owner_email}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, owner_email: e.target.value }))
+            }
+            required
+            className="input-field"
+            maxLength={254}
+          />
+          <p className="text-xs text-neutral-400 mt-1">
+            Required for secure messaging dashboard access
+          </p>
         </div>
 
         <div>
@@ -209,19 +245,18 @@ export default function CreateBagForm({ onSuccess }: Props) {
           >
             Message for finder (optional)
           </label>
-          <textarea
-            id="owner_message"
-            placeholder="e.g., Please text me and keep the bag somewhere safe."
-            maxLength={500}
-            rows={3}
+          <CharacterLimitTextArea
             value={formData.owner_message}
-            onChange={(e) =>
+            onChange={(value) =>
               setFormData((prev) => ({
                 ...prev,
-                owner_message: e.target.value,
+                owner_message: value,
               }))
             }
-            className="input-field resize-none"
+            maxLength={150}
+            placeholder="e.g., Please text me and keep the bag somewhere safe."
+            rows={3}
+            className="input-field"
           />
         </div>
 

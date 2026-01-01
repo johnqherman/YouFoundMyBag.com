@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../utils/api';
+import CharacterLimitTextArea from './CharacterLimitTextArea';
 
 interface Props {
   shortId: string;
@@ -69,16 +70,22 @@ export default function ContactModal({ shortId, ownerName, onClose }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!turnstileToken || !message.trim()) {
-      setError('Please complete all fields and security verification');
+    if (!turnstileToken || !message.trim() || !senderInfo.trim()) {
+      setError('Please complete all required fields and security verification');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(senderInfo.trim())) {
+      setError('Please enter a valid email address');
       return;
     }
 
     setLoading(true);
     try {
-      await api.sendMessage(shortId, {
-        from_message: message.trim(),
-        sender_info: senderInfo.trim() || undefined,
+      await api.startConversation(shortId, {
+        finder_message: message.trim(),
+        finder_email: senderInfo.trim() || undefined,
         turnstile_token: turnstileToken,
       });
       setSuccess(true);
@@ -103,7 +110,12 @@ export default function ContactModal({ shortId, ownerName, onClose }: Props) {
               Message Sent!
             </h2>
             <p className="text-neutral-700 mb-6">
-              Your message has been sent to {ownerName || 'the owner'}.
+              Your message has been sent to {ownerName || 'the owner'}!
+              <br />
+              <br />
+              <strong>Check your email ({senderInfo})</strong> for a secure link
+              to continue the conversation. Both you and the owner can
+              communicate safely through our private messaging system.
             </p>
             <button onClick={onClose} className="finder-btn w-full">
               Close
@@ -137,15 +149,14 @@ export default function ContactModal({ shortId, ownerName, onClose }: Props) {
             >
               Your message *
             </label>
-            <textarea
-              id="message"
-              rows={4}
-              placeholder="Hi! I found your bag. Let me know how to return it."
+            <CharacterLimitTextArea
               value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-black"
+              onChange={setMessage}
               maxLength={1000}
+              placeholder="Hi! I found your bag. Let me know how to return it."
+              rows={4}
               required
+              className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-black"
             />
           </div>
 
@@ -154,16 +165,22 @@ export default function ContactModal({ shortId, ownerName, onClose }: Props) {
               htmlFor="senderInfo"
               className="block text-sm font-medium text-black mb-2"
             >
-              Your contact info (optional)
+              Your email address *
             </label>
             <input
               id="senderInfo"
-              type="text"
-              placeholder="Your email or phone"
+              type="email"
+              placeholder="your@email.com"
               value={senderInfo}
               onChange={(e) => setSenderInfo(e.target.value)}
               className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-black"
+              maxLength={254}
+              required
             />
+            <p className="text-xs text-neutral-600 mt-1">
+              Required for secure conversation. You'll receive a secure link to
+              continue messaging with the owner.
+            </p>
           </div>
 
           <div id="turnstile-widget"></div>

@@ -14,6 +14,7 @@ export const basicRateLimit = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => process.env.NODE_ENV === 'development',
 });
 
 export const createBagRateLimit = rateLimit({
@@ -24,6 +25,7 @@ export const createBagRateLimit = rateLimit({
     message: 'Too many bags created, please try again later',
     retry_after: 60 * 60,
   },
+  skip: () => process.env.NODE_ENV === 'development',
 });
 
 export const sendMessageRateLimit = rateLimit({
@@ -34,6 +36,7 @@ export const sendMessageRateLimit = rateLimit({
     message: 'Too many messages sent, please try again later',
     retry_after: 5 * 60,
   },
+  skip: () => process.env.NODE_ENV === 'development',
 });
 
 export const securityHeaders = helmet({
@@ -46,13 +49,26 @@ export const securityHeaders = helmet({
       scriptSrc: ["'self'", 'https://challenges.cloudflare.com'],
       frameSrc: ["'self'", 'https://challenges.cloudflare.com'],
       connectSrc: ["'self'", 'https://challenges.cloudflare.com'],
+      objectSrc: ["'none'"],
+      baseUri: ["'self'"],
+      formAction: ["'self'"],
+      ...(process.env.NODE_ENV === 'production' && {
+        upgradeInsecureRequests: [],
+      }),
     },
   },
   crossOriginEmbedderPolicy: false,
+  noSniff: true,
+  xssFilter: true,
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
 });
 
 export function dbRateLimit(maxRequests: number, windowMinutes: number) {
   return async (req: Request, res: Response, next: NextFunction) => {
+    if (process.env.NODE_ENV === 'development') {
+      return next();
+    }
+
     try {
       const clientIp =
         req.ip ||

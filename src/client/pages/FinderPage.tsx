@@ -91,36 +91,65 @@ export default function FinderPage() {
             </div>
           )}
 
-          <div className="space-y-4 mb-8">
+          <div className="space-y-6 mb-8">
             <p className="text-lg font-semibold text-center mb-6">
-              Please contact me using one of the options below:
+              Choose how you'd like to contact me:
             </p>
 
-            {data.contact_options.map((option, index) => (
-              <div key={index}>
-                {option.direct_contact ? (
-                  <a
-                    href={
-                      option.type === 'email'
-                        ? `mailto:${option.direct_contact}`
-                        : option.type === 'sms'
-                          ? `sms:${option.direct_contact}`
-                          : '#'
-                    }
-                    className="finder-btn w-full text-center block"
-                  >
-                    {option.label}: {option.direct_contact}
-                  </a>
-                ) : (
-                  <button
-                    onClick={() => setShowContactModal(true)}
-                    className="finder-btn w-full"
-                  >
-                    📩 Send a message
-                  </button>
-                )}
+            {data.contact_options.some((option) => option.direct_contact) && (
+              <div className="bg-neutral-100 border border-neutral-300 rounded-xl p-4">
+                <h3 className="font-medium text-neutral-800 mb-2">
+                  📞 Direct Contact
+                </h3>
+                <p className="text-sm text-neutral-600 mb-3">
+                  Contact me directly (my info will be visible)
+                </p>
+                <div className="space-y-2">
+                  {data.contact_options
+                    .filter((option) => option.direct_contact)
+                    .map((option, index) => (
+                      <a
+                        key={index}
+                        href={
+                          option.type === 'email'
+                            ? `mailto:${option.direct_contact}`
+                            : option.type === 'sms'
+                              ? `sms:${option.direct_contact}`
+                              : option.type === 'whatsapp'
+                                ? `https://wa.me/${option.direct_contact?.replace(/\D/g, '')}`
+                                : '#'
+                        }
+                        className="finder-btn w-full text-center block"
+                      >
+                        {option.type === 'email' && '📧'}
+                        {option.type === 'sms' && '💬'}
+                        {option.type === 'whatsapp' && '📱'}
+                        {option.type === 'signal' && '🔐'}
+                        {option.type === 'telegram' && '✈️'}{' '}
+                        {option.direct_contact}
+                      </a>
+                    ))}
+                </div>
               </div>
-            ))}
+            )}
+
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+              <h3 className="font-medium text-blue-800 mb-2">
+                🔒 Private Messaging
+              </h3>
+              <p className="text-sm text-blue-700 mb-3">
+                Send a secure message (your info stays private)
+              </p>
+              <button
+                onClick={() => setShowContactModal(true)}
+                className="finder-btn w-full bg-blue-600 hover:bg-blue-700"
+              >
+                📩 Send Private Message
+              </button>
+              <p className="text-xs text-blue-600 mt-2">
+                The owner can respond through our secure messaging system
+              </p>
+            </div>
           </div>
 
           <div className="text-center text-neutral-600 text-sm">

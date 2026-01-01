@@ -41,6 +41,7 @@ export const contactSchema = z
 export const createBagSchema = z.object({
   display_name: z.string().max(30).optional(),
   owner_message: z.string().max(150).optional(),
+  owner_email: z.string().email().max(254),
   contacts: z.array(contactSchema).min(1).max(5),
 });
 
@@ -54,3 +55,24 @@ export const shortIdSchema = z
   .string()
   .length(6)
   .regex(/^[23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+$/);
+
+export const startConversationSchema = z.object({
+  finder_message: z.string().min(1).max(1000).trim(),
+  finder_email: z.string().email().optional(),
+  turnstile_token: z.string().min(1),
+});
+
+export const sendReplySchema = z.object({
+  conversation_id: z.string().uuid(),
+  message_content: z.string().min(1).max(1000).trim(),
+});
+
+export const magicLinkSchema = z.object({
+  email: z.string().email().max(254),
+  conversation_id: z.string().uuid().optional(),
+  bag_ids: z.array(z.string().uuid()).optional(),
+});
+
+export const verifyMagicLinkSchema = z.object({
+  magic_token: z.string().min(32).max(128),
+});

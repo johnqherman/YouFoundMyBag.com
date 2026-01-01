@@ -6,7 +6,10 @@ export interface Bag {
   short_id: string;
   display_name?: string;
   owner_message?: string;
+  owner_email: string;
+  status: 'active' | 'recovered' | 'archived';
   created_at: Date;
+  updated_at: Date;
 }
 
 export interface Contact {
@@ -23,8 +26,13 @@ export async function createBag(
 ): Promise<Bag> {
   return withTransaction(async (client) => {
     const bagResult = await client.query(
-      'INSERT INTO bags (short_id, display_name, owner_message) VALUES ($1, $2, $3) RETURNING *',
-      [shortId, data.display_name || null, data.owner_message || null]
+      'INSERT INTO bags (short_id, display_name, owner_message, owner_email) VALUES ($1, $2, $3, $4) RETURNING *',
+      [
+        shortId,
+        data.display_name || null,
+        data.owner_message || null,
+        data.owner_email,
+      ]
     );
 
     const bag = bagResult.rows[0];

@@ -1,6 +1,7 @@
 export interface CreateBagRequest {
   display_name?: string;
   owner_message?: string;
+  owner_email: string;
   contacts: Contact[];
 }
 
@@ -64,4 +65,84 @@ export interface ApiError {
   message: string;
   details?: Record<string, unknown>;
   retry_after?: number;
+}
+
+export interface Conversation {
+  id: string;
+  bag_id: string;
+  status: 'active' | 'resolved' | 'archived';
+  finder_email?: string;
+  last_message_at: string;
+  created_at: string;
+}
+
+export interface ConversationMessage {
+  id: string;
+  conversation_id: string;
+  sender_type: 'finder' | 'owner';
+  message_content: string;
+  read_at?: string;
+  sent_at: string;
+}
+
+export interface ConversationThread {
+  conversation: Conversation;
+  messages: ConversationMessage[];
+  bag: {
+    short_id: string;
+    display_name?: string;
+    status: 'active' | 'recovered' | 'archived';
+  };
+}
+
+export interface OwnerDashboard {
+  bags: Array<{
+    id: string;
+    short_id: string;
+    display_name?: string;
+    status: 'active' | 'recovered' | 'archived';
+    created_at: string;
+    conversation_count: number;
+    latest_conversation?: string;
+  }>;
+}
+
+export interface OwnerSession {
+  token: string;
+  email: string;
+  bag_ids: string[];
+  expires_at: string;
+  conversation_id?: string;
+  session_type?: 'owner' | 'finder' | 'magic_owner' | 'magic_finder';
+}
+
+export interface StartConversationRequest {
+  finder_message: string;
+  finder_email?: string;
+  turnstile_token: string;
+}
+
+export interface SendReplyRequest {
+  conversation_id: string;
+  message_content: string;
+}
+
+export type MessageContext = 'initial' | 'follow-up' | 'response';
+
+export interface MessageContextInfo {
+  context: MessageContext;
+  isFirstFromSender: boolean;
+  hasRecipientReplied: boolean;
+  lastSenderType: 'finder' | 'owner' | null;
+}
+
+export interface BagData {
+  id: string;
+  short_id: string;
+  display_name?: string;
+  owner_message?: string;
+  owner_email: string;
+  status: 'active' | 'recovered' | 'archived';
+  created_at: string;
+  updated_at: string;
 }

@@ -21,11 +21,12 @@ export default function HomePage() {
         <header className="text-center mb-8">
           <h1 className="text-3xl font-bold mb-4">YouFoundMyBag</h1>
           <p className="text-neutral-300 text-lg">
-            Lost your bag? Let the finder contact you safely.
+            Protect your belongings with smart recovery tags.
           </p>
           <p className="text-neutral-400 mt-2">
-            Create a QR code to put on your belongings. No personal info is
-            shared.
+            Create a QR code for your bags, backpacks, and valuables. If someone
+            finds them, they can contact you safely without seeing your personal
+            info.
           </p>
         </header>
 

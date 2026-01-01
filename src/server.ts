@@ -13,6 +13,9 @@ import {
 
 import { routes as bagRoutes } from './features/bags/index.js';
 import { routes as messagingRoutes } from './features/messaging/index.js';
+import { conversationRoutes } from './features/conversations/index.js';
+import { finderRoutes } from './features/conversations/finderRoutes.js';
+import { authRoutes } from './features/auth/index.js';
 
 const app = express();
 if (config.NODE_ENV === 'production') {
@@ -43,6 +46,9 @@ app.get('/health', (req, res) => {
 
 app.use('/api/bags', createBagRateLimit, dbRateLimit(5, 60), bagRoutes);
 app.use('/api/bags', sendMessageRateLimit, dbRateLimit(3, 5), messagingRoutes);
+app.use('/api', sendMessageRateLimit, dbRateLimit(5, 60), conversationRoutes);
+app.use('/api', basicRateLimit, dbRateLimit(3, 60), finderRoutes);
+app.use('/api', basicRateLimit, dbRateLimit(3, 60), authRoutes);
 
 if (config.NODE_ENV === 'production') {
   app.use(express.static('dist/frontend'));

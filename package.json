@@ -15,16 +15,20 @@
     "start": "node dist/server.js",
     "lint": "eslint src --ext .ts,.tsx",
     "typecheck": "tsc --noEmit",
-    "db:init": "psql ${DATABASE_URL:-postgresql://localhost:5432/youfoundmybag} < src/database/schema.sql"
+    "db:init": "psql ${DATABASE_URL:-postgresql://localhost:5432/youfoundmybag_dev} < src/database/schema.sql"
   },
   "dependencies": {
+    "@types/dompurify": "^3.0.5",
+    "@types/jsdom": "^27.0.0",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
+    "dompurify": "^3.3.1",
     "dotenv": "^17.2.3",
     "express": "^4.18.2",
     "express-rate-limit": "^7.1.5",
     "helmet": "^7.1.0",
     "intl-tel-input": "^25.14.0",
+    "jsdom": "^27.4.0",
     "nanoid": "^5.0.4",
     "nodemailer": "^7.0.12",
     "pg": "^8.11.3",

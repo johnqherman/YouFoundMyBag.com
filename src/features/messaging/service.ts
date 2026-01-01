@@ -24,6 +24,11 @@ export async function verifyTurnstile(
   token: string,
   remoteip?: string
 ): Promise<boolean> {
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Development mode: skipping Turnstile verification');
+    return true;
+  }
+
   const secretKey = process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY;
   if (!secretKey) {
     console.warn('Turnstile secret key not configured');

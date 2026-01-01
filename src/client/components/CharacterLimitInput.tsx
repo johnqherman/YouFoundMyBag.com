@@ -1,0 +1,130 @@
+import { useState, useEffect } from 'react';
+
+interface CharacterLimitInputProps {
+  value: string;
+  onChange: (value: string) => void;
+  maxLength: number;
+  placeholder?: string;
+  className?: string;
+  disabled?: boolean;
+  required?: boolean;
+  type?: 'text' | 'email';
+  name?: string;
+}
+
+export default function CharacterLimitInput({
+  value,
+  onChange,
+  maxLength,
+  placeholder,
+  className = '',
+  disabled = false,
+  required = false,
+  type = 'text',
+  name,
+}: CharacterLimitInputProps) {
+  const remaining = maxLength - value.length;
+  const isNearLimit = remaining <= 20;
+  const isAtLimit = remaining <= 0;
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+
+    if (newValue.length <= maxLength) {
+      onChange(newValue);
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pastedText = e.clipboardData.getData('text');
+    const availableSpace = maxLength - value.length;
+    const textToAdd = pastedText.slice(0, availableSpace);
+    onChange(value + textToAdd);
+  };
+
+  const getCounterColor = () => {
+    if (isAtLimit) return 'text-red-400';
+    if (isNearLimit) return 'text-yellow-400';
+    return 'text-neutral-400';
+  };
+
+  const getBorderColor = () => {
+    if (disabled) return '';
+    if (isAtLimit) return 'border-red-500 focus:ring-red-500';
+    if (isNearLimit) return 'border-yellow-500 focus:ring-yellow-500';
+    return 'border-neutral-600 focus:ring-blue-500';
+  };
+
+  const baseClasses = `
+    w-full p-3 bg-neutral-700 rounded-lg resize-none
+    focus:ring-2 focus:border-transparent transition-colors
+    disabled:bg-neutral-600 disabled:cursor-not-allowed
+    ${getBorderColor()}
+    ${className}
+  `.trim();
+
+  return (
+    <div className="relative">
+      <input
+        type={type}
+        name={name}
+        value={value}
+        onChange={handleChange}
+        onPaste={handlePaste}
+        placeholder={placeholder}
+        className={baseClasses}
+        disabled={disabled}
+        required={required}
+        maxLength={maxLength}
+      />
+
+      <div
+        className={`absolute bottom-3 right-3 text-sm font-mono ${getCounterColor()}`}
+      >
+        {value.length}/{maxLength}
+      </div>
+
+      {isNearLimit && (
+        <div className="sr-only" aria-live="polite">
+          {remaining === 0
+            ? 'Character limit reached'
+            : `${remaining} characters remaining`}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function useCharacterLimit(
+  initialValue: string = '',
+  maxLength: number
+) {
+  const [value, setValue] = useState(initialValue);
+  const remaining = maxLength - value.length;
+  const isNearLimit = remaining <= 20;
+  const isAtLimit = remaining <= 0;
+
+  const handleChange = (newValue: string) => {
+    if (newValue.length <= maxLength) {
+      setValue(newValue);
+    }
+  };
+
+  const handlePaste = (pastedText: string) => {
+    const availableSpace = maxLength - value.length;
+    const textToAdd = pastedText.slice(0, availableSpace);
+    setValue(value + textToAdd);
+  };
+
+  return {
+    value,
+    setValue: handleChange,
+    remaining,
+    isNearLimit,
+    isAtLimit,
+    handlePaste,
+    maxLength,
+    progress: (value.length / maxLength) * 100,
+  };
+}
