@@ -211,14 +211,14 @@ export default function FinderConversationPage() {
 
   if (!conversation) {
     return (
-      <div className="min-h-screen bg-neutral-950 text-neutral-100">
+      <div className="min-h-screen bg-white text-neutral-900">
         <div className="max-w-readable mx-auto p-6">
           <div className="text-center">
             <div className="text-6xl mb-4">❓</div>
-            <h1 className="text-2xl font-bold text-yellow-400 mb-4">
+            <h1 className="text-2xl font-bold text-red-700 mb-4">
               Conversation Not Found
             </h1>
-            <p className="text-neutral-400 mb-6">
+            <p className="text-neutral-800 mb-6">
               The conversation you're looking for doesn't exist or you don't
               have access to it.
             </p>
@@ -229,10 +229,10 @@ export default function FinderConversationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100">
+    <div className="min-h-screen bg-white text-neutral-900">
       <div className="max-w-4xl mx-auto p-6">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2">
+          <h1 className="text-3xl font-bold mb-2 text-neutral-900">
             Conversation about{' '}
             {formatBagDisplayName(
               conversation.bag.owner_name,
@@ -240,9 +240,9 @@ export default function FinderConversationPage() {
               conversation.bag.short_id
             )}
           </h1>
-          <p className="text-neutral-400 mb-2">
+          <p className="text-neutral-800 mb-2">
             Status:{' '}
-            <span className="text-green-400">
+            <span className="text-green-800 font-bold">
               {conversation.conversation.status}
             </span>
             {conversation.bag.owner_name && (
@@ -251,7 +251,7 @@ export default function FinderConversationPage() {
               </span>
             )}
           </p>
-          <p className="text-sm text-neutral-500">
+          <p className="text-sm text-neutral-800">
             You're connected as the finder who reported finding this item.
           </p>
         </div>
@@ -262,28 +262,33 @@ export default function FinderConversationPage() {
               key={message.id}
               className={`p-4 rounded-lg ${
                 message.sender_type === 'finder'
-                  ? 'bg-green-900/30 ml-8'
-                  : 'bg-neutral-800 mr-8'
+                  ? 'bg-green-100 border-2 border-green-400 ml-8'
+                  : 'bg-blue-100 border-2 border-blue-400 mr-8'
               }`}
             >
               <div className="flex justify-between items-start mb-2">
-                <span className="font-medium">
+                <span className="font-medium text-neutral-900">
                   {message.sender_type === 'finder'
                     ? 'You'
                     : conversation.bag.owner_name || 'Owner'}
                 </span>
-                <span className="text-sm text-neutral-400">
+                <span className="text-sm text-neutral-700 font-medium">
                   {new Date(message.sent_at).toLocaleString()}
                 </span>
               </div>
-              <p className="text-neutral-200">{message.message_content}</p>
+              <p className="text-neutral-900">{message.message_content}</p>
             </div>
           ))}
         </div>
 
         {conversation.conversation.status === 'active' && (
-          <form onSubmit={sendReply} className="bg-neutral-800 rounded-lg p-4">
-            <h3 className="text-lg font-semibold mb-4">Send a Reply</h3>
+          <form
+            onSubmit={sendReply}
+            className="bg-gray-100 border-2 border-gray-400 rounded-lg p-4"
+          >
+            <h3 className="text-lg font-semibold text-neutral-900 mb-4">
+              Send a Reply
+            </h3>
             <CharacterLimitTextArea
               value={replyMessage}
               onChange={setReplyMessage}
@@ -291,12 +296,13 @@ export default function FinderConversationPage() {
               placeholder="Type your reply to the owner..."
               rows={4}
               disabled={sending}
+              variant="light"
             />
             <div className="mt-4 flex justify-end">
               <button
                 type="submit"
                 disabled={!replyMessage.trim() || sending}
-                className="px-6 py-2 bg-green-600 hover:bg-green-700 disabled:bg-neutral-600 text-white rounded-lg"
+                className="px-6 py-2 bg-green-700 hover:bg-green-800 disabled:bg-gray-500 text-white rounded-lg font-semibold"
               >
                 {sending ? 'Sending...' : 'Send Reply'}
               </button>
@@ -305,18 +311,18 @@ export default function FinderConversationPage() {
         )}
 
         {conversation.conversation.status !== 'active' && (
-          <div className="bg-neutral-800 rounded-lg p-4 text-center">
-            <p className="text-neutral-400">
+          <div className="bg-yellow-100 border-2 border-yellow-500 rounded-lg p-4 text-center">
+            <p className="text-yellow-900 font-bold">
               This conversation has been {conversation.conversation.status}.
             </p>
           </div>
         )}
 
-        <div className="mt-6 p-4 bg-blue-900/20 border border-blue-800 rounded-lg">
-          <h4 className="text-sm font-medium text-blue-400 mb-2">
+        <div className="mt-6 p-4 bg-blue-100 border-2 border-blue-500 rounded-lg">
+          <h4 className="text-sm font-bold text-blue-900 mb-2">
             🔒 Privacy Notice
           </h4>
-          <p className="text-xs text-neutral-400">
+          <p className="text-xs text-blue-800 font-medium">
             This conversation is secure and private. Only you and the item owner
             can see these messages. Your magic link provides secure access to
             this conversation only.
