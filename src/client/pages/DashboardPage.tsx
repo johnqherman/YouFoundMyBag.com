@@ -9,11 +9,29 @@ import type {
 } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 
+function formatBagDisplayName(
+  ownerName?: string,
+  bagName?: string,
+  shortId?: string
+): string {
+  if (bagName && ownerName) {
+    return `${ownerName}'s ${bagName}`;
+  }
+  if (bagName) {
+    return bagName;
+  }
+  if (ownerName) {
+    return `${ownerName}'s bag`;
+  }
+  return `Bag ${shortId}`;
+}
+
 interface DashboardData {
   bags: Array<{
     id: string;
     short_id: string;
-    display_name?: string;
+    owner_name?: string;
+    bag_name?: string;
     status: 'active' | 'recovered' | 'archived';
     created_at: string;
     conversation_count: number;
@@ -196,7 +214,11 @@ export default function DashboardPage() {
                     >
                       <div className="flex justify-between items-start mb-2">
                         <h3 className="font-medium">
-                          {bag.display_name || `Bag ${bag.short_id}`}
+                          {formatBagDisplayName(
+                            bag.owner_name,
+                            bag.bag_name,
+                            bag.short_id
+                          )}
                         </h3>
                         <span
                           className={`text-xs px-2 py-1 rounded-full ${
@@ -283,8 +305,11 @@ export default function DashboardPage() {
                         <div className="flex justify-between items-start mb-2">
                           <div>
                             <h3 className="font-medium">
-                              {thread.bag.display_name ||
-                                `Bag ${thread.bag.short_id}`}
+                              {formatBagDisplayName(
+                                thread.bag.owner_name,
+                                thread.bag.bag_name,
+                                thread.bag.short_id
+                              )}
                             </h3>
                             <div className="flex items-center gap-2 text-sm text-neutral-400">
                               <span>

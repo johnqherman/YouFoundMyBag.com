@@ -9,6 +9,23 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import CharacterLimitTextArea from '../components/CharacterLimitTextArea';
 import type { ConversationThread, ConversationMessage } from '../types/index';
 
+function formatBagDisplayName(
+  ownerName?: string,
+  bagName?: string,
+  shortId?: string
+): string {
+  if (bagName && ownerName) {
+    return `${ownerName}'s ${bagName}`;
+  }
+  if (bagName) {
+    return bagName;
+  }
+  if (ownerName) {
+    return `${ownerName}'s bag`;
+  }
+  return `Bag ${shortId}`;
+}
+
 export default function FinderConversationPage() {
   const { conversationId } = useParams();
   const navigate = useNavigate();
@@ -217,13 +234,22 @@ export default function FinderConversationPage() {
         <div className="mb-6">
           <h1 className="text-3xl font-bold mb-2">
             Conversation about{' '}
-            {conversation.bag.display_name || conversation.bag.short_id}
+            {formatBagDisplayName(
+              conversation.bag.owner_name,
+              conversation.bag.bag_name,
+              conversation.bag.short_id
+            )}
           </h1>
           <p className="text-neutral-400 mb-2">
             Status:{' '}
             <span className="text-green-400">
               {conversation.conversation.status}
             </span>
+            {conversation.bag.owner_name && (
+              <span className="ml-4">
+                • Owner: {conversation.bag.owner_name}
+              </span>
+            )}
           </p>
           <p className="text-sm text-neutral-500">
             You're connected as the finder who reported finding this item.
@@ -242,7 +268,9 @@ export default function FinderConversationPage() {
             >
               <div className="flex justify-between items-start mb-2">
                 <span className="font-medium">
-                  {message.sender_type === 'finder' ? 'You' : 'Owner'}
+                  {message.sender_type === 'finder'
+                    ? 'You'
+                    : conversation.bag.owner_name || 'Owner'}
                 </span>
                 <span className="text-sm text-neutral-400">
                   {new Date(message.sent_at).toLocaleString()}

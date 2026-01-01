@@ -3,7 +3,8 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE public.bags (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
   short_id VARCHAR(6) UNIQUE NOT NULL,
-  display_name VARCHAR(30),
+  owner_name VARCHAR(30),
+  bag_name VARCHAR(30),
   owner_message VARCHAR(150),
   owner_email VARCHAR(254) NOT NULL,
   status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'recovered', 'archived')),
@@ -43,6 +44,7 @@ CREATE TABLE public.conversations (
   bag_id UUID REFERENCES public.bags (id) ON DELETE CASCADE,
   status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'resolved', 'archived')),
   finder_email VARCHAR(254),
+  finder_display_name VARCHAR(30),
   last_message_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

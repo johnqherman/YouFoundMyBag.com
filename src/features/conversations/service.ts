@@ -123,7 +123,8 @@ export async function startConversation(
   const conversation = await conversationRepository.createConversation(
     bag.id,
     messageData.finder_message,
-    messageData.finder_email
+    messageData.finder_email,
+    messageData.finder_display_name
   );
 
   try {
@@ -179,7 +180,7 @@ export async function sendReply(
     ) {
       await sendContextualFinderNotification({
         finderEmail: conversationThread.conversation.finder_email,
-        senderName: conversationThread.bag.display_name || 'Bag owner',
+        senderName: conversationThread.bag.owner_name || 'Bag owner',
         message: replyData.message_content,
         conversationId,
         context: messageContext.context,
@@ -189,7 +190,8 @@ export async function sendReply(
       if (bag?.owner_email) {
         await sendContextualOwnerNotification({
           ownerEmail: bag.owner_email,
-          senderName: 'The finder',
+          senderName:
+            conversationThread.conversation.finder_display_name || 'The finder',
           message: replyData.message_content,
           conversationId,
           bagIds: [bag.id],

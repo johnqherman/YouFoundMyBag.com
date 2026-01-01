@@ -89,7 +89,7 @@ export async function sendMessageToBagOwner(
       contacts,
       messageData.from_message,
       messageData.sender_info,
-      bag?.display_name
+      bag?.owner_name
     );
     console.log(`Message sent via email relay for bag ${shortId}`);
   } catch (emailError) {

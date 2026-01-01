@@ -39,7 +39,8 @@ export const contactSchema = z
   );
 
 export const createBagSchema = z.object({
-  display_name: z.string().max(30).optional(),
+  owner_name: z.string().max(30).optional(),
+  bag_name: z.string().max(30).optional(),
   owner_message: z.string().max(150).optional(),
   owner_email: z.string().email().max(254),
   contacts: z.array(contactSchema).min(1).max(5),
@@ -59,6 +60,7 @@ export const shortIdSchema = z
 export const startConversationSchema = z.object({
   finder_message: z.string().min(1).max(1000).trim(),
   finder_email: z.string().email().optional(),
+  finder_display_name: z.string().max(30).optional(),
   turnstile_token: z.string().min(1),
 });
 

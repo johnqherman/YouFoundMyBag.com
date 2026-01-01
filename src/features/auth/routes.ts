@@ -146,7 +146,8 @@ router.get(
           bagMap.set(bagId, {
             id: bagId,
             short_id: shortId,
-            display_name: thread.bag.display_name,
+            owner_name: thread.bag.owner_name,
+            bag_name: thread.bag.bag_name,
             status: thread.bag.status,
             created_at: thread.conversation.created_at,
             conversations: [],
@@ -176,7 +177,8 @@ router.get(
       const bags = Array.from(bagMap.values()).map((bag) => ({
         id: bag.id,
         short_id: bag.short_id,
-        display_name: bag.display_name,
+        owner_name: bag.owner_name,
+        bag_name: bag.bag_name,
         status: bag.status,
         created_at: bag.created_at,
         conversation_count: bag.conversation_count,

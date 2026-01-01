@@ -8,11 +8,12 @@ import type {
 export async function createConversation(
   bagId: string,
   finderMessage: string,
-  finderEmail?: string
+  finderEmail?: string,
+  finderDisplayName?: string
 ): Promise<Conversation> {
   const conversationResult = await pool.query(
-    'INSERT INTO conversations (bag_id, finder_email) VALUES ($1, $2) RETURNING *',
-    [bagId, finderEmail || null]
+    'INSERT INTO conversations (bag_id, finder_email, finder_display_name) VALUES ($1, $2, $3) RETURNING *',
+    [bagId, finderEmail || null, finderDisplayName || null]
   );
 
   const conversation = conversationResult.rows[0];
@@ -65,7 +66,7 @@ export async function getConversationsByOwnerEmail(
     `
     SELECT
       c.*,
-      b.short_id, b.display_name, b.status as bag_status,
+      b.short_id, b.owner_name, b.bag_name, b.status as bag_status,
       array_agg(
         json_build_object(
           'id', cm.id,
@@ -80,7 +81,7 @@ export async function getConversationsByOwnerEmail(
     JOIN bags b ON c.bag_id = b.id
     LEFT JOIN conversation_messages cm ON c.id = cm.conversation_id
     WHERE b.owner_email = $1
-    GROUP BY c.id, b.short_id, b.display_name, b.status
+    GROUP BY c.id, b.short_id, b.owner_name, b.bag_name, b.status
     ORDER BY c.last_message_at DESC
   `,
     [ownerEmail]
@@ -92,13 +93,15 @@ export async function getConversationsByOwnerEmail(
       bag_id: row.bag_id,
       status: row.status,
       finder_email: row.finder_email,
+      finder_display_name: row.finder_display_name,
       last_message_at: row.last_message_at,
       created_at: row.created_at,
     },
     messages: row.messages.filter((msg: any) => msg.id !== null),
     bag: {
       short_id: row.short_id,
-      display_name: row.display_name,
+      owner_name: row.owner_name,
+      bag_name: row.bag_name,
       status: row.bag_status,
     },
   }));
@@ -111,7 +114,7 @@ export async function getConversationById(
     `
     SELECT
       c.*,
-      b.short_id, b.display_name, b.status as bag_status, b.owner_email,
+      b.short_id, b.owner_name, b.bag_name, b.status as bag_status, b.owner_email,
       array_agg(
         json_build_object(
           'id', cm.id,
@@ -126,7 +129,7 @@ export async function getConversationById(
     JOIN bags b ON c.bag_id = b.id
     LEFT JOIN conversation_messages cm ON c.id = cm.conversation_id
     WHERE c.id = $1
-    GROUP BY c.id, b.short_id, b.display_name, b.status, b.owner_email
+    GROUP BY c.id, b.short_id, b.owner_name, b.bag_name, b.status, b.owner_email
   `,
     [conversationId]
   );
@@ -140,13 +143,15 @@ export async function getConversationById(
       bag_id: row.bag_id,
       status: row.status,
       finder_email: row.finder_email,
+      finder_display_name: row.finder_display_name,
       last_message_at: row.last_message_at,
       created_at: row.created_at,
     },
     messages: row.messages.filter((msg: any) => msg.id !== null),
     bag: {
       short_id: row.short_id,
-      display_name: row.display_name,
+      owner_name: row.owner_name,
+      bag_name: row.bag_name,
       status: row.bag_status,
     },
   };

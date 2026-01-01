@@ -15,7 +15,8 @@ interface Props {
 }
 
 interface FormData {
-  display_name: string;
+  owner_name: string;
+  bag_name: string;
   owner_message: string;
   owner_email: string;
   contacts: ContactWithId[];
@@ -23,7 +24,8 @@ interface FormData {
 
 export default function CreateBagForm({ onSuccess }: Props) {
   const [formData, setFormData] = useState<FormData>({
-    display_name: '',
+    owner_name: '',
+    bag_name: '',
     owner_message: '',
     owner_email: '',
     contacts: [
@@ -144,7 +146,8 @@ export default function CreateBagForm({ onSuccess }: Props) {
       }
 
       const requestData: CreateBagRequest = {
-        display_name: formData.display_name?.trim() || undefined,
+        owner_name: formData.owner_name?.trim() || undefined,
+        bag_name: formData.bag_name?.trim() || undefined,
         owner_message: formData.owner_message?.trim() || undefined,
         owner_email: formData.owner_email.trim(),
         contacts: validContacts.map(
@@ -199,18 +202,33 @@ export default function CreateBagForm({ onSuccess }: Props) {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label
-            htmlFor="display_name"
+            htmlFor="owner_name"
             className="block text-sm font-medium mb-2"
           >
             Your name (optional)
           </label>
           <CharacterLimitInput
-            value={formData.display_name}
+            value={formData.owner_name}
             onChange={(value) =>
-              setFormData((prev) => ({ ...prev, display_name: value }))
+              setFormData((prev) => ({ ...prev, owner_name: value }))
             }
             maxLength={30}
             placeholder="e.g., John"
+            className="input-field"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="bag_name" className="block text-sm font-medium mb-2">
+            Bag type (optional)
+          </label>
+          <CharacterLimitInput
+            value={formData.bag_name}
+            onChange={(value) =>
+              setFormData((prev) => ({ ...prev, bag_name: value }))
+            }
+            maxLength={30}
+            placeholder="e.g., Backpack, Laptop Bag"
             className="input-field"
           />
         </div>

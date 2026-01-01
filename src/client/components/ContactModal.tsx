@@ -20,6 +20,7 @@ declare global {
 export default function ContactModal({ shortId, ownerName, onClose }: Props) {
   const [message, setMessage] = useState('');
   const [senderInfo, setSenderInfo] = useState('');
+  const [senderName, setSenderName] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -43,6 +44,7 @@ export default function ContactModal({ shortId, ownerName, onClose }: Props) {
               ?.VITE_CLOUDFLARE_TURNSTILE_SITE_KEY ||
             '1x00000000000000000000AA',
           callback: (token: string) => setTurnstileToken(token),
+          theme: 'light',
         });
       }
     };
@@ -86,6 +88,7 @@ export default function ContactModal({ shortId, ownerName, onClose }: Props) {
       await api.startConversation(shortId, {
         finder_message: message.trim(),
         finder_email: senderInfo.trim() || undefined,
+        finder_display_name: senderName.trim() || undefined,
         turnstile_token: turnstileToken,
       });
       setSuccess(true);
@@ -152,12 +155,34 @@ export default function ContactModal({ shortId, ownerName, onClose }: Props) {
             <CharacterLimitTextArea
               value={message}
               onChange={setMessage}
-              maxLength={1000}
+              maxLength={300}
               placeholder="Hi! I found your bag. Let me know how to return it."
               rows={4}
               required
+              variant="light"
               className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-black"
             />
+          </div>
+
+          <div>
+            <label
+              htmlFor="senderName"
+              className="block text-sm font-medium text-black mb-2"
+            >
+              Your name (optional)
+            </label>
+            <input
+              id="senderName"
+              type="text"
+              placeholder="Your name"
+              value={senderName}
+              onChange={(e) => setSenderName(e.target.value)}
+              className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-black"
+              maxLength={30}
+            />
+            <p className="text-xs text-neutral-600 mt-1">
+              This will be shown to the owner instead of your email address.
+            </p>
           </div>
 
           <div>

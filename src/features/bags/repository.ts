@@ -4,7 +4,8 @@ import type { CreateBagRequest } from '../../client/types/index.js';
 export interface Bag {
   id: string;
   short_id: string;
-  display_name?: string;
+  owner_name?: string;
+  bag_name?: string;
   owner_message?: string;
   owner_email: string;
   status: 'active' | 'recovered' | 'archived';
@@ -26,10 +27,11 @@ export async function createBag(
 ): Promise<Bag> {
   return withTransaction(async (client) => {
     const bagResult = await client.query(
-      'INSERT INTO bags (short_id, display_name, owner_message, owner_email) VALUES ($1, $2, $3, $4) RETURNING *',
+      'INSERT INTO bags (short_id, owner_name, bag_name, owner_message, owner_email) VALUES ($1, $2, $3, $4, $5) RETURNING *',
       [
         shortId,
-        data.display_name || null,
+        data.owner_name || null,
+        data.bag_name || null,
         data.owner_message || null,
         data.owner_email,
       ]
@@ -83,7 +85,8 @@ export async function getFinderPageData(shortId: string) {
 
   return {
     short_id: bag.short_id,
-    display_name: bag.display_name,
+    owner_name: bag.owner_name,
+    bag_name: bag.bag_name,
     owner_message: bag.owner_message,
     contact_options: contactOptions,
   };

@@ -1,6 +1,6 @@
 import { customAlphabet } from 'nanoid';
 
-const ALPHABET = '23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+const ALPHABET = '23456789ABDEGHJKNQRTYabdeghijknoqrty';
 export const generateShortId = customAlphabet(ALPHABET, 6);
 
 export function isValidShortId(shortId: string): boolean {

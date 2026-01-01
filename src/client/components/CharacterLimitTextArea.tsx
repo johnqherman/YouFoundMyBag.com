@@ -10,6 +10,7 @@ interface CharacterLimitTextAreaProps {
   required?: boolean;
   rows?: number;
   name?: string;
+  variant?: 'light' | 'dark';
 }
 
 export default function CharacterLimitTextArea({
@@ -22,6 +23,7 @@ export default function CharacterLimitTextArea({
   required = false,
   rows = 4,
   name,
+  variant = 'dark',
 }: CharacterLimitTextAreaProps) {
   const remaining = maxLength - value.length;
   const isNearLimit = remaining <= 20;
@@ -44,22 +46,26 @@ export default function CharacterLimitTextArea({
   };
 
   const getCounterColor = () => {
-    if (isAtLimit) return 'text-red-400';
-    if (isNearLimit) return 'text-yellow-400';
-    return 'text-neutral-400';
+    if (isAtLimit) return variant === 'light' ? 'text-red-600' : 'text-red-400';
+    if (isNearLimit)
+      return variant === 'light' ? 'text-yellow-600' : 'text-yellow-400';
+    return variant === 'light' ? 'text-neutral-600' : 'text-neutral-400';
   };
 
   const getBorderColor = () => {
     if (disabled) return '';
     if (isAtLimit) return 'border-red-500 focus:ring-red-500';
     if (isNearLimit) return 'border-yellow-500 focus:ring-yellow-500';
-    return 'border-neutral-600 focus:ring-blue-500';
+    return variant === 'light'
+      ? 'border-neutral-300 focus:ring-blue-500'
+      : 'border-neutral-600 focus:ring-blue-500';
   };
 
   const baseClasses = `
-    w-full p-3 bg-neutral-700 rounded-lg resize-none
+    w-full p-3 rounded-lg resize-none
     focus:ring-2 focus:border-transparent transition-colors
-    disabled:bg-neutral-600 disabled:cursor-not-allowed
+    ${variant === 'light' ? 'bg-white disabled:bg-neutral-100' : 'bg-neutral-700 disabled:bg-neutral-600'}
+    disabled:cursor-not-allowed
     ${getBorderColor()}
     ${className}
   `.trim();

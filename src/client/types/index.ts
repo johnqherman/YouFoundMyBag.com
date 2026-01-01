@@ -1,5 +1,6 @@
 export interface CreateBagRequest {
-  display_name?: string;
+  owner_name?: string;
+  bag_name?: string;
   owner_message?: string;
   owner_email: string;
   contacts: Contact[];
@@ -11,7 +12,8 @@ export interface CreateBagResponse {
     short_id: string;
     url: string;
     qr_code: string;
-    display_name?: string;
+    owner_name?: string;
+    bag_name?: string;
     created_at: string;
   };
 }
@@ -20,7 +22,8 @@ export interface FinderPageData {
   success: boolean;
   data: {
     short_id: string;
-    display_name?: string;
+    owner_name?: string;
+    bag_name?: string;
     owner_message?: string;
     contact_options: Array<{
       type: 'email' | 'sms' | 'signal' | 'whatsapp' | 'telegram';
@@ -72,6 +75,7 @@ export interface Conversation {
   bag_id: string;
   status: 'active' | 'resolved' | 'archived';
   finder_email?: string;
+  finder_display_name?: string;
   last_message_at: string;
   created_at: string;
 }
@@ -90,7 +94,8 @@ export interface ConversationThread {
   messages: ConversationMessage[];
   bag: {
     short_id: string;
-    display_name?: string;
+    owner_name?: string;
+    bag_name?: string;
     status: 'active' | 'recovered' | 'archived';
   };
 }
@@ -99,7 +104,8 @@ export interface OwnerDashboard {
   bags: Array<{
     id: string;
     short_id: string;
-    display_name?: string;
+    owner_name?: string;
+    bag_name?: string;
     status: 'active' | 'recovered' | 'archived';
     created_at: string;
     conversation_count: number;
@@ -119,6 +125,7 @@ export interface OwnerSession {
 export interface StartConversationRequest {
   finder_message: string;
   finder_email?: string;
+  finder_display_name?: string;
   turnstile_token: string;
 }
 
@@ -139,7 +146,8 @@ export interface MessageContextInfo {
 export interface BagData {
   id: string;
   short_id: string;
-  display_name?: string;
+  owner_name?: string;
+  bag_name?: string;
   owner_message?: string;
   owner_email: string;
   status: 'active' | 'recovered' | 'archived';

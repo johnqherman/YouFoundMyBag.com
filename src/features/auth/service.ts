@@ -136,7 +136,8 @@ export async function getOwnerDashboard(ownerEmail: string): Promise<{
   bags: Array<{
     id: string;
     short_id: string;
-    display_name?: string;
+    owner_name?: string;
+    bag_name?: string;
     status: 'active' | 'recovered' | 'archived';
     created_at: string;
     conversation_count: number;

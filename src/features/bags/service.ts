@@ -34,7 +34,8 @@ export async function createBagWithQR(data: CreateBagRequest) {
     short_id: bag.short_id,
     url: bagUrl,
     qr_code: qrCodeDataUrl,
-    display_name: bag.display_name,
+    owner_name: bag.owner_name,
+    bag_name: bag.bag_name,
     created_at: bag.created_at.toISOString(),
   };
 }

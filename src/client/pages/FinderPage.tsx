@@ -5,6 +5,17 @@ import type { FinderPageData } from '../types';
 import ContactModal from '../components/ContactModal';
 import LoadingSpinner from '../components/LoadingSpinner';
 
+function formatOwnerReference(ownerName?: string): string {
+  return ownerName ? `${ownerName}'s` : 'my';
+}
+
+function formatBagDisplayName(ownerName?: string, bagName?: string): string {
+  if (bagName) {
+    return bagName;
+  }
+  return 'bag';
+}
+
 export default function FinderPage() {
   const { shortId } = useParams<{ shortId: string }>();
   const [bagData, setBagData] = useState<FinderPageData | null>(null);
@@ -72,8 +83,8 @@ export default function FinderPage() {
           <div className="text-center mb-8">
             <div className="text-6xl mb-4">🎒</div>
             <h1 className="text-3xl font-bold mb-4">
-              You found {data.display_name ? `${data.display_name}'s` : 'my'}{' '}
-              bag!
+              You found {formatOwnerReference(data.owner_name)}{' '}
+              {formatBagDisplayName(data.owner_name, data.bag_name)}!
             </h1>
             <p className="text-lg text-neutral-700 mb-6">
               Thank you for taking the time to help.
@@ -83,7 +94,7 @@ export default function FinderPage() {
           {data.owner_message && (
             <div className="bg-neutral-100 border border-neutral-300 rounded-xl p-4 mb-8">
               <p className="font-medium text-neutral-800 mb-2">
-                Message from {data.display_name || 'owner'}:
+                Message from {data.owner_name || 'owner'}:
               </p>
               <p className="text-neutral-700 italic">
                 &quot;{data.owner_message}&quot;
@@ -174,7 +185,7 @@ export default function FinderPage() {
         <ContactModal
           shortId={shortId}
           onClose={() => setShowContactModal(false)}
-          ownerName={data.display_name}
+          ownerName={data.owner_name}
         />
       )}
     </div>
