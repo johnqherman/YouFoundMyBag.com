@@ -3,6 +3,10 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import LoadingSpinner from '../components/LoadingSpinner';
 import CharacterLimitTextArea from '../components/CharacterLimitTextArea';
 import type { ConversationThread, ConversationMessage } from '../types/index';
+import {
+  formatConversationParticipant,
+  getContextualReplyPlaceholder,
+} from '../../infrastructure/utils/personalization';
 
 function formatBagDisplayName(
   ownerName?: string,
@@ -216,9 +220,15 @@ export default function ConversationPage() {
             >
               <div className="flex justify-between items-start mb-2">
                 <span className="font-medium">
-                  {message.sender_type === 'owner'
-                    ? 'You'
-                    : conversation.conversation.finder_display_name || 'Finder'}
+                  {formatConversationParticipant(
+                    message.sender_type,
+                    {
+                      ownerName: conversation.bag.owner_name,
+                      bagName: conversation.bag.bag_name,
+                      finderName: conversation.conversation.finder_display_name,
+                    },
+                    message.sender_type === 'owner'
+                  )}
                 </span>
                 <span className="text-sm text-neutral-400">
                   {new Date(message.sent_at).toLocaleString()}
@@ -236,7 +246,15 @@ export default function ConversationPage() {
               value={replyMessage}
               onChange={setReplyMessage}
               maxLength={1000}
-              placeholder="Type your reply to the finder..."
+              placeholder={getContextualReplyPlaceholder(
+                'finder',
+                {
+                  ownerName: conversation.bag.owner_name,
+                  bagName: conversation.bag.bag_name,
+                  finderName: conversation.conversation.finder_display_name,
+                },
+                'response'
+              )}
               rows={4}
               disabled={sending}
             />

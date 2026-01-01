@@ -3,6 +3,10 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import LoadingSpinner from '../components/LoadingSpinner';
 import CharacterLimitTextArea from '../components/CharacterLimitTextArea';
 import type { ConversationThread, ConversationMessage } from '../types/index';
+import {
+  formatConversationParticipant,
+  getContextualReplyPlaceholder,
+} from '../../infrastructure/utils/personalization';
 
 function formatBagDisplayName(
   ownerName?: string,
@@ -267,9 +271,15 @@ export default function FinderConversationPage() {
             >
               <div className="flex justify-between items-start mb-2">
                 <span className="font-medium text-neutral-900">
-                  {message.sender_type === 'finder'
-                    ? 'You'
-                    : conversation.bag.owner_name || 'Owner'}
+                  {formatConversationParticipant(
+                    message.sender_type,
+                    {
+                      ownerName: conversation.bag.owner_name,
+                      bagName: conversation.bag.bag_name,
+                      finderName: conversation.conversation.finder_display_name,
+                    },
+                    message.sender_type === 'finder'
+                  )}
                 </span>
                 <span className="text-sm text-neutral-700 font-medium">
                   {new Date(message.sent_at).toLocaleString()}
@@ -292,7 +302,15 @@ export default function FinderConversationPage() {
               value={replyMessage}
               onChange={setReplyMessage}
               maxLength={1000}
-              placeholder="Type your reply to the owner..."
+              placeholder={getContextualReplyPlaceholder(
+                'owner',
+                {
+                  ownerName: conversation.bag.owner_name,
+                  bagName: conversation.bag.bag_name,
+                  finderName: conversation.conversation.finder_display_name,
+                },
+                'response'
+              )}
               rows={4}
               disabled={sending}
               variant="light"

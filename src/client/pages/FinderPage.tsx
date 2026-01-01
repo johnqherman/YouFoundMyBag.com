@@ -113,7 +113,8 @@ export default function FinderPage() {
                   📞 Direct Contact
                 </h3>
                 <p className="text-sm text-neutral-600 mb-3">
-                  Contact me directly (my info will be visible)
+                  Contact {data.owner_name || 'me'} directly (your info will be
+                  visible)
                 </p>
                 <div className="space-y-2">
                   {data.contact_options
@@ -158,16 +159,10 @@ export default function FinderPage() {
                 📩 Send Private Message
               </button>
               <p className="text-xs text-blue-600 mt-2">
-                The owner can respond through our secure messaging system
+                {data.owner_name || 'The owner'} will be able respond through
+                our messaging system
               </p>
             </div>
-          </div>
-
-          <div className="text-center text-neutral-600 text-sm">
-            <p>
-              If I don&apos;t respond immediately, please keep the bag somewhere
-              safe. I really appreciate it.
-            </p>
           </div>
         </div>
 

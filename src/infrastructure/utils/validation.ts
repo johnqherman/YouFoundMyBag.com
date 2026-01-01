@@ -46,12 +46,6 @@ export const createBagSchema = z.object({
   contacts: z.array(contactSchema).min(1).max(5),
 });
 
-export const sendMessageSchema = z.object({
-  from_message: z.string().min(1).max(300).trim(),
-  sender_info: z.string().max(30).optional(),
-  turnstile_token: z.string().min(1),
-});
-
 export const shortIdSchema = z
   .string()
   .length(6)

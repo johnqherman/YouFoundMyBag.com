@@ -33,17 +33,6 @@ export interface FinderPageData {
   };
 }
 
-export interface SendMessageRequest {
-  from_message: string;
-  sender_info?: string;
-  turnstile_token: string;
-}
-
-export interface SendMessageResponse {
-  success: boolean;
-  message: string;
-}
-
 export interface Contact {
   type: 'email' | 'sms' | 'signal' | 'whatsapp' | 'telegram';
   value: string;

@@ -1,6 +1,5 @@
 import nodemailer from 'nodemailer';
 import { config } from '../config/index.js';
-import type { Contact } from '../../client/types/index.js';
 import {
   generateMagicLinkToken,
   generateFinderMagicLinkToken,
@@ -32,55 +31,6 @@ function getTransporter() {
 
 function getDashboardUrl(): string {
   return process.env.APP_URL || 'http://localhost:3000';
-}
-
-export async function sendContactEmail(
-  contacts: Contact[],
-  message: string,
-  senderInfo?: string,
-  bagDisplayName?: string
-): Promise<void> {
-  const emailer = getTransporter();
-  if (!emailer) {
-    console.log('Email not configured - message saved but not sent');
-    return;
-  }
-
-  const emailContacts = contacts.filter((c) => c.type === 'email');
-  if (emailContacts.length === 0) return;
-
-  const { content: safeMessage } = secureEmailContent(message);
-  const safeSenderInfo = senderInfo
-    ? secureEmailContent(senderInfo).content
-    : '';
-  const safeBagDisplayName = bagDisplayName
-    ? secureEmailContent(bagDisplayName).content
-    : '';
-
-  const subject = `Someone found your bag${safeBagDisplayName ? ` (${safeBagDisplayName})` : ''}!`;
-  const textBody = `
-Good news! Someone found your bag.
-
-Message: "${safeMessage}"
-
-${safeSenderInfo ? `Contact info: ${safeSenderInfo}` : ''}
-
-Message sent via YouFoundMyBag.com
-  `;
-
-  for (const contact of emailContacts) {
-    try {
-      await emailer.sendMail({
-        from: config.SMTP_FROM,
-        to: contact.value,
-        subject,
-        text: textBody,
-      });
-      console.log(`Email sent to ${contact.value}`);
-    } catch (error) {
-      console.error(`Email failed to ${contact.value}:`, error);
-    }
-  }
 }
 
 export async function sendReplyEmail({
@@ -552,6 +502,13 @@ YouFoundMyBag.com - Privacy-first lost item recovery
 }
 
 import type { MessageContext } from '../../features/conversations/service.js';
+import {
+  getContextualSubject,
+  getContextualGreeting,
+  getContextualDescription,
+  type PersonalizationContext,
+  type NameInfo,
+} from '../utils/personalization.js';
 
 export async function sendContextualFinderNotification({
   finderEmail,
@@ -559,12 +516,14 @@ export async function sendContextualFinderNotification({
   message,
   conversationId,
   context,
+  names,
 }: {
   finderEmail: string;
   senderName: string;
   message: string;
   conversationId: string;
   context: MessageContext;
+  names: NameInfo;
 }): Promise<void> {
   const { magicLinkToken } = await generateFinderMagicLinkToken(
     finderEmail,
@@ -589,28 +548,18 @@ export async function sendContextualFinderNotification({
   const { content: safeMessage } = secureEmailContent(message);
   const { content: safeSenderName } = secureEmailContent(senderName);
 
-  let subject: string;
-  let greeting: string;
-  let contextDescription: string;
+  const personalizationContext: PersonalizationContext = {
+    context,
+    senderType: 'owner',
+    recipientType: 'finder',
+  };
 
-  switch (context) {
-    case 'initial':
-      subject = 'The bag owner responded to you!';
-      greeting = '📬 The bag owner responded to your message!';
-      contextDescription =
-        'The bag owner responded to your message. Click the secure link below to continue the conversation and arrange the bag return.';
-      break;
-    case 'follow-up':
-      subject = `New message from ${safeSenderName}`;
-      greeting = `📬 ${safeSenderName} sent you another message!`;
-      contextDescription = `${safeSenderName} sent you a follow-up message. Click the secure link below to continue the conversation.`;
-      break;
-    case 'response':
-      subject = `${safeSenderName} replied to your message!`;
-      greeting = `📬 ${safeSenderName} replied to your message!`;
-      contextDescription = `${safeSenderName} replied to your message. Click the secure link below to continue the conversation.`;
-      break;
-  }
+  const subject = getContextualSubject(personalizationContext, names);
+  const greeting = getContextualGreeting(personalizationContext, names);
+  const contextDescription = getContextualDescription(
+    personalizationContext,
+    names
+  );
 
   const textBody = `
 ${greeting}
@@ -691,6 +640,7 @@ export async function sendContextualOwnerNotification({
   conversationId,
   bagIds,
   context,
+  names,
 }: {
   ownerEmail: string;
   senderName: string;
@@ -698,6 +648,7 @@ export async function sendContextualOwnerNotification({
   conversationId: string;
   bagIds: string[];
   context: MessageContext;
+  names: NameInfo;
 }): Promise<void> {
   const { magicLinkToken } = await generateMagicLinkToken(
     ownerEmail,
@@ -719,29 +670,18 @@ export async function sendContextualOwnerNotification({
   const { content: safeMessage } = secureEmailContent(message);
   const { content: safeSenderName } = secureEmailContent(senderName);
 
-  let subject: string;
-  let greeting: string;
-  let contextDescription: string;
+  const personalizationContext: PersonalizationContext = {
+    context,
+    senderType: 'finder',
+    recipientType: 'owner',
+  };
 
-  switch (context) {
-    case 'initial':
-      subject = 'Someone found your bag! Click to respond';
-      greeting = '🎒 Someone found your bag!';
-      contextDescription =
-        'Great news! Someone found your bag and wants to return it. Click the secure link below to respond to the finder.';
-      break;
-    case 'follow-up':
-      subject = 'New message about your bag from the finder';
-      greeting = '📬 New message about your bag!';
-      contextDescription =
-        'The finder sent you another message about your bag. Click the secure link below to view the message and respond.';
-      break;
-    case 'response':
-      subject = `${safeSenderName} replied to your message!`;
-      greeting = `💬 ${safeSenderName} replied to your message!`;
-      contextDescription = `${safeSenderName} replied to your message. Click the secure link below to continue the conversation.`;
-      break;
-  }
+  const subject = getContextualSubject(personalizationContext, names);
+  const greeting = getContextualGreeting(personalizationContext, names);
+  const contextDescription = getContextualDescription(
+    personalizationContext,
+    names
+  );
 
   const textBody = `
 ${greeting}

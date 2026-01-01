@@ -2,8 +2,6 @@ import type {
   CreateBagRequest,
   CreateBagResponse,
   FinderPageData,
-  SendMessageRequest,
-  SendMessageResponse,
   StartConversationRequest,
   ApiError,
 } from '../types/index.js';
@@ -71,16 +69,6 @@ class ApiClient {
 
   async getFinderPageData(shortId: string): Promise<FinderPageData> {
     return this.request<FinderPageData>(`/bags/${shortId}`);
-  }
-
-  async sendMessage(
-    shortId: string,
-    messageData: SendMessageRequest
-  ): Promise<SendMessageResponse> {
-    return this.request<SendMessageResponse>(`/bags/${shortId}/message`, {
-      method: 'POST',
-      body: JSON.stringify(messageData),
-    });
   }
 
   async startConversation(

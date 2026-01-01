@@ -25,6 +25,12 @@ import {
 } from '../../infrastructure/email/index.js';
 import { generateMagicLink, generateFinderMagicLink } from '../auth/service.js';
 import * as conversationRepository from './repository.js';
+import {
+  getContextualSubject,
+  getContextualSenderName,
+  type PersonalizationContext,
+  type NameInfo,
+} from '../../infrastructure/utils/personalization.js';
 
 export function analyzeMessageContext(
   messages: ConversationMessage[],
@@ -84,20 +90,16 @@ export function getMessageContextLabel(
 
 export function getNotificationSubject(
   context: MessageContext,
-  senderName: string,
-  senderType: 'finder' | 'owner'
+  senderType: 'finder' | 'owner',
+  names: NameInfo
 ): string {
-  if (context === 'initial') {
-    return senderType === 'finder'
-      ? 'Someone found your bag!'
-      : 'New message about your bag';
-  } else if (context === 'follow-up') {
-    return senderType === 'finder'
-      ? 'New message about your bag from the finder'
-      : 'New message from the bag owner';
-  } else {
-    return `${senderName} replied to your message!`;
-  }
+  const personalizationContext: PersonalizationContext = {
+    context,
+    senderType,
+    recipientType: senderType === 'finder' ? 'owner' : 'finder',
+  };
+
+  return getContextualSubject(personalizationContext, names);
 }
 
 export async function startConversation(
@@ -172,28 +174,45 @@ export async function sendReply(
   );
 
   try {
+    const names: NameInfo = {
+      ownerName: conversationThread.bag.owner_name,
+      bagName: conversationThread.bag.bag_name,
+      finderName: conversationThread.conversation.finder_display_name,
+    };
+
     if (
       senderType === 'owner' &&
       conversationThread.conversation.finder_email
     ) {
+      const senderName = getContextualSenderName(
+        senderType,
+        names,
+        messageContext.context
+      );
       await sendContextualFinderNotification({
         finderEmail: conversationThread.conversation.finder_email,
-        senderName: conversationThread.bag.owner_name || 'Bag owner',
+        senderName,
         message: replyData.message_content,
         conversationId,
         context: messageContext.context,
+        names,
       });
     } else if (senderType === 'finder') {
       const bag = await getBagByShortId(conversationThread.bag.short_id);
       if (bag?.owner_email) {
+        const senderName = getContextualSenderName(
+          senderType,
+          names,
+          messageContext.context
+        );
         await sendContextualOwnerNotification({
           ownerEmail: bag.owner_email,
-          senderName:
-            conversationThread.conversation.finder_display_name || 'The finder',
+          senderName,
           message: replyData.message_content,
           conversationId,
           bagIds: [bag.id],
           context: messageContext.context,
+          names,
         });
       }
     }
