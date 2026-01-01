@@ -9,6 +9,7 @@ import ContactInput from './ContactInput';
 import PhoneInputErrorBoundary from './PhoneInputErrorBoundary';
 import CharacterLimitInput from './CharacterLimitInput';
 import CharacterLimitTextArea from './CharacterLimitTextArea';
+import PrivacyWarning from './PrivacyWarning';
 
 interface Props {
   onSuccess: (bagData: CreateBagResponse) => void;
@@ -263,6 +264,12 @@ export default function CreateBagForm({ onSuccess }: Props) {
           >
             Message for finder (optional)
           </label>
+          <PrivacyWarning
+            message="Avoid sharing personal contact details here."
+            storageKey="create-bag-message-privacy-tip"
+            variant="dark"
+            className="mb-3"
+          />
           <CharacterLimitTextArea
             value={formData.owner_message}
             onChange={(value) =>

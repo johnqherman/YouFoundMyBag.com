@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import LoadingSpinner from '../components/LoadingSpinner';
 import CharacterLimitTextArea from '../components/CharacterLimitTextArea';
@@ -32,7 +32,7 @@ export default function ConversationPage() {
   const [replyMessage, setReplyMessage] = useState('');
   const [sending, setSending] = useState(false);
 
-  const loadConversation = async () => {
+  const loadConversation = useCallback(async () => {
     const token = localStorage.getItem('owner_session_token');
     if (!token) {
       navigate('/auth/verify');
@@ -67,7 +67,7 @@ export default function ConversationPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [conversationId, navigate]);
 
   const sendReply = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,7 +113,7 @@ export default function ConversationPage() {
     if (conversationId) {
       loadConversation();
     }
-  }, [conversationId]);
+  }, [conversationId, loadConversation]);
 
   if (loading) {
     return (
@@ -158,8 +158,8 @@ export default function ConversationPage() {
               Conversation Not Found
             </h1>
             <p className="text-neutral-400 mb-6">
-              The conversation you're looking for doesn't exist or you don't
-              have access to it.
+              The conversation you&apos;re looking for doesn&apos;t exist or you
+              don&apos;t have access to it.
             </p>
             <Link
               to="/dashboard"

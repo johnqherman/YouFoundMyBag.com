@@ -1,10 +1,5 @@
-import { useEffect, useState } from 'react';
-import {
-  useParams,
-  useNavigate,
-  Link,
-  useSearchParams,
-} from 'react-router-dom';
+import { useEffect, useState, useCallback } from 'react';
+import { useParams, useSearchParams } from 'react-router-dom';
 import LoadingSpinner from '../components/LoadingSpinner';
 import CharacterLimitTextArea from '../components/CharacterLimitTextArea';
 import type { ConversationThread, ConversationMessage } from '../types/index';
@@ -28,7 +23,6 @@ function formatBagDisplayName(
 
 export default function FinderConversationPage() {
   const { conversationId } = useParams();
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [conversation, setConversation] = useState<ConversationThread | null>(
     null
@@ -39,7 +33,44 @@ export default function FinderConversationPage() {
   const [sending, setSending] = useState(false);
   const [authenticating, setAuthenticating] = useState(false);
 
-  const authenticateWithMagicLink = async () => {
+  const loadConversation = useCallback(async () => {
+    const token = localStorage.getItem('finder_session_token');
+    if (!token) {
+      setError('No authentication token found');
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `/api/finder/conversation/${conversationId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('finder_session_token');
+          setError(
+            'Session expired. Please use your original magic link to access the conversation.'
+          );
+          return;
+        }
+        throw new Error('Failed to load conversation');
+      }
+
+      const result = await response.json();
+      setConversation(result.data);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Failed to load conversation'
+      );
+    }
+  }, [conversationId]);
+
+  const authenticateWithMagicLink = useCallback(async () => {
     const token = searchParams.get('token');
     if (!token) {
       setError('Invalid magic link - no token found');
@@ -77,44 +108,7 @@ export default function FinderConversationPage() {
       setAuthenticating(false);
       setLoading(false);
     }
-  };
-
-  const loadConversation = async () => {
-    const token = localStorage.getItem('finder_session_token');
-    if (!token) {
-      setError('No authentication token found');
-      return;
-    }
-
-    try {
-      const response = await fetch(
-        `/api/finder/conversation/${conversationId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          localStorage.removeItem('finder_session_token');
-          setError(
-            'Session expired. Please use your original magic link to access the conversation.'
-          );
-          return;
-        }
-        throw new Error('Failed to load conversation');
-      }
-
-      const result = await response.json();
-      setConversation(result.data);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Failed to load conversation'
-      );
-    }
-  };
+  }, [searchParams, loadConversation]);
 
   const sendReply = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -174,7 +168,12 @@ export default function FinderConversationPage() {
         setLoading(false);
       }
     }
-  }, [conversationId, searchParams]);
+  }, [
+    conversationId,
+    searchParams,
+    authenticateWithMagicLink,
+    loadConversation,
+  ]);
 
   if (loading || authenticating) {
     return (
@@ -219,8 +218,8 @@ export default function FinderConversationPage() {
               Conversation Not Found
             </h1>
             <p className="text-neutral-800 mb-6">
-              The conversation you're looking for doesn't exist or you don't
-              have access to it.
+              The conversation you&apos;re looking for doesn&apos;t exist or you
+              don&apos;t have access to it.
             </p>
           </div>
         </div>
@@ -252,7 +251,7 @@ export default function FinderConversationPage() {
             )}
           </p>
           <p className="text-sm text-neutral-800">
-            You're connected as the finder who reported finding this item.
+            You&apos;re connected as the finder who reported finding this item.
           </p>
         </div>
 

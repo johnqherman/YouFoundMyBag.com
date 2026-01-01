@@ -5,6 +5,15 @@ import type {
   ConversationThread,
 } from '../../client/types/index.js';
 
+interface DatabaseMessage {
+  id: string | null;
+  conversation_id: string;
+  sender_type: 'finder' | 'owner';
+  message_content: string;
+  read_at: string | null;
+  sent_at: string;
+}
+
 export async function createConversation(
   bagId: string,
   finderMessage: string,
@@ -97,7 +106,7 @@ export async function getConversationsByOwnerEmail(
       last_message_at: row.last_message_at,
       created_at: row.created_at,
     },
-    messages: row.messages.filter((msg: any) => msg.id !== null),
+    messages: row.messages.filter((msg: DatabaseMessage) => msg.id !== null),
     bag: {
       short_id: row.short_id,
       owner_name: row.owner_name,
@@ -147,7 +156,7 @@ export async function getConversationById(
       last_message_at: row.last_message_at,
       created_at: row.created_at,
     },
-    messages: row.messages.filter((msg: any) => msg.id !== null),
+    messages: row.messages.filter((msg: DatabaseMessage) => msg.id !== null),
     bag: {
       short_id: row.short_id,
       owner_name: row.owner_name,

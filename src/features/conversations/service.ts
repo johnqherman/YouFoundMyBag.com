@@ -20,7 +20,6 @@ export interface MessageContextInfo {
 import { getBagByShortId } from '../bags/repository.js';
 import { verifyTurnstile } from '../messaging/service.js';
 import {
-  sendReplyEmail,
   sendContextualFinderNotification,
   sendContextualOwnerNotification,
 } from '../../infrastructure/email/index.js';
@@ -103,8 +102,7 @@ export function getNotificationSubject(
 
 export async function startConversation(
   shortId: string,
-  messageData: StartConversationRequest,
-  ipHash: string
+  messageData: StartConversationRequest
 ): Promise<Conversation> {
   const turnstileValid = await verifyTurnstile(messageData.turnstile_token);
   if (!turnstileValid) {

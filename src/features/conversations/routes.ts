@@ -42,12 +42,10 @@ router.post(
       }
 
       const messageData: StartConversationRequest = bodyResult.data;
-      const ipHash = conversationService.getClientIpHash(req);
 
       const conversation = await conversationService.startConversation(
         shortIdResult.data,
-        messageData,
-        ipHash
+        messageData
       );
 
       res.json({
@@ -103,7 +101,7 @@ router.post(
         return;
       }
 
-      const { sender_type, sender_email } = req.body;
+      const { sender_type } = req.body;
 
       if (!sender_type || !['finder', 'owner'].includes(sender_type)) {
         res.status(400).json({

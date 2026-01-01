@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '../utils/api';
 import CharacterLimitTextArea from './CharacterLimitTextArea';
+import PrivacyWarning from './PrivacyWarning';
 
 interface Props {
   shortId: string;
@@ -152,6 +153,12 @@ export default function ContactModal({ shortId, ownerName, onClose }: Props) {
             >
               Your message *
             </label>
+            <PrivacyWarning
+              message="Avoid sharing personal contact details here."
+              storageKey="contact-modal-privacy-tip"
+              variant="light"
+              className="mb-3"
+            />
             <CharacterLimitTextArea
               value={message}
               onChange={setMessage}
@@ -203,8 +210,8 @@ export default function ContactModal({ shortId, ownerName, onClose }: Props) {
               required
             />
             <p className="text-xs text-neutral-600 mt-1">
-              Required for secure conversation. You'll receive a secure link to
-              continue messaging with the owner.
+              Required for secure conversation. You&apos;ll receive a secure
+              link to continue messaging with the owner.
             </p>
           </div>
 

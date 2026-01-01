@@ -104,7 +104,7 @@ export default function FinderPage() {
 
           <div className="space-y-6 mb-8">
             <p className="text-lg font-semibold text-center mb-6">
-              Choose how you'd like to contact me:
+              Choose how you&apos;d like to contact me:
             </p>
 
             {data.contact_options.some((option) => option.direct_contact) && (

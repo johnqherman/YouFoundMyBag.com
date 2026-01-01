@@ -133,6 +133,77 @@ html .iti__a11y-text,
 body .iti__selected-country,
 html .iti__selected-country,
 .iti__selected-country.iti__selected-country {
+  border: none !important;
+  background: transparent !important;
+  border-top-left-radius: 0.5rem !important;
+  border-bottom-left-radius: 0.5rem !important;
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+
+body .iti__selected-country:hover,
+html .iti__selected-country:hover,
+.iti__selected-country.iti__selected-country:hover {
+  border: none !important;
+  background: rgba(64, 64, 64, 0.2) !important;
+  border-top-left-radius: 0.5rem !important;
+  border-bottom-left-radius: 0.5rem !important;
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+
+body .iti__selected-country-primary,
+html .iti__selected-country-primary,
+.iti__selected-country-primary.iti__selected-country-primary {
+  border: none !important;
+  background: transparent !important;
+  border-top-left-radius: 0.5rem !important;
+  border-bottom-left-radius: 0.5rem !important;
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+
+body .iti__selected-country-primary:hover,
+html .iti__selected-country-primary:hover,
+.iti__selected-country-primary.iti__selected-country-primary:hover {
+  border: none !important;
+  background: rgba(64, 64, 64, 0.2) !important;
+  border-top-left-radius: 0.5rem !important;
+  border-bottom-left-radius: 0.5rem !important;
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+
+body .iti__tel-input,
+html .iti__tel-input,
+.iti__tel-input.iti__tel-input {
+  border: none !important;
+  background: rgba(64, 64, 64, 0.2) !important;
+}
+
+body .iti__country,
+html .iti__country,
+.iti__country.iti__country {
+  border: none !important;
+  background: rgba(64, 64, 64, 0.2) !important;
+}
+
+body .iti__search-input-wrapper,
+html .iti__search-input-wrapper,
+.iti__search-input-wrapper.iti__search-input-wrapper {
+  position: relative !important;
+}
+
+body .iti__search-input,
+html .iti__search-input,
+.iti__search-input.iti__search-input {
+  padding-left: 32px !important;
+}
+
+body .iti,
+html .iti,
+.iti.iti {
+  border-radius: 0.75rem !important;
   background: #171717 !important;
   border: 1px solid #404040 !important;
 }

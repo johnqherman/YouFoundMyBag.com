@@ -132,7 +132,7 @@ export async function logout(token: string): Promise<void> {
   await authRepository.deleteOwnerSession(token);
 }
 
-export async function getOwnerDashboard(ownerEmail: string): Promise<{
+export async function getOwnerDashboard(): Promise<{
   bags: Array<{
     id: string;
     short_id: string;
