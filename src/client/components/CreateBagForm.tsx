@@ -29,21 +29,17 @@ export default function CreateBagForm({ onSuccess }: Props) {
     bag_name: '',
     owner_message: '',
     owner_email: '',
-    contacts: [
-      {
-        id: crypto.randomUUID(),
-        type: 'email',
-        value: '',
-        allow_direct_display: false,
-      },
-    ],
+    contacts: [],
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const allContactTypes: Array<
-    'email' | 'sms' | 'signal' | 'whatsapp' | 'telegram'
-  > = ['email', 'sms', 'signal', 'whatsapp', 'telegram'];
+  const allContactTypes: Array<'sms' | 'signal' | 'whatsapp' | 'telegram'> = [
+    'sms',
+    'signal',
+    'whatsapp',
+    'telegram',
+  ];
 
   const getAvailableContactTypes = (currentIndex: number) => {
     const usedTypes = formData.contacts
@@ -62,13 +58,11 @@ export default function CreateBagForm({ onSuccess }: Props) {
           {
             id: crypto.randomUUID(),
             type: availableTypes[0] as
-              | 'email'
               | 'sms'
               | 'signal'
               | 'whatsapp'
               | 'telegram',
             value: '',
-            allow_direct_display: false,
           },
         ],
       }));
@@ -76,12 +70,10 @@ export default function CreateBagForm({ onSuccess }: Props) {
   };
 
   const removeContact = (index: number) => {
-    if (formData.contacts.length > 1) {
-      setFormData((prev) => ({
-        ...prev,
-        contacts: prev.contacts.filter((_, i) => i !== index),
-      }));
-    }
+    setFormData((prev) => ({
+      ...prev,
+      contacts: prev.contacts.filter((_, i) => i !== index),
+    }));
   };
 
   const updateContact = useCallback(
@@ -89,13 +81,7 @@ export default function CreateBagForm({ onSuccess }: Props) {
       setFormData((prev) => ({
         ...prev,
         contacts: prev.contacts.map((contact, i) =>
-          i === index
-            ? {
-                ...updatedContact,
-                allow_direct_display:
-                  updatedContact.allow_direct_display || false,
-              }
-            : contact
+          i === index ? updatedContact : contact
         ),
       }));
     },
@@ -123,26 +109,23 @@ export default function CreateBagForm({ onSuccess }: Props) {
         contact.value.trim()
       );
 
-      if (validContacts.length === 0) {
-        setError('At least one contact method is required');
-        return;
-      }
-
-      const contactTypes = validContacts.map((contact) => contact.type);
-      const uniqueTypes = new Set(contactTypes);
-      if (contactTypes.length !== uniqueTypes.size) {
-        setError('You cannot use the same contact type more than once');
-        return;
-      }
-
-      for (const contact of validContacts) {
-        const validationError = validateContactFormat(
-          contact.type,
-          contact.value
-        );
-        if (validationError) {
-          setError(validationError);
+      if (validContacts.length > 0) {
+        const contactTypes = validContacts.map((contact) => contact.type);
+        const uniqueTypes = new Set(contactTypes);
+        if (contactTypes.length !== uniqueTypes.size) {
+          setError('You cannot use the same contact type more than once');
           return;
+        }
+
+        for (const contact of validContacts) {
+          const validationError = validateContactFormat(
+            contact.type,
+            contact.value
+          );
+          if (validationError) {
+            setError(validationError);
+            return;
+          }
         }
       }
 
@@ -151,13 +134,10 @@ export default function CreateBagForm({ onSuccess }: Props) {
         bag_name: formData.bag_name?.trim() || undefined,
         owner_message: formData.owner_message?.trim() || undefined,
         owner_email: formData.owner_email.trim(),
-        contacts: validContacts.map(
-          ({ type, value, allow_direct_display }) => ({
-            type,
-            value,
-            allow_direct_display,
-          })
-        ),
+        contacts: validContacts.map(({ type, value }) => ({
+          type,
+          value,
+        })),
       };
 
       const result = await api.createBag(requestData);
@@ -174,13 +154,6 @@ export default function CreateBagForm({ onSuccess }: Props) {
     value: string
   ): string | null => {
     switch (type) {
-      case 'email': {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(value)) {
-          return 'Please enter a valid email address';
-        }
-        break;
-      }
       case 'sms':
       case 'whatsapp':
       case 'signal':
@@ -286,36 +259,63 @@ export default function CreateBagForm({ onSuccess }: Props) {
         </div>
 
         <div>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-2">
             <label className="block text-sm font-medium">
-              Contact methods *
+              Contact methods (optional)
             </label>
-            {getAvailableContactTypes(-1).length > 0 && (
-              <button
-                type="button"
-                onClick={addContact}
-                className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1"
-              >
-                + Add another contact method
-              </button>
-            )}
+            {formData.contacts.length > 0 &&
+              getAvailableContactTypes(-1).length > 0 && (
+                <button
+                  type="button"
+                  onClick={addContact}
+                  className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1"
+                >
+                  + Add contact method
+                </button>
+              )}
+          </div>
+
+          <div className="bg-amber-900 border border-amber-700 text-amber-200 px-3 py-2 rounded-lg mb-4">
+            <p className="text-xs">
+              ⚠️{' '}
+              <strong>
+                These will be visible to anyone who finds your item.
+              </strong>{' '}
+              Finders can always reach you through our secure
+              private messaging system.
+            </p>
           </div>
 
           <div className="space-y-3">
-            {formData.contacts.map((contact, index) => (
-              <PhoneInputErrorBoundary key={`boundary-${contact.id}`}>
-                <ContactInput
-                  key={contact.id}
-                  contact={contact}
-                  onUpdate={(updatedContact) =>
-                    updateContact(index, updatedContact)
-                  }
-                  onRemove={() => removeContact(index)}
-                  availableTypes={getAvailableContactTypes(index)}
-                  showRemoveButton={formData.contacts.length > 1}
-                />
-              </PhoneInputErrorBoundary>
-            ))}
+            {formData.contacts.length === 0 ? (
+              <div className="text-center py-6 bg-neutral-900 rounded-xl border-2 border-dashed border-neutral-700">
+                <p className="text-neutral-400 text-sm mb-3">
+                  No contact methods added
+                </p>
+                <button
+                  type="button"
+                  onClick={addContact}
+                  className="text-sm text-blue-400 hover:text-blue-300"
+                >
+                  + Add your first contact method
+                </button>
+              </div>
+            ) : (
+              formData.contacts.map((contact, index) => (
+                <PhoneInputErrorBoundary key={`boundary-${contact.id}`}>
+                  <ContactInput
+                    key={contact.id}
+                    contact={contact}
+                    onUpdate={(updatedContact) =>
+                      updateContact(index, updatedContact)
+                    }
+                    onRemove={() => removeContact(index)}
+                    availableTypes={getAvailableContactTypes(index)}
+                    showRemoveButton={true}
+                  />
+                </PhoneInputErrorBoundary>
+              ))
+            )}
           </div>
         </div>
 

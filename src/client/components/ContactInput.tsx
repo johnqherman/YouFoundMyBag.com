@@ -8,7 +8,7 @@ interface ContactInputProps {
   contact: ContactWithId;
   onUpdate: (contact: ContactWithId) => void;
   onRemove?: () => void;
-  availableTypes: Array<'email' | 'sms' | 'signal' | 'whatsapp' | 'telegram'>;
+  availableTypes: Array<'sms' | 'signal' | 'whatsapp' | 'telegram'>;
   showRemoveButton?: boolean;
 }
 
@@ -56,12 +56,7 @@ export default function ContactInput({
   const handleTypeChange = (newType: string) => {
     if (!isMountedRef.current) return;
 
-    const typedNewType = newType as
-      | 'email'
-      | 'sms'
-      | 'signal'
-      | 'whatsapp'
-      | 'telegram';
+    const typedNewType = newType as 'sms' | 'signal' | 'whatsapp' | 'telegram';
 
     const wasPhoneType = isPhoneType(contact.type);
     const isNowPhoneType = isPhoneType(typedNewType);
@@ -87,12 +82,7 @@ export default function ContactInput({
 
     const errors: string[] = [];
     if (newValue.trim()) {
-      if (contact.type === 'email') {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(newValue)) {
-          errors.push('Please enter a valid email address');
-        }
-      } else if (contact.type === 'telegram') {
+      if (contact.type === 'telegram') {
         if (!newValue.startsWith('@')) {
           errors.push('Telegram username should start with @');
         }
@@ -108,27 +98,8 @@ export default function ContactInput({
     }
   };
 
-  const handleDirectDisplayChange = (checked: boolean) => {
-    if (!isMountedRef.current) return;
-
-    let currentValue = contact.value;
-    if (isPhoneType(contact.type) && isMountedRef.current) {
-      currentValue = phoneNumber;
-    }
-
-    if (isMountedRef.current) {
-      onUpdate({
-        ...contact,
-        value: currentValue,
-        allow_direct_display: checked,
-      });
-    }
-  };
-
   const getPlaceholder = () => {
     switch (contact.type) {
-      case 'email':
-        return 'your@email.com';
       case 'telegram':
         return '@username';
       default:
@@ -137,7 +108,7 @@ export default function ContactInput({
   };
 
   const getInputType = () => {
-    return contact.type === 'email' ? 'email' : 'text';
+    return 'text';
   };
 
   return (
@@ -161,7 +132,6 @@ export default function ContactInput({
         >
           {availableTypes.map((type) => (
             <option key={type} value={type}>
-              {type === 'email' && 'Email'}
               {type === 'sms' && 'Text/SMS'}
               {type === 'signal' && 'Signal'}
               {type === 'whatsapp' && 'WhatsApp'}
@@ -232,16 +202,6 @@ export default function ContactInput({
             </p>
           </div>
         )}
-
-        <label className="flex items-center text-sm">
-          <input
-            type="checkbox"
-            checked={contact.allow_direct_display || false}
-            onChange={(e) => handleDirectDisplayChange(e.target.checked)}
-            className="mr-2"
-          />
-          Share contact info directly (less private)
-        </label>
       </div>
     </div>
   );

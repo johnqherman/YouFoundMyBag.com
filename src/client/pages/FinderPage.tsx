@@ -107,7 +107,7 @@ export default function FinderPage() {
               Choose how you&apos;d like to contact me:
             </p>
 
-            {data.contact_options.some((option) => option.direct_contact) && (
+            {data.contact_options.length > 0 && (
               <div className="bg-neutral-100 border border-neutral-300 rounded-xl p-4">
                 <h3 className="font-medium text-neutral-800 mb-2">
                   📞 Direct Contact
@@ -117,30 +117,29 @@ export default function FinderPage() {
                   visible)
                 </p>
                 <div className="space-y-2">
-                  {data.contact_options
-                    .filter((option) => option.direct_contact)
-                    .map((option, index) => (
-                      <a
-                        key={index}
-                        href={
-                          option.type === 'email'
-                            ? `mailto:${option.direct_contact}`
-                            : option.type === 'sms'
-                              ? `sms:${option.direct_contact}`
-                              : option.type === 'whatsapp'
-                                ? `https://wa.me/${option.direct_contact?.replace(/\D/g, '')}`
+                  {data.contact_options.map((option, index) => (
+                    <a
+                      key={index}
+                      href={
+                        option.type === 'sms'
+                          ? `sms:${option.direct_contact}`
+                          : option.type === 'whatsapp'
+                            ? `https://wa.me/${option.direct_contact?.replace(/\D/g, '')}`
+                            : option.type === 'signal'
+                              ? `signal://contact/${option.direct_contact}`
+                              : option.type === 'telegram'
+                                ? `tg://resolve?domain=${option.direct_contact?.replace('@', '')}`
                                 : '#'
-                        }
-                        className="finder-btn w-full text-center block"
-                      >
-                        {option.type === 'email' && '📧'}
-                        {option.type === 'sms' && '💬'}
-                        {option.type === 'whatsapp' && '📱'}
-                        {option.type === 'signal' && '🔐'}
-                        {option.type === 'telegram' && '✈️'}{' '}
-                        {option.direct_contact}
-                      </a>
-                    ))}
+                      }
+                      className="finder-btn w-full text-center block"
+                    >
+                      {option.type === 'sms' && '💬'}
+                      {option.type === 'whatsapp' && '📱'}
+                      {option.type === 'signal' && '🔐'}
+                      {option.type === 'telegram' && '✈️'}{' '}
+                      {option.direct_contact}
+                    </a>
+                  ))}
                 </div>
               </div>
             )}

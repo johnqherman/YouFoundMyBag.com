@@ -26,7 +26,7 @@ export interface FinderPageData {
     bag_name?: string;
     owner_message?: string;
     contact_options: Array<{
-      type: 'email' | 'sms' | 'signal' | 'whatsapp' | 'telegram';
+      type: 'sms' | 'signal' | 'whatsapp' | 'telegram';
       label: string;
       direct_contact?: string;
     }>;
@@ -34,9 +34,8 @@ export interface FinderPageData {
 }
 
 export interface Contact {
-  type: 'email' | 'sms' | 'signal' | 'whatsapp' | 'telegram';
+  type: 'sms' | 'signal' | 'whatsapp' | 'telegram';
   value: string;
-  allow_direct_display?: boolean;
 }
 
 export interface ContactWithId extends Contact {
@@ -48,7 +47,6 @@ export interface DbContact {
   bag_id: string;
   type: string;
   value: string;
-  allow_direct_display: boolean;
   created_at: Date;
 }
 

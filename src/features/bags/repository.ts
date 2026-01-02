@@ -18,7 +18,6 @@ export interface Contact {
   bag_id: string;
   type: 'email' | 'sms' | 'signal' | 'whatsapp' | 'telegram';
   value: string;
-  allow_direct_display: boolean;
 }
 
 export async function createBag(
@@ -41,13 +40,8 @@ export async function createBag(
 
     for (const contact of data.contacts) {
       await client.query(
-        'INSERT INTO contacts (bag_id, type, value, allow_direct_display) VALUES ($1, $2, $3, $4)',
-        [
-          bag.id,
-          contact.type,
-          contact.value,
-          contact.allow_direct_display || false,
-        ]
+        'INSERT INTO contacts (bag_id, type, value) VALUES ($1, $2, $3)',
+        [bag.id, contact.type, contact.value]
       );
     }
 
@@ -67,19 +61,15 @@ export async function getFinderPageData(shortId: string) {
   if (!bag) return null;
 
   const contactsResult = await pool.query(
-    'SELECT type, value, allow_direct_display FROM contacts WHERE bag_id = $1',
+    'SELECT type, value FROM contacts WHERE bag_id = $1',
     [bag.id]
   );
 
   const contactOptions = contactsResult.rows.map(
-    (contact: {
-      type: string;
-      value: string;
-      allow_direct_display: boolean;
-    }) => ({
+    (contact: { type: string; value: string }) => ({
       type: contact.type,
       label: getContactLabel(contact.type),
-      direct_contact: contact.allow_direct_display ? contact.value : undefined,
+      direct_contact: contact.value,
     })
   );
 

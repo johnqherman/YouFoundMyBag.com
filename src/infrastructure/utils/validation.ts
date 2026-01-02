@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
 export const contactTypeSchema = z.enum([
-  'email',
   'sms',
   'signal',
   'whatsapp',
@@ -24,12 +23,9 @@ export const contactSchema = z
   .object({
     type: contactTypeSchema,
     value: z.string().max(254),
-    allow_direct_display: z.boolean().optional().default(false),
   })
   .refine(
     (data) => {
-      if (data.type === 'email')
-        return emailSchema.safeParse(data.value).success;
       if (data.type === 'sms') return phoneSchema.safeParse(data.value).success;
       if (data.type === 'telegram')
         return telegramSchema.safeParse(data.value).success;
@@ -43,7 +39,7 @@ export const createBagSchema = z.object({
   bag_name: z.string().max(30).optional(),
   owner_message: z.string().max(150).optional(),
   owner_email: z.string().email().max(254),
-  contacts: z.array(contactSchema).min(1).max(5),
+  contacts: z.array(contactSchema).min(0).max(5),
 });
 
 export const shortIdSchema = z
