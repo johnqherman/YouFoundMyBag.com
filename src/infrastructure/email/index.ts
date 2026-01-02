@@ -89,7 +89,7 @@ This message was sent through YouFoundMyBag.com's secure messaging system.
 
       <div style="background-color: #f8fafc; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
         <h3 style="margin-top: 0; color: #374151;">${safeSenderName} wrote:</h3>
-        <p style="color: #4b5563; margin: 0; white-space: pre-line;">"${safeMessage}"</p>
+        <p style="color: #4b5563; margin: 0; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">"${safeMessage}"</p>
       </div>
 
       <div style="text-align: center; margin: 30px 0;">
@@ -366,7 +366,7 @@ YouFoundMyBag.com - Privacy-first lost item recovery
 
       <div style="background-color: #f8fafc; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
         <h3 style="margin-top: 0; color: #374151;">${safeSenderName} wrote:</h3>
-        <p style="color: #4b5563; margin: 0; white-space: pre-line;">"${safeMessage}"</p>
+        <p style="color: #4b5563; margin: 0; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">"${safeMessage}"</p>
       </div>
 
       <div style="text-align: center; margin: 30px 0;">
@@ -462,7 +462,7 @@ YouFoundMyBag.com - Privacy-first lost item recovery
 
       <div style="background-color: #f8fafc; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
         <h3 style="margin-top: 0; color: #374151;">${safeSenderName} wrote:</h3>
-        <p style="color: #4b5563; margin: 0; white-space: pre-line;">"${safeMessage}"</p>
+        <p style="color: #4b5563; margin: 0; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">"${safeMessage}"</p>
       </div>
 
       <div style="text-align: center; margin: 30px 0;">
@@ -589,7 +589,7 @@ YouFoundMyBag.com - Privacy-first lost item recovery
 
       <div style="background-color: #f8fafc; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
         <h3 style="margin-top: 0; color: #374151;">${safeSenderName} wrote:</h3>
-        <p style="color: #4b5563; margin: 0; white-space: pre-line;">"${safeMessage}"</p>
+        <p style="color: #4b5563; margin: 0; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">"${safeMessage}"</p>
       </div>
 
       <div style="text-align: center; margin: 30px 0;">
@@ -711,7 +711,7 @@ YouFoundMyBag.com - Privacy-first lost item recovery
 
       <div style="background-color: #f8fafc; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
         <h3 style="margin-top: 0; color: #374151;">${safeSenderName} wrote:</h3>
-        <p style="color: #4b5563; margin: 0; white-space: pre-line;">"${safeMessage}"</p>
+        <p style="color: #4b5563; margin: 0; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">"${safeMessage}"</p>
       </div>
 
       <div style="text-align: center; margin: 30px 0;">

@@ -282,11 +282,11 @@ export default function ConversationPage() {
                 </span>
               </div>
               <p
-                className={
+                className={`text-wrap-aggressive ${
                   message.sender_type === 'owner'
                     ? 'text-white'
                     : 'text-neutral-900'
-                }
+                }`}
               >
                 {message.message_content}
               </p>

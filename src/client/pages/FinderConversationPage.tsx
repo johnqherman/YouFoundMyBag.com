@@ -315,11 +315,11 @@ export default function FinderConversationPage() {
                 </span>
               </div>
               <p
-                className={
+                className={`text-wrap-aggressive ${
                   message.sender_type === 'finder'
                     ? 'text-white'
                     : 'text-neutral-900'
-                }
+                }`}
               >
                 {message.message_content}
               </p>
