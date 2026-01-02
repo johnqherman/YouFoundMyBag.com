@@ -86,7 +86,7 @@ export default function AuthVerifyPage() {
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100">
-      <div className="max-w-readable mx-auto p-6">
+      <div className="max-w-md mx-auto p-6 lg:max-w-2xl">
         <div className="text-center">
           <div className="text-6xl mb-4">❌</div>
           <h1 className="text-2xl font-bold text-red-400 mb-4">

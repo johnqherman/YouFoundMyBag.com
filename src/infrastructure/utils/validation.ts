@@ -5,6 +5,9 @@ export const contactTypeSchema = z.enum([
   'signal',
   'whatsapp',
   'telegram',
+  'instagram',
+  'email',
+  'other',
 ]);
 export const emailSchema = z.string().email().max(254);
 export const phoneSchema = z
@@ -22,25 +25,47 @@ export const telegramSchema = z
 export const contactSchema = z
   .object({
     type: contactTypeSchema,
-    value: z.string().max(254),
+    value: z.string().min(1).max(255),
+    label: z.string().max(50).optional(),
+    is_primary: z.boolean().optional(),
   })
   .refine(
     (data) => {
       if (data.type === 'sms') return phoneSchema.safeParse(data.value).success;
       if (data.type === 'telegram')
         return telegramSchema.safeParse(data.value).success;
-      return data.value.length >= 3 && data.value.length <= 254;
+      if (data.type === 'email')
+        return emailSchema.safeParse(data.value).success;
+      if (data.type === 'instagram')
+        return data.value.startsWith('@') && data.value.length >= 2;
+      return data.value.length >= 1 && data.value.length <= 255;
     },
     { message: 'Invalid contact value for the specified type' }
   );
 
-export const createBagSchema = z.object({
-  owner_name: z.string().max(30).optional(),
-  bag_name: z.string().max(30).optional(),
-  owner_message: z.string().max(150).optional(),
-  owner_email: z.string().email().max(254),
-  contacts: z.array(contactSchema).min(0).max(5),
-});
+export const createBagSchema = z
+  .object({
+    owner_name: z.string().max(30).optional(),
+    bag_name: z.string().max(30).optional(),
+    owner_message: z.string().max(150).optional(),
+    owner_email: z.string().email().max(254).optional(),
+    contacts: z.array(contactSchema).min(0).max(5).default([]),
+    secure_messaging_enabled: z.boolean().optional(),
+  })
+  .refine(
+    (data) => {
+      const secureMessaging = data.secure_messaging_enabled !== false;
+      if (secureMessaging) {
+        return data.owner_email && data.owner_email.length > 0;
+      } else {
+        return data.contacts && data.contacts.length > 0;
+      }
+    },
+    {
+      message:
+        'Email required for secure messaging or contact methods required for direct contact',
+    }
+  );
 
 export const shortIdSchema = z
   .string()

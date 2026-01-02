@@ -5,11 +5,12 @@ import type {
   CreateBagResponse,
   ContactWithId,
 } from '../types/index';
-import ContactInput from './ContactInput';
-import PhoneInputErrorBoundary from './PhoneInputErrorBoundary';
-import CharacterLimitInput from './CharacterLimitInput';
-import CharacterLimitTextArea from './CharacterLimitTextArea';
-import PrivacyWarning from './PrivacyWarning';
+import DirectContactWarning from './DirectContactWarning';
+import StepIndicator from './StepIndicator';
+import Step1BasicInfo from './steps/Step1BasicInfo';
+import Step2ContactPreference from './steps/Step2ContactPreference';
+import Step3ContactDetails from './steps/Step3ContactDetails';
+import Step4ReviewSubmit from './steps/Step4ReviewSubmit';
 
 interface Props {
   onSuccess: (bagData: CreateBagResponse) => void;
@@ -21,25 +22,35 @@ interface FormData {
   owner_message: string;
   owner_email: string;
   contacts: ContactWithId[];
+  secure_messaging_enabled: boolean;
 }
 
 export default function CreateBagForm({ onSuccess }: Props) {
+  const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<FormData>({
     owner_name: '',
     bag_name: '',
     owner_message: '',
     owner_email: '',
     contacts: [],
+    secure_messaging_enabled: true,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showDirectContactWarning, setShowDirectContactWarning] =
+    useState(false);
 
-  const allContactTypes: Array<'sms' | 'signal' | 'whatsapp' | 'telegram'> = [
-    'sms',
-    'signal',
-    'whatsapp',
-    'telegram',
+  const stepNames = [
+    'Basic Information',
+    'Contact Preferences',
+    'Contact Details',
+    'Review & Submit',
   ];
+  const totalSteps = stepNames.length;
+
+  const allContactTypes: Array<
+     'sms' | 'signal' | 'whatsapp' | 'telegram' | 'instagram' | 'email' | 'other'
+  > = ['sms', 'signal', 'whatsapp', 'telegram', 'instagram', 'email', 'other'];
 
   const getAvailableContactTypes = (currentIndex: number) => {
     const usedTypes = formData.contacts
@@ -57,12 +68,9 @@ export default function CreateBagForm({ onSuccess }: Props) {
           ...prev.contacts,
           {
             id: crypto.randomUUID(),
-            type: availableTypes[0] as
-              | 'sms'
-              | 'signal'
-              | 'whatsapp'
-              | 'telegram',
+            type: availableTypes[0] as ContactWithId['type'],
             value: '',
+            is_primary: prev.contacts.length === 0,
           },
         ],
       }));
@@ -80,13 +88,112 @@ export default function CreateBagForm({ onSuccess }: Props) {
     (index: number, updatedContact: ContactWithId) => {
       setFormData((prev) => ({
         ...prev,
-        contacts: prev.contacts.map((contact, i) =>
-          i === index ? updatedContact : contact
-        ),
+        contacts: prev.contacts.map((contact, i) => {
+          if (i === index) {
+            return updatedContact;
+          }
+          if (updatedContact.is_primary && contact.is_primary) {
+            return { ...contact, is_primary: false };
+          }
+          return contact;
+        }),
       }));
     },
     []
   );
+
+  const handleContactPreferenceChange = (useSecureMessaging: boolean) => {
+    if (!useSecureMessaging) {
+      setShowDirectContactWarning(true);
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        secure_messaging_enabled: true,
+      }));
+    }
+  };
+
+  const handleDirectContactConfirm = () => {
+    setFormData((prev) => ({
+      ...prev,
+      secure_messaging_enabled: false,
+      owner_email: '',
+    }));
+    setShowDirectContactWarning(false);
+    if (formData.contacts.length === 0) {
+      addContact();
+    }
+  };
+
+  const validateCurrentStep = (): boolean => {
+    setError(null);
+
+    switch (currentStep) {
+      case 2:
+        return true;
+      case 3: {
+        if (formData.secure_messaging_enabled) {
+          if (!formData.owner_email.trim()) {
+            setError('Your email address is required for secure messaging');
+            return false;
+          }
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(formData.owner_email.trim())) {
+            setError('Please enter a valid email address');
+            return false;
+          }
+        } else {
+          const validContacts = formData.contacts.filter((contact) =>
+            contact.value.trim()
+          );
+          if (validContacts.length === 0) {
+            setError(
+              'At least one contact method is required for direct contact'
+            );
+            return false;
+          }
+        }
+
+        const validContacts = formData.contacts.filter((contact) =>
+          contact.value.trim()
+        );
+        for (const contact of validContacts) {
+          const validationError = validateContactFormat(
+            contact.type,
+            contact.value
+          );
+          if (validationError) {
+            setError(validationError);
+            return false;
+          }
+        }
+        return true;
+      }
+      default:
+        return true;
+    }
+  };
+
+  const nextStep = () => {
+    if (validateCurrentStep() && currentStep < totalSteps) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const prevStep = () => {
+    setError(null);
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const updateFormData = (updates: Partial<FormData>) => {
+    setFormData((prev) => ({ ...prev, ...updates }));
+  };
+
+  const handleDirectContactCancel = () => {
+    setShowDirectContactWarning(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,15 +201,28 @@ export default function CreateBagForm({ onSuccess }: Props) {
     setLoading(true);
 
     try {
-      if (!formData.owner_email.trim()) {
-        setError('Your email address is required');
-        return;
-      }
+      if (formData.secure_messaging_enabled) {
+        if (!formData.owner_email.trim()) {
+          setError('Your email address is required for secure messaging');
+          return;
+        }
 
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(formData.owner_email.trim())) {
-        setError('Please enter a valid email address');
-        return;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.owner_email.trim())) {
+          setError('Please enter a valid email address');
+          return;
+        }
+      } else {
+        const validContacts = formData.contacts.filter((contact) =>
+          contact.value.trim()
+        );
+
+        if (validContacts.length === 0) {
+          setError(
+            'At least one contact method is required for direct contact'
+          );
+          return;
+        }
       }
 
       const validContacts = formData.contacts.filter((contact) =>
@@ -133,12 +253,18 @@ export default function CreateBagForm({ onSuccess }: Props) {
         owner_name: formData.owner_name?.trim() || undefined,
         bag_name: formData.bag_name?.trim() || undefined,
         owner_message: formData.owner_message?.trim() || undefined,
-        owner_email: formData.owner_email.trim(),
-        contacts: validContacts.map(({ type, value }) => ({
+        secure_messaging_enabled: formData.secure_messaging_enabled,
+        contacts: validContacts.map(({ type, value, label, is_primary }) => ({
           type,
           value,
+          label,
+          is_primary,
         })),
       };
+
+      if (formData.secure_messaging_enabled) {
+        requestData.owner_email = formData.owner_email.trim();
+      }
 
       const result = await api.createBag(requestData);
       onSuccess(result);
@@ -155,180 +281,111 @@ export default function CreateBagForm({ onSuccess }: Props) {
   ): string | null => {
     switch (type) {
       case 'sms':
+      case 'phone':
       case 'whatsapp':
       case 'signal':
         if (!value.startsWith('+') || value.length < 7) {
-          return 'Please enter a valid phone number';
+          return 'Please enter a valid phone number with country code';
         }
         break;
       case 'telegram':
+      case 'instagram':
         if (!value.startsWith('@')) {
-          return 'Telegram username should start with @';
+          return 'Username should start with @';
+        }
+        break;
+      case 'email': {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value)) {
+          return 'Please enter a valid email address';
+        }
+        break;
+      }
+      case 'other':
+        if (value.length < 3) {
+          return 'Contact information should be at least 3 characters';
         }
         break;
     }
     return null;
   };
 
+  const renderCurrentStep = () => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <Step1BasicInfo
+            formData={{
+              owner_name: formData.owner_name,
+              bag_name: formData.bag_name,
+              owner_message: formData.owner_message,
+            }}
+            onChange={updateFormData}
+            onNext={nextStep}
+          />
+        );
+      case 2:
+        return (
+          <Step2ContactPreference
+            formData={{
+              secure_messaging_enabled: formData.secure_messaging_enabled,
+            }}
+            onChange={updateFormData}
+            onNext={nextStep}
+            onBack={prevStep}
+            onContactPreferenceChange={handleContactPreferenceChange}
+          />
+        );
+      case 3:
+        return (
+          <Step3ContactDetails
+            formData={{
+              owner_email: formData.owner_email,
+              contacts: formData.contacts,
+              secure_messaging_enabled: formData.secure_messaging_enabled,
+            }}
+            onChange={updateFormData}
+            onNext={nextStep}
+            onBack={prevStep}
+            addContact={addContact}
+            removeContact={removeContact}
+            updateContact={updateContact}
+            getAvailableContactTypes={getAvailableContactTypes}
+            error={error}
+          />
+        );
+      case 4:
+        return (
+          <Step4ReviewSubmit
+            formData={formData}
+            onBack={prevStep}
+            onSubmit={handleSubmit}
+            loading={loading}
+            error={error}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="card">
-      <h2 className="text-xl font-semibold mb-6">Create your bag QR code</h2>
+      <StepIndicator
+        currentStep={currentStep}
+        totalSteps={totalSteps}
+        stepNames={stepNames}
+      />
+
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label
-            htmlFor="owner_name"
-            className="block text-sm font-medium mb-2"
-          >
-            Your name (optional)
-          </label>
-          <CharacterLimitInput
-            value={formData.owner_name}
-            onChange={(value) =>
-              setFormData((prev) => ({ ...prev, owner_name: value }))
-            }
-            maxLength={30}
-            placeholder="e.g., John"
-            className="input-field"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="bag_name" className="block text-sm font-medium mb-2">
-            Bag type (optional)
-          </label>
-          <CharacterLimitInput
-            value={formData.bag_name}
-            onChange={(value) =>
-              setFormData((prev) => ({ ...prev, bag_name: value }))
-            }
-            maxLength={30}
-            placeholder="e.g., Backpack, Laptop Bag"
-            className="input-field"
-          />
-        </div>
-
-        <div>
-          <label
-            htmlFor="owner_email"
-            className="block text-sm font-medium mb-2"
-          >
-            Your email address *
-          </label>
-          <input
-            type="email"
-            placeholder="your@email.com"
-            value={formData.owner_email}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, owner_email: e.target.value }))
-            }
-            required
-            className="input-field"
-            maxLength={254}
-          />
-          <p className="text-xs text-neutral-400 mt-1">
-            Required for secure messaging dashboard access
-          </p>
-        </div>
-
-        <div>
-          <label
-            htmlFor="owner_message"
-            className="block text-sm font-medium mb-2"
-          >
-            Message for finder (optional)
-          </label>
-          <PrivacyWarning
-            message="Avoid sharing personal contact details here."
-            storageKey="create-bag-message-privacy-tip"
-            variant="dark"
-            className="mb-3"
-          />
-          <CharacterLimitTextArea
-            value={formData.owner_message}
-            onChange={(value) =>
-              setFormData((prev) => ({
-                ...prev,
-                owner_message: value,
-              }))
-            }
-            maxLength={150}
-            placeholder="e.g., Please text me and keep the bag somewhere safe."
-            rows={3}
-            className="input-field"
-          />
-        </div>
-
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="block text-sm font-medium">
-              Contact methods (optional)
-            </label>
-            {formData.contacts.length > 0 &&
-              getAvailableContactTypes(-1).length > 0 && (
-                <button
-                  type="button"
-                  onClick={addContact}
-                  className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1"
-                >
-                  + Add contact method
-                </button>
-              )}
-          </div>
-
-          <div className="bg-amber-900 border border-amber-700 text-amber-200 px-3 py-2 rounded-lg mb-4">
-            <p className="text-xs">
-              ⚠️{' '}
-              <strong>
-                These will be visible to anyone who finds your item.
-              </strong>{' '}
-              Finders can always reach you through our secure
-              private messaging system.
-            </p>
-          </div>
-
-          <div className="space-y-3">
-            {formData.contacts.length === 0 ? (
-              <div className="text-center py-6 bg-neutral-900 rounded-xl border-2 border-dashed border-neutral-700">
-                <p className="text-neutral-400 text-sm mb-3">
-                  No contact methods added
-                </p>
-                <button
-                  type="button"
-                  onClick={addContact}
-                  className="text-sm text-blue-400 hover:text-blue-300"
-                >
-                  + Add your first contact method
-                </button>
-              </div>
-            ) : (
-              formData.contacts.map((contact, index) => (
-                <PhoneInputErrorBoundary key={`boundary-${contact.id}`}>
-                  <ContactInput
-                    key={contact.id}
-                    contact={contact}
-                    onUpdate={(updatedContact) =>
-                      updateContact(index, updatedContact)
-                    }
-                    onRemove={() => removeContact(index)}
-                    availableTypes={getAvailableContactTypes(index)}
-                    showRemoveButton={true}
-                  />
-                </PhoneInputErrorBoundary>
-              ))
-            )}
-          </div>
-        </div>
-
-        {error && (
-          <div className="bg-red-900 border border-red-700 text-red-200 px-4 py-3 rounded-xl">
-            {error}
-          </div>
-        )}
-
-        <button type="submit" disabled={loading} className="btn-primary w-full">
-          {loading ? 'Creating...' : 'Create QR Code'}
-        </button>
+        {renderCurrentStep()}
       </form>
+
+      <DirectContactWarning
+        isOpen={showDirectContactWarning}
+        onConfirm={handleDirectContactConfirm}
+        onCancel={handleDirectContactCancel}
+      />
     </div>
   );
 }

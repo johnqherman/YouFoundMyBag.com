@@ -29,8 +29,8 @@ export default function BagCreated({ bagData, onCreateAnother }: Props) {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100">
-      <div className="max-w-md mx-auto p-6">
+    <div className="min-h-screen bg-neutral-950 text-neutral-100 pb-20">
+      <div className="max-w-md mx-auto p-6 lg:max-w-2xl">
         <div className="card text-center">
           <h1 className="text-2xl font-bold mb-6 text-green-400">
             ✅ Your QR code is ready!
@@ -68,7 +68,8 @@ export default function BagCreated({ bagData, onCreateAnother }: Props) {
                   <strong>
                     Print the QR code <em>or</em> write down the short link
                     above.
-                  </strong>{' '}
+                  </strong>
+                  <br />
                   Either works! If you can’t print the QR code, make sure to
                   write down the link so a finder can safely contact you.
                 </p>
@@ -92,6 +93,20 @@ export default function BagCreated({ bagData, onCreateAnother }: Props) {
           </div>
         </div>
       </div>
+
+      <footer className="fixed bottom-0 left-0 right-0 bg-neutral-950/80 backdrop-blur-sm text-center py-6 text-neutral-500 text-sm">
+        <p>
+          Privacy-first • No tracking •{' '}
+          <a
+            href="https://github.com/johnqherman/YouFoundMyBag.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-neutral-400 transition-colors duration-200"
+          >
+            Open source
+          </a>
+        </p>
+      </footer>
     </div>
   );
 }

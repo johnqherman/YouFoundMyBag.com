@@ -4,7 +4,10 @@ import { createReadableShortId } from '../../infrastructure/utils/short-id.js';
 import * as repository from './repository.js';
 import type { CreateBagRequest } from '../../client/types/index.js';
 
-export async function createBagWithQR(data: CreateBagRequest) {
+export async function createBagWithQR(
+  data: CreateBagRequest,
+  ipAddress?: string
+) {
   let shortId: string;
   let attempts = 0;
   const maxAttempts = 10;
@@ -21,7 +24,7 @@ export async function createBagWithQR(data: CreateBagRequest) {
     }
   } while (attempts < maxAttempts);
 
-  const bag = await repository.createBag(data, shortId);
+  const bag = await repository.createBag(data, shortId, ipAddress);
 
   const bagUrl = `${config.FRONTEND_URL}/b/${shortId}`;
   const qrCodeDataUrl = await QRCode.toDataURL(bagUrl, {

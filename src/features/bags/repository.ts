@@ -7,7 +7,10 @@ export interface Bag {
   owner_name?: string;
   bag_name?: string;
   owner_message?: string;
-  owner_email: string;
+  owner_email?: string;
+  secure_messaging_enabled: boolean;
+  opt_out_timestamp?: Date;
+  opt_out_ip_address?: string;
   status: 'active' | 'recovered' | 'archived';
   created_at: Date;
   updated_at: Date;
@@ -16,33 +19,69 @@ export interface Bag {
 export interface Contact {
   id: string;
   bag_id: string;
-  type: 'email' | 'sms' | 'signal' | 'whatsapp' | 'telegram';
+  type:
+    | 'sms'
+    | 'signal'
+    | 'whatsapp'
+    | 'telegram'
+    | 'instagram'
+    | 'email'
+    | 'other';
   value: string;
+  is_primary?: boolean;
+  display_order?: number;
+  label?: string;
+  created_at: Date;
 }
 
 export async function createBag(
   data: CreateBagRequest,
-  shortId: string
+  shortId: string,
+  ipAddress?: string
 ): Promise<Bag> {
   return withTransaction(async (client) => {
+    const secureMessagingEnabled = data.secure_messaging_enabled !== false;
+    const optOutTimestamp = !secureMessagingEnabled ? new Date() : null;
+    const optOutIpAddress = !secureMessagingEnabled ? ipAddress : null;
+
     const bagResult = await client.query(
-      'INSERT INTO bags (short_id, owner_name, bag_name, owner_message, owner_email) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      `INSERT INTO bags (
+        short_id, owner_name, bag_name, owner_message, owner_email,
+        secure_messaging_enabled, opt_out_timestamp, opt_out_ip_address
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
       [
         shortId,
         data.owner_name || null,
         data.bag_name || null,
         data.owner_message || null,
-        data.owner_email,
+        secureMessagingEnabled ? data.owner_email : null,
+        secureMessagingEnabled,
+        optOutTimestamp,
+        optOutIpAddress,
       ]
     );
 
     const bag = bagResult.rows[0];
 
-    for (const contact of data.contacts) {
-      await client.query(
-        'INSERT INTO contacts (bag_id, type, value) VALUES ($1, $2, $3)',
-        [bag.id, contact.type, contact.value]
-      );
+    if (data.contacts && data.contacts.length > 0) {
+      for (let i = 0; i < data.contacts.length; i++) {
+        const contact = data.contacts[i];
+        if (contact) {
+          await client.query(
+            `INSERT INTO contacts (
+              bag_id, type, value, is_primary, display_order, label
+            ) VALUES ($1, $2, $3, $4, $5, $6)`,
+            [
+              bag.id,
+              contact.type,
+              contact.value,
+              contact.is_primary || i === 0,
+              i,
+              contact.label || null,
+            ]
+          );
+        }
+      }
     }
 
     return bag;
@@ -61,15 +100,24 @@ export async function getFinderPageData(shortId: string) {
   if (!bag) return null;
 
   const contactsResult = await pool.query(
-    'SELECT type, value FROM contacts WHERE bag_id = $1',
+    `SELECT type, value, is_primary, label
+     FROM contacts
+     WHERE bag_id = $1
+     ORDER BY display_order, created_at`,
     [bag.id]
   );
 
   const contactOptions = contactsResult.rows.map(
-    (contact: { type: string; value: string }) => ({
+    (contact: {
+      type: string;
+      value: string;
+      is_primary: boolean;
+      label: string | null;
+    }) => ({
       type: contact.type,
-      label: getContactLabel(contact.type),
-      direct_contact: contact.value,
+      value: contact.value,
+      label: contact.label || getContactLabel(contact.type),
+      is_primary: contact.is_primary || false,
     })
   );
 
@@ -78,6 +126,7 @@ export async function getFinderPageData(shortId: string) {
     owner_name: bag.owner_name,
     bag_name: bag.bag_name,
     owner_message: bag.owner_message,
+    secure_messaging_enabled: bag.secure_messaging_enabled,
     contact_options: contactOptions,
   };
 }
@@ -98,16 +147,20 @@ export async function getBagId(shortId: string): Promise<string | null> {
 
 function getContactLabel(type: string): string {
   switch (type) {
-    case 'email':
-      return 'Send email';
     case 'sms':
-      return 'Text message';
+      return 'Phone Number';
     case 'signal':
-      return 'Signal message';
+      return 'Signal';
     case 'whatsapp':
-      return 'WhatsApp message';
+      return 'WhatsApp';
     case 'telegram':
-      return 'Telegram message';
+      return 'Telegram';
+    case 'instagram':
+      return 'Instagram';
+    case 'email':
+      return 'Email';
+    case 'other':
+      return 'Contact';
     default:
       return 'Contact owner';
   }

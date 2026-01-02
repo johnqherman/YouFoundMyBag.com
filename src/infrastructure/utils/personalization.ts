@@ -159,8 +159,9 @@ export function getContextualDescription(
   const senderName = getContextualSenderName(senderType, names, context);
 
   if (context === 'follow-up') {
+    const bagType = names.bagName || 'bag';
     return senderType === 'finder'
-      ? `${senderName} sent you another message about your bag. Click the secure link below to view the message and respond.`
+      ? `${senderName} sent you another message about your ${bagType}. Click the secure link below to view the message and respond.`
       : `${senderName} sent you a follow-up message. Click the secure link below to continue the conversation.`;
   }
 

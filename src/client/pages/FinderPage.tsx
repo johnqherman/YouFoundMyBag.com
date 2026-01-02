@@ -103,9 +103,34 @@ export default function FinderPage() {
           )}
 
           <div className="space-y-6 mb-8">
-            <p className="text-lg font-semibold text-center mb-6">
-              Choose how you&apos;d like to contact me:
-            </p>
+            {data.secure_messaging_enabled ? (
+              <p className="text-lg font-semibold text-center mb-6">
+                Choose how you&apos;d like to contact me:
+              </p>
+            ) : (
+              <>
+                <p className="text-lg font-semibold text-center mb-6">
+                  Contact {data.owner_name || 'me'} directly:
+                </p>
+
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+                  <div className="flex items-start gap-3">
+                    <div className="text-amber-600 text-xl flex-shrink-0">
+                      ⚠️
+                    </div>
+                    <div>
+                      <p className="text-sm text-amber-800 font-medium mb-1">
+                        This owner prefers direct contact
+                      </p>
+                      <p className="text-xs text-amber-700">
+                        YouFoundMyBag cannot assist with communication issues
+                        for direct contact.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
 
             {data.contact_options.length > 0 && (
               <div className="bg-neutral-100 border border-neutral-300 rounded-xl p-4">
@@ -117,51 +142,99 @@ export default function FinderPage() {
                   visible)
                 </p>
                 <div className="space-y-2">
-                  {data.contact_options.map((option, index) => (
-                    <a
-                      key={index}
-                      href={
-                        option.type === 'sms'
-                          ? `sms:${option.direct_contact}`
-                          : option.type === 'whatsapp'
-                            ? `https://wa.me/${option.direct_contact?.replace(/\D/g, '')}`
-                            : option.type === 'signal'
-                              ? `signal://contact/${option.direct_contact}`
-                              : option.type === 'telegram'
-                                ? `tg://resolve?domain=${option.direct_contact?.replace('@', '')}`
-                                : '#'
-                      }
-                      className="finder-btn w-full text-center block"
-                    >
-                      {option.type === 'sms' && '💬'}
-                      {option.type === 'whatsapp' && '📱'}
-                      {option.type === 'signal' && '🔐'}
-                      {option.type === 'telegram' && '✈️'}{' '}
-                      {option.direct_contact}
-                    </a>
-                  ))}
+                  {data.contact_options
+                    .sort(
+                      (a, b) => (b.is_primary ? 1 : 0) - (a.is_primary ? 1 : 0)
+                    )
+                    .map((option, index) => {
+                      const getContactHref = () => {
+                        switch (option.type) {
+                          case 'sms':
+                            return `tel:${option.value}`;
+                          case 'signal':
+                            return `signal://contact/${option.value}`;
+                          case 'whatsapp':
+                            return `https://wa.me/${option.value.replace(/\D/g, '')}`;
+                          case 'telegram':
+                            return `tg://resolve?domain=${option.value.replace('@', '')}`;
+                          case 'instagram':
+                            return `https://instagram.com/${option.value.replace('@', '')}`;
+                          case 'email':
+                            return `mailto:${option.value}`;
+                          default:
+                            return '#';
+                        }
+                      };
+
+                      const getContactIcon = () => {
+                        switch (option.type) {
+                          case 'sms':
+                            return '📞';
+                          case 'signal':
+                            return '🔐';
+                          case 'whatsapp':
+                            return '📱';
+                          case 'telegram':
+                            return '✈️';
+                          case 'instagram':
+                            return '📸';
+                          case 'email':
+                            return '📧';
+                          case 'other':
+                            return '📞';
+                          default:
+                            return '📞';
+                        }
+                      };
+
+                      return (
+                        <div
+                          key={index}
+                          className={`border rounded-lg p-3 ${
+                            option.is_primary
+                              ? 'border-blue-300 bg-blue-50'
+                              : 'border-neutral-300 bg-white'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium text-neutral-800">
+                              {getContactIcon()} {option.label}
+                            </span>
+                            {option.is_primary && (
+                              <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+                                Primary
+                              </span>
+                            )}
+                          </div>
+                          <a
+                            href={getContactHref()}
+                            className="finder-btn w-full text-center block"
+                          >
+                            {option.value}
+                          </a>
+                        </div>
+                      );
+                    })}
                 </div>
               </div>
             )}
 
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-              <h3 className="font-medium text-blue-800 mb-2">
-                🔒 Private Messaging
-              </h3>
-              <p className="text-sm text-blue-700 mb-3">
-                Send a secure message (your info stays private)
-              </p>
-              <button
-                onClick={() => setShowContactModal(true)}
-                className="finder-btn w-full bg-blue-600 hover:bg-blue-700"
-              >
-                📩 Send Private Message
-              </button>
-              <p className="text-xs text-blue-600 mt-2">
-                {data.owner_name || 'The owner'} will be able respond through
-                our messaging system
-              </p>
-            </div>
+            {data.secure_messaging_enabled && (
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <h3 className="font-medium text-blue-800 mb-2">
+                  🔒 Private Messaging
+                </h3>
+                <p className="text-sm text-blue-700 mb-3">
+                  Send a secure message (your info stays private)
+                </p>
+                <button
+                  onClick={() => setShowContactModal(true)}
+                  className="finder-btn w-full bg-blue-600 hover:bg-blue-700"
+                >
+                  📩 Send Private Message
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -175,7 +248,7 @@ export default function FinderPage() {
         </div>
       </div>
 
-      {showContactModal && shortId && (
+      {showContactModal && shortId && data.secure_messaging_enabled && (
         <ContactModal
           shortId={shortId}
           onClose={() => setShowContactModal(false)}

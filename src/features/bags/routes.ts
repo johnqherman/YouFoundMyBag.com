@@ -11,7 +11,8 @@ const router = express.Router();
 router.post('/', async (req, res): Promise<void> => {
   try {
     const validatedData = createBagSchema.parse(req.body);
-    const result = await bagService.createBagWithQR(validatedData);
+    const clientIp = req.ip || req.connection.remoteAddress || undefined;
+    const result = await bagService.createBagWithQR(validatedData, clientIp);
 
     res.status(201).json({
       success: true,

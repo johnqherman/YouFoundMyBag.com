@@ -2,8 +2,9 @@ export interface CreateBagRequest {
   owner_name?: string;
   bag_name?: string;
   owner_message?: string;
-  owner_email: string;
+  owner_email?: string;
   contacts: Contact[];
+  secure_messaging_enabled?: boolean;
 }
 
 export interface CreateBagResponse {
@@ -25,17 +26,35 @@ export interface FinderPageData {
     owner_name?: string;
     bag_name?: string;
     owner_message?: string;
+    secure_messaging_enabled: boolean;
     contact_options: Array<{
-      type: 'sms' | 'signal' | 'whatsapp' | 'telegram';
+      type:
+        | 'sms'
+        | 'signal'
+        | 'whatsapp'
+        | 'telegram'
+        | 'instagram'
+        | 'email'
+        | 'other';
       label: string;
-      direct_contact?: string;
+      value: string;
+      is_primary: boolean;
     }>;
   };
 }
 
 export interface Contact {
-  type: 'sms' | 'signal' | 'whatsapp' | 'telegram';
+  type:
+    | 'sms'
+    | 'signal'
+    | 'whatsapp'
+    | 'telegram'
+    | 'instagram'
+    | 'email'
+    | 'other';
   value: string;
+  label?: string;
+  is_primary?: boolean;
 }
 
 export interface ContactWithId extends Contact {
@@ -136,7 +155,8 @@ export interface BagData {
   owner_name?: string;
   bag_name?: string;
   owner_message?: string;
-  owner_email: string;
+  owner_email?: string;
+  secure_messaging_enabled: boolean;
   status: 'active' | 'recovered' | 'archived';
   created_at: string;
   updated_at: string;

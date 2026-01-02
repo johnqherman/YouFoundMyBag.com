@@ -8,7 +8,9 @@ interface ContactInputProps {
   contact: ContactWithId;
   onUpdate: (contact: ContactWithId) => void;
   onRemove?: () => void;
-  availableTypes: Array<'sms' | 'signal' | 'whatsapp' | 'telegram'>;
+  availableTypes: Array<
+    'sms' | 'signal' | 'whatsapp' | 'telegram' | 'instagram' | 'email' | 'other'
+  >;
   showRemoveButton?: boolean;
 }
 
@@ -20,6 +22,7 @@ export default function ContactInput({
   showRemoveButton = false,
 }: ContactInputProps) {
   const [errors, setErrors] = useState<string[]>([]);
+  const [customLabel, setCustomLabel] = useState(contact.label || '');
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const intlTelInputInstanceRef = useRef<any>(null);
@@ -56,7 +59,7 @@ export default function ContactInput({
   const handleTypeChange = (newType: string) => {
     if (!isMountedRef.current) return;
 
-    const typedNewType = newType as 'sms' | 'signal' | 'whatsapp' | 'telegram';
+    const typedNewType = newType as ContactWithId['type'];
 
     const wasPhoneType = isPhoneType(contact.type);
     const isNowPhoneType = isPhoneType(typedNewType);
@@ -73,6 +76,7 @@ export default function ContactInput({
         ...contact,
         type: typedNewType,
         value: finalValue,
+        label: typedNewType === 'other' ? customLabel : undefined,
       });
     }
   };
@@ -82,9 +86,14 @@ export default function ContactInput({
 
     const errors: string[] = [];
     if (newValue.trim()) {
-      if (contact.type === 'telegram') {
+      if (contact.type === 'telegram' || contact.type === 'instagram') {
         if (!newValue.startsWith('@')) {
-          errors.push('Telegram username should start with @');
+          errors.push('Username should start with @');
+        }
+      } else if (contact.type === 'email') {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(newValue)) {
+          errors.push('Please enter a valid email address');
         }
       }
     }
@@ -98,10 +107,32 @@ export default function ContactInput({
     }
   };
 
+  const handleCustomLabelChange = (label: string) => {
+    setCustomLabel(label);
+    if (contact.type === 'other') {
+      onUpdate({
+        ...contact,
+        label,
+      });
+    }
+  };
+
+  const handlePrimaryChange = (isPrimary: boolean) => {
+    onUpdate({
+      ...contact,
+      is_primary: isPrimary,
+    });
+  };
+
   const getPlaceholder = () => {
     switch (contact.type) {
       case 'telegram':
+      case 'instagram':
         return '@username';
+      case 'email':
+        return 'your@email.com';
+      case 'other':
+        return 'Contact information';
       default:
         return 'Enter contact info';
     }
@@ -132,13 +163,27 @@ export default function ContactInput({
         >
           {availableTypes.map((type) => (
             <option key={type} value={type}>
-              {type === 'sms' && 'Text/SMS'}
+              {type === 'sms' && 'Phone Number'}
               {type === 'signal' && 'Signal'}
               {type === 'whatsapp' && 'WhatsApp'}
               {type === 'telegram' && 'Telegram'}
+              {type === 'instagram' && 'Instagram'}
+              {type === 'email' && 'Email'}
+              {type === 'other' && 'Other'}
             </option>
           ))}
         </select>
+
+        {contact.type === 'other' && (
+          <input
+            type="text"
+            placeholder="e.g., Discord, Skype, etc."
+            value={customLabel}
+            onChange={(e) => handleCustomLabelChange(e.target.value)}
+            className="input-field mb-3"
+            maxLength={50}
+          />
+        )}
 
         {isPhoneType(contact.type) ? (
           <div ref={containerRef} className="phone-input-container">
@@ -184,6 +229,18 @@ export default function ContactInput({
             required
           />
         )}
+
+        <div className="flex items-center mt-2">
+          <label className="flex items-center gap-2 text-sm cursor-pointer">
+            <input
+              type="checkbox"
+              checked={contact.is_primary || false}
+              onChange={(e) => handlePrimaryChange(e.target.checked)}
+              className="rounded border-neutral-600 bg-neutral-700 text-blue-500"
+            />
+            <span className="text-neutral-400">Primary contact method</span>
+          </label>
+        </div>
 
         {errors.length > 0 && (
           <div className="mb-3">

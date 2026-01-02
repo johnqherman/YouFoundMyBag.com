@@ -6,20 +6,43 @@ CREATE TABLE public.bags (
   owner_name VARCHAR(30),
   bag_name VARCHAR(30),
   owner_message VARCHAR(150),
-  owner_email VARCHAR(254) NOT NULL,
+  owner_email VARCHAR(254),
+  secure_messaging_enabled BOOLEAN DEFAULT TRUE,
+  opt_out_timestamp TIMESTAMP WITH TIME ZONE,
+  opt_out_ip_address INET,
   status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'recovered', 'archived')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  CONSTRAINT bags_email_required_for_secure_messaging CHECK (
+    (
+      secure_messaging_enabled = TRUE
+      AND owner_email IS NOT NULL
+    )
+    OR (
+      secure_messaging_enabled = FALSE
+      AND owner_email IS NULL
+    )
+  )
 );
 
 CREATE TABLE public.contacts (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
   bag_id UUID REFERENCES public.bags (id) ON DELETE CASCADE,
   type VARCHAR(20) NOT NULL CHECK (
-    type IN ('email', 'sms', 'signal', 'whatsapp', 'telegram')
+    type IN (
+      'sms',
+      'signal',
+      'whatsapp',
+      'telegram',
+      'instagram',
+      'email',
+      'other'
+    )
   ),
-  value VARCHAR(254) NOT NULL,
-  allow_direct_display BOOLEAN DEFAULT FALSE,
+  value VARCHAR(255) NOT NULL,
+  is_primary BOOLEAN DEFAULT FALSE,
+  display_order INTEGER DEFAULT 0,
+  label VARCHAR(50),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -75,6 +98,10 @@ CREATE INDEX idx_bags_short_id ON public.bags (short_id);
 CREATE INDEX idx_bags_owner_email ON public.bags (owner_email);
 
 CREATE INDEX idx_bags_status ON public.bags (status);
+
+CREATE INDEX idx_bags_secure_messaging ON public.bags (secure_messaging_enabled);
+
+CREATE INDEX idx_bags_opt_out_timestamp ON public.bags (opt_out_timestamp);
 
 CREATE INDEX idx_contacts_bag_id ON public.contacts (bag_id);
 

@@ -16,10 +16,15 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100">
-      <div className="max-w-readable mx-auto p-6">
+    <div className="min-h-screen bg-neutral-950 text-neutral-100 pb-20">
+      <div className="max-w-md mx-auto p-6 lg:max-w-2xl">
         <header className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-4">YouFoundMyBag</h1>
+          <h1 className="text-3xl font-bold mb-4">
+            YouFoundMyBag!
+            <span className="text-xl text-neutral-500 font-normal ml-0.5">
+              .com
+            </span>
+          </h1>
           <p className="text-neutral-300 text-lg">
             Protect your belongings with smart recovery tags.
           </p>
@@ -33,11 +38,21 @@ export default function HomePage() {
         <main>
           <CreateBagForm onSuccess={setCreatedBag} />
         </main>
-
-        <footer className="text-center mt-12 text-neutral-500 text-sm">
-          <p>Privacy-first • No tracking • Open source</p>
-        </footer>
       </div>
+
+      <footer className="fixed bottom-0 left-0 right-0 bg-neutral-950/80 backdrop-blur-sm text-center py-6 text-neutral-500 text-sm">
+        <p>
+          Privacy-first • No tracking •{' '}
+          <a
+            href="https://github.com/johnqherman/YouFoundMyBag.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-neutral-400 transition-colors duration-200"
+          >
+            Open source
+          </a>
+        </p>
+      </footer>
     </div>
   );
 }

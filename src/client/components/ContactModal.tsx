@@ -187,9 +187,10 @@ export default function ContactModal({ shortId, ownerName, onClose }: Props) {
               className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-black"
               maxLength={30}
             />
-            <p className="text-xs text-neutral-600 mt-1">
+            {/* TODO: Change or remove this copy. End users never see each other's email addresses. */}
+            {/* <p className="text-xs text-neutral-600 mt-1">
               This will be shown to the owner instead of your email address.
-            </p>
+            </p> */}
           </div>
 
           <div>

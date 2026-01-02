@@ -127,13 +127,22 @@ export async function startConversation(
     messageData.finder_display_name
   );
 
-  try {
-    await generateMagicLink(bag.owner_email, conversation.id, [bag.id]);
+  if (bag.owner_email) {
+    try {
+      await generateMagicLink(bag.owner_email, conversation.id, [bag.id]);
+      console.log(
+        `Magic link sent to owner for bag ${shortId}, conversation ${conversation.id}`
+      );
+    } catch (emailError) {
+      console.error(
+        `Failed to send magic link for bag ${shortId}:`,
+        emailError
+      );
+    }
+  } else {
     console.log(
-      `Magic link sent to owner for bag ${shortId}, conversation ${conversation.id}`
+      `Skipped magic link for bag ${shortId} - owner opted for direct contact only`
     );
-  } catch (emailError) {
-    console.error(`Failed to send magic link for bag ${shortId}:`, emailError);
   }
 
   try {
