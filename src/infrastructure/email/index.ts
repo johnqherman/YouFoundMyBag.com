@@ -754,3 +754,123 @@ YouFoundMyBag.com - Privacy-first lost item recovery
     throw error;
   }
 }
+
+export async function sendConversationResolvedNotification({
+  finderEmail,
+  conversationId,
+  names,
+}: {
+  finderEmail: string;
+  conversationId: string;
+  names: NameInfo;
+}): Promise<void> {
+  const { magicLinkToken } = await generateFinderMagicLinkToken(
+    finderEmail,
+    conversationId
+  );
+
+  const emailer = getTransporter();
+  if (!emailer) {
+    console.log(
+      'Email not configured - conversation resolved notification not sent'
+    );
+    return;
+  }
+
+  const dashboardUrl = getDashboardUrl();
+  const magicLinkUrl = `${dashboardUrl}/finder/conversation/${conversationId}?token=${magicLinkToken}`;
+
+  const { content: safeBagName } = secureEmailContent(names.bagName || '');
+  const { content: safeOwnerName } = secureEmailContent(names.ownerName || '');
+
+  const bagDisplayName = names.bagName
+    ? names.ownerName
+      ? `${safeOwnerName}'s ${safeBagName}`
+      : safeBagName
+    : names.ownerName
+      ? `${safeOwnerName}'s bag`
+      : 'the bag';
+
+  const subject = `Conversation about ${bagDisplayName} has been resolved`;
+
+  const textBody = `
+✅ Good news! The conversation about ${bagDisplayName} has been marked as resolved.
+
+The bag owner has indicated that this matter has been successfully completed.
+
+You can still view the full conversation history by clicking this secure link:
+${magicLinkUrl}
+
+This link will expire in 24 hours.
+
+Thank you for using YouFoundMyBag.com to help reunite lost items with their owners!
+
+YouFoundMyBag.com - Privacy-first lost item recovery
+  `;
+
+  const htmlBody = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: #10b981; font-size: 24px;">
+          ✅ Conversation Resolved!
+        </h1>
+      </div>
+
+      <p style="color: #4b5563; margin-bottom: 20px;">
+        Good news! The conversation about <strong>${bagDisplayName}</strong> has been marked as resolved by the bag owner.
+      </p>
+
+      <div style="background-color: #ecfdf5; border-left: 4px solid #10b981; padding: 15px; margin: 20px 0;">
+        <p style="margin: 0; color: #047857; font-size: 14px;">
+          🎉 <strong>Success:</strong> This matter has been successfully completed.
+        </p>
+      </div>
+
+      <p style="color: #4b5563; margin-bottom: 20px;">
+        You can still view the full conversation history if needed:
+      </p>
+
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${magicLinkUrl}"
+           style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
+          View Conversation
+        </a>
+      </div>
+
+      <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
+        <p style="margin: 0; color: #92400e; font-size: 14px;">
+          🔒 <strong>Security Notice:</strong> This link expires in 24 hours.
+        </p>
+      </div>
+
+      <p style="color: #4b5563; text-align: center; margin: 30px 0;">
+        Thank you for using YouFoundMyBag.com to help reunite lost items with their owners!
+      </p>
+
+      <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+
+      <p style="color: #6b7280; font-size: 12px; text-align: center;">
+        YouFoundMyBag.com - Privacy-first lost item recovery
+      </p>
+    </div>
+  `;
+
+  try {
+    await emailer.sendMail({
+      from: config.SMTP_FROM,
+      to: finderEmail,
+      subject,
+      text: textBody,
+      html: htmlBody,
+    });
+    console.log(
+      `Conversation resolved notification sent to finder ${finderEmail}`
+    );
+  } catch (error) {
+    console.error(
+      `Conversation resolved notification failed to ${finderEmail}:`,
+      error
+    );
+    throw error;
+  }
+}

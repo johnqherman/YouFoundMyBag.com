@@ -132,6 +132,23 @@ export default function FinderPage() {
               </>
             )}
 
+            {data.secure_messaging_enabled && (
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <h3 className="font-medium text-blue-800 mb-2">
+                  🔒 Private Messaging
+                </h3>
+                <p className="text-sm text-blue-700 mb-3">
+                  Send a secure message (your info stays private)
+                </p>
+                <button
+                  onClick={() => setShowContactModal(true)}
+                  className="finder-btn w-full bg-blue-600 hover:bg-blue-700"
+                >
+                  📩 Send Private Message
+                </button>
+              </div>
+            )}
+
             {data.contact_options.length > 0 && (
               <div className="bg-neutral-100 border border-neutral-300 rounded-xl p-4">
                 <h3 className="font-medium text-neutral-800 mb-2">
@@ -216,23 +233,6 @@ export default function FinderPage() {
                       );
                     })}
                 </div>
-              </div>
-            )}
-
-            {data.secure_messaging_enabled && (
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                <h3 className="font-medium text-blue-800 mb-2">
-                  🔒 Private Messaging
-                </h3>
-                <p className="text-sm text-blue-700 mb-3">
-                  Send a secure message (your info stays private)
-                </p>
-                <button
-                  onClick={() => setShowContactModal(true)}
-                  className="finder-btn w-full bg-blue-600 hover:bg-blue-700"
-                >
-                  📩 Send Private Message
-                </button>
               </div>
             )}
           </div>

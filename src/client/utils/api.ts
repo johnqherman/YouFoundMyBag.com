@@ -83,6 +83,21 @@ class ApiClient {
       body: JSON.stringify(messageData),
     });
   }
+
+  async resolveConversation(
+    conversationId: string,
+    token: string
+  ): Promise<{
+    success: boolean;
+    message: string;
+  }> {
+    return this.request(`/conversations/${conversationId}/resolve`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }
 }
 
 export const api = new ApiClient();

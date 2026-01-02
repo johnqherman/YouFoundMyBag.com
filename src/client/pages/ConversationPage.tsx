@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import LoadingSpinner from '../components/LoadingSpinner';
 import CharacterLimitTextArea from '../components/CharacterLimitTextArea';
 import type { ConversationThread, ConversationMessage } from '../types/index';
+import { api } from '../utils/api';
 import {
   formatConversationParticipant,
   getContextualReplyPlaceholder,
@@ -35,6 +36,7 @@ export default function ConversationPage() {
   const [error, setError] = useState<string | null>(null);
   const [replyMessage, setReplyMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const [resolving, setResolving] = useState(false);
 
   const loadConversation = useCallback(async () => {
     const token = localStorage.getItem('owner_session_token');
@@ -73,8 +75,8 @@ export default function ConversationPage() {
     }
   }, [conversationId, navigate]);
 
-  const sendReply = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const sendReply = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!replyMessage.trim() || sending) return;
 
     const token = localStorage.getItem('owner_session_token');
@@ -110,6 +112,35 @@ export default function ConversationPage() {
       setError(err instanceof Error ? err.message : 'Failed to send reply');
     } finally {
       setSending(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendReply();
+    }
+  };
+
+  const handleResolveConversation = async () => {
+    if (!conversationId || resolving) return;
+
+    const token = localStorage.getItem('owner_session_token');
+    if (!token) {
+      navigate('/auth/verify');
+      return;
+    }
+
+    setResolving(true);
+    try {
+      await api.resolveConversation(conversationId, token);
+      await loadConversation();
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Failed to resolve conversation'
+      );
+    } finally {
+      setResolving(false);
     }
   };
 
@@ -197,8 +228,18 @@ export default function ConversationPage() {
           </h1>
           <p className="text-neutral-400">
             Status:{' '}
-            <span className="text-green-400">
-              {conversation.conversation.status}
+            <span
+              className={`font-medium ${
+                conversation.conversation.status === 'active'
+                  ? 'text-green-400'
+                  : conversation.conversation.status === 'resolved'
+                    ? 'text-blue-400'
+                    : 'text-neutral-400'
+              }`}
+            >
+              {conversation.conversation.status === 'resolved'
+                ? 'Resolved'
+                : 'Active'}
             </span>
             {conversation.conversation.finder_display_name && (
               <span className="ml-4">
@@ -214,8 +255,8 @@ export default function ConversationPage() {
               key={message.id}
               className={`p-4 rounded-lg ${
                 message.sender_type === 'owner'
-                  ? 'bg-blue-900/30 ml-8'
-                  : 'bg-neutral-800 mr-8'
+                  ? 'bg-blue-500 text-white ml-8'
+                  : 'bg-neutral-200 text-neutral-900 mr-8'
               }`}
             >
               <div className="flex justify-between items-start mb-2">
@@ -230,11 +271,25 @@ export default function ConversationPage() {
                     message.sender_type === 'owner'
                   )}
                 </span>
-                <span className="text-sm text-neutral-400">
+                <span
+                  className={`text-sm ${
+                    message.sender_type === 'owner'
+                      ? 'text-blue-100'
+                      : 'text-neutral-600'
+                  }`}
+                >
                   {new Date(message.sent_at).toLocaleString()}
                 </span>
               </div>
-              <p className="text-neutral-200">{message.message_content}</p>
+              <p
+                className={
+                  message.sender_type === 'owner'
+                    ? 'text-white'
+                    : 'text-neutral-900'
+                }
+              >
+                {message.message_content}
+              </p>
             </div>
           ))}
         </div>
@@ -242,33 +297,32 @@ export default function ConversationPage() {
         {conversation.conversation.status === 'active' && (
           <form onSubmit={sendReply} className="bg-neutral-800 rounded-lg p-4">
             <h3 className="text-lg font-semibold mb-4">Send a Reply</h3>
-            <CharacterLimitTextArea
-              value={replyMessage}
-              onChange={setReplyMessage}
-              maxLength={1000}
-              placeholder={getContextualReplyPlaceholder(
-                'finder',
-                {
-                  ownerName: conversation.bag.owner_name,
-                  bagName: conversation.bag.bag_name,
-                  finderName: conversation.conversation.finder_display_name,
-                },
-                'response'
-              )}
-              rows={4}
-              disabled={sending}
-            />
+            <div onKeyDown={handleKeyDown}>
+              <CharacterLimitTextArea
+                value={replyMessage}
+                onChange={setReplyMessage}
+                maxLength={500}
+                placeholder={getContextualReplyPlaceholder(
+                  'finder',
+                  {
+                    ownerName: conversation.bag.owner_name,
+                    bagName: conversation.bag.bag_name,
+                    finderName: conversation.conversation.finder_display_name,
+                  },
+                  'response'
+                )}
+                rows={4}
+                disabled={sending}
+              />
+            </div>
             <div className="mt-4 flex justify-between">
               <button
                 type="button"
-                onClick={() => {
-                  // TODO: Implement resolve conversation
-                  console.log('Resolve conversation not implemented yet');
-                }}
+                onClick={handleResolveConversation}
                 className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-neutral-600 text-white rounded-lg"
-                disabled={sending}
+                disabled={sending || resolving}
               >
-                Mark as Resolved
+                {resolving ? 'Resolving...' : 'Mark as Resolved'}
               </button>
               <button
                 type="submit"
@@ -281,10 +335,22 @@ export default function ConversationPage() {
           </form>
         )}
 
-        {conversation.conversation.status !== 'active' && (
+        {conversation.conversation.status === 'resolved' && (
+          <div className="bg-blue-900/20 border border-blue-400/30 rounded-lg p-4 text-center">
+            <div className="text-blue-400 text-lg mb-2">✓</div>
+            <p className="text-blue-300 font-medium">
+              This conversation has been resolved.
+            </p>
+            <p className="text-neutral-400 text-sm mt-1">
+              No further replies can be sent.
+            </p>
+          </div>
+        )}
+
+        {conversation.conversation.status === 'archived' && (
           <div className="bg-neutral-800 rounded-lg p-4 text-center">
             <p className="text-neutral-400">
-              This conversation has been {conversation.conversation.status}.
+              This conversation has been archived.
             </p>
           </div>
         )}

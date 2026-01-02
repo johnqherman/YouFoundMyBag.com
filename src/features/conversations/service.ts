@@ -22,6 +22,7 @@ import { verifyTurnstile } from '../messaging/service.js';
 import {
   sendContextualFinderNotification,
   sendContextualOwnerNotification,
+  sendConversationResolvedNotification,
 } from '../../infrastructure/email/index.js';
 import { generateMagicLink, generateFinderMagicLink } from '../auth/service.js';
 import * as conversationRepository from './repository.js';
@@ -293,6 +294,34 @@ export async function resolveConversation(
     conversationId,
     'resolved'
   );
+
+  if (thread.conversation.finder_email) {
+    try {
+      const names: NameInfo = {
+        ownerName: thread.bag.owner_name,
+        bagName: thread.bag.bag_name,
+        finderName: thread.conversation.finder_display_name,
+      };
+
+      await sendConversationResolvedNotification({
+        finderEmail: thread.conversation.finder_email,
+        conversationId,
+        names,
+      });
+      console.log(
+        `Conversation resolved notification sent to finder for conversation ${conversationId}`
+      );
+    } catch (emailError) {
+      console.error(
+        `Failed to send conversation resolved notification for conversation ${conversationId}:`,
+        emailError
+      );
+    }
+  } else {
+    console.log(
+      `Skipped conversation resolved notification for conversation ${conversationId} - no finder email`
+    );
+  }
 }
 
 export function getClientIpHash(

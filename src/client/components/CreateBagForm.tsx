@@ -7,10 +7,10 @@ import type {
 } from '../types/index';
 import DirectContactWarning from './DirectContactWarning';
 import StepIndicator from './StepIndicator';
-import Step1BasicInfo from './steps/Step1BasicInfo';
-import Step2ContactPreference from './steps/Step2ContactPreference';
-import Step3ContactDetails from './steps/Step3ContactDetails';
-import Step4ReviewSubmit from './steps/Step4ReviewSubmit';
+import BasicInfo from './steps/BasicInfo';
+import ContactPreference from './steps/ContactPreference';
+import ContactDetails from './steps/ContactDetails';
+import ReviewSubmit from './steps/ReviewSubmit';
 
 interface Props {
   onSuccess: (bagData: CreateBagResponse) => void;
@@ -49,7 +49,7 @@ export default function CreateBagForm({ onSuccess }: Props) {
   const totalSteps = stepNames.length;
 
   const allContactTypes: Array<
-     'sms' | 'signal' | 'whatsapp' | 'telegram' | 'instagram' | 'email' | 'other'
+    'sms' | 'signal' | 'whatsapp' | 'telegram' | 'instagram' | 'email' | 'other'
   > = ['sms', 'signal', 'whatsapp', 'telegram', 'instagram', 'email', 'other'];
 
   const getAvailableContactTypes = (currentIndex: number) => {
@@ -314,7 +314,7 @@ export default function CreateBagForm({ onSuccess }: Props) {
     switch (currentStep) {
       case 1:
         return (
-          <Step1BasicInfo
+          <BasicInfo
             formData={{
               owner_name: formData.owner_name,
               bag_name: formData.bag_name,
@@ -326,7 +326,7 @@ export default function CreateBagForm({ onSuccess }: Props) {
         );
       case 2:
         return (
-          <Step2ContactPreference
+          <ContactPreference
             formData={{
               secure_messaging_enabled: formData.secure_messaging_enabled,
             }}
@@ -338,7 +338,7 @@ export default function CreateBagForm({ onSuccess }: Props) {
         );
       case 3:
         return (
-          <Step3ContactDetails
+          <ContactDetails
             formData={{
               owner_email: formData.owner_email,
               contacts: formData.contacts,
@@ -356,7 +356,7 @@ export default function CreateBagForm({ onSuccess }: Props) {
         );
       case 4:
         return (
-          <Step4ReviewSubmit
+          <ReviewSubmit
             formData={formData}
             onBack={prevStep}
             onSubmit={handleSubmit}

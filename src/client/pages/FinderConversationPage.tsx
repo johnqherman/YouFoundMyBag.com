@@ -114,8 +114,8 @@ export default function FinderConversationPage() {
     }
   }, [searchParams, loadConversation]);
 
-  const sendReply = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const sendReply = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!replyMessage.trim() || sending) return;
 
     const token = localStorage.getItem('finder_session_token');
@@ -152,6 +152,13 @@ export default function FinderConversationPage() {
       setError(err instanceof Error ? err.message : 'Failed to send reply');
     } finally {
       setSending(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendReply();
     }
   };
 
@@ -245,8 +252,18 @@ export default function FinderConversationPage() {
           </h1>
           <p className="text-neutral-800 mb-2">
             Status:{' '}
-            <span className="text-green-800 font-bold">
-              {conversation.conversation.status}
+            <span
+              className={`font-bold ${
+                conversation.conversation.status === 'active'
+                  ? 'text-green-800'
+                  : conversation.conversation.status === 'resolved'
+                    ? 'text-blue-800'
+                    : 'text-neutral-600'
+              }`}
+            >
+              {conversation.conversation.status === 'resolved'
+                ? 'Resolved'
+                : 'Active'}
             </span>
             {conversation.bag.owner_name && (
               <span className="ml-4">
@@ -265,12 +282,18 @@ export default function FinderConversationPage() {
               key={message.id}
               className={`p-4 rounded-lg ${
                 message.sender_type === 'finder'
-                  ? 'bg-green-100 border-2 border-green-400 ml-8'
-                  : 'bg-blue-100 border-2 border-blue-400 mr-8'
+                  ? 'bg-blue-500 text-white ml-8'
+                  : 'bg-neutral-200 text-neutral-900 mr-8'
               }`}
             >
               <div className="flex justify-between items-start mb-2">
-                <span className="font-medium text-neutral-900">
+                <span
+                  className={`font-medium ${
+                    message.sender_type === 'finder'
+                      ? 'text-white'
+                      : 'text-neutral-900'
+                  }`}
+                >
                   {formatConversationParticipant(
                     message.sender_type,
                     {
@@ -281,11 +304,25 @@ export default function FinderConversationPage() {
                     message.sender_type === 'finder'
                   )}
                 </span>
-                <span className="text-sm text-neutral-700 font-medium">
+                <span
+                  className={`text-sm font-medium ${
+                    message.sender_type === 'finder'
+                      ? 'text-blue-100'
+                      : 'text-neutral-600'
+                  }`}
+                >
                   {new Date(message.sent_at).toLocaleString()}
                 </span>
               </div>
-              <p className="text-neutral-900">{message.message_content}</p>
+              <p
+                className={
+                  message.sender_type === 'finder'
+                    ? 'text-white'
+                    : 'text-neutral-900'
+                }
+              >
+                {message.message_content}
+              </p>
             </div>
           ))}
         </div>
@@ -298,23 +335,25 @@ export default function FinderConversationPage() {
             <h3 className="text-lg font-semibold text-neutral-900 mb-4">
               Send a Reply
             </h3>
-            <CharacterLimitTextArea
-              value={replyMessage}
-              onChange={setReplyMessage}
-              maxLength={1000}
-              placeholder={getContextualReplyPlaceholder(
-                'owner',
-                {
-                  ownerName: conversation.bag.owner_name,
-                  bagName: conversation.bag.bag_name,
-                  finderName: conversation.conversation.finder_display_name,
-                },
-                'response'
-              )}
-              rows={4}
-              disabled={sending}
-              variant="light"
-            />
+            <div onKeyDown={handleKeyDown}>
+              <CharacterLimitTextArea
+                value={replyMessage}
+                onChange={setReplyMessage}
+                maxLength={500}
+                placeholder={getContextualReplyPlaceholder(
+                  'owner',
+                  {
+                    ownerName: conversation.bag.owner_name,
+                    bagName: conversation.bag.bag_name,
+                    finderName: conversation.conversation.finder_display_name,
+                  },
+                  'response'
+                )}
+                rows={4}
+                disabled={sending}
+                variant="light"
+              />
+            </div>
             <div className="mt-4 flex justify-end">
               <button
                 type="submit"
@@ -327,10 +366,22 @@ export default function FinderConversationPage() {
           </form>
         )}
 
-        {conversation.conversation.status !== 'active' && (
+        {conversation.conversation.status === 'resolved' && (
+          <div className="bg-blue-100 border-2 border-blue-500 rounded-lg p-4 text-center">
+            <div className="text-blue-600 text-lg mb-2">✓</div>
+            <p className="text-blue-900 font-bold">
+              This conversation has been resolved by the owner.
+            </p>
+            <p className="text-blue-700 text-sm mt-1">
+              No further replies can be sent.
+            </p>
+          </div>
+        )}
+
+        {conversation.conversation.status === 'archived' && (
           <div className="bg-yellow-100 border-2 border-yellow-500 rounded-lg p-4 text-center">
             <p className="text-yellow-900 font-bold">
-              This conversation has been {conversation.conversation.status}.
+              This conversation has been archived.
             </p>
           </div>
         )}

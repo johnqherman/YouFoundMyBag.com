@@ -2,13 +2,13 @@ import { ContactWithId } from '../../types';
 import ContactInput from '../ContactInput';
 import PhoneInputErrorBoundary from '../PhoneInputErrorBoundary';
 
-interface Step3Props {
+interface ContactDetailsProps {
   formData: {
     owner_email: string;
     contacts: ContactWithId[];
     secure_messaging_enabled: boolean;
   };
-  onChange: (updates: Partial<Step3Props['formData']>) => void;
+  onChange: (updates: Partial<ContactDetailsProps['formData']>) => void;
   onNext: () => void;
   onBack: () => void;
   addContact: () => void;
@@ -17,12 +17,12 @@ interface Step3Props {
   getAvailableContactTypes: (
     currentIndex: number
   ) => Array<
-     'sms' |'signal' | 'whatsapp' | 'telegram' | 'instagram' | 'email' | 'other'
+    'sms' | 'signal' | 'whatsapp' | 'telegram' | 'instagram' | 'email' | 'other'
   >;
   error?: string | null;
 }
 
-export default function Step3ContactDetails({
+export default function ContactDetails({
   formData,
   onChange,
   onNext,
@@ -32,7 +32,7 @@ export default function Step3ContactDetails({
   updateContact,
   getAvailableContactTypes,
   error,
-}: Step3Props) {
+}: ContactDetailsProps) {
   return (
     <div className="space-y-6">
       <div>

@@ -1,6 +1,6 @@
 import { ContactWithId } from '../../types';
 
-interface Step4Props {
+interface ReviewSubmitProps {
   formData: {
     owner_name: string;
     bag_name: string;
@@ -15,13 +15,13 @@ interface Step4Props {
   error: string | null;
 }
 
-export default function Step4ReviewSubmit({
+export default function ReviewSubmit({
   formData,
   onBack,
   onSubmit,
   loading,
   error,
-}: Step4Props) {
+}: ReviewSubmitProps) {
   const getContactIcon = (type: string) => {
     switch (type) {
       case 'sms':

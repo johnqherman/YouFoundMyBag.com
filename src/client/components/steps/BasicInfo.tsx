@@ -2,21 +2,21 @@ import CharacterLimitInput from '../CharacterLimitInput';
 import CharacterLimitTextArea from '../CharacterLimitTextArea';
 import PrivacyWarning from '../PrivacyWarning';
 
-interface Step1Props {
+interface BasicInfoProps {
   formData: {
     owner_name: string;
     bag_name: string;
     owner_message: string;
   };
-  onChange: (updates: Partial<Step1Props['formData']>) => void;
+  onChange: (updates: Partial<BasicInfoProps['formData']>) => void;
   onNext: () => void;
 }
 
-export default function Step1BasicInfo({
+export default function BasicInfo({
   formData,
   onChange,
   onNext,
-}: Step1Props) {
+}: BasicInfoProps) {
   return (
     <div className="space-y-6">
       <div>

@@ -1,19 +1,19 @@
-interface Step2Props {
+interface ContactPreferenceProps {
   formData: {
     secure_messaging_enabled: boolean;
   };
-  onChange: (updates: Partial<Step2Props['formData']>) => void;
+  onChange: (updates: Partial<ContactPreferenceProps['formData']>) => void;
   onNext: () => void;
   onBack: () => void;
   onContactPreferenceChange: (useSecureMessaging: boolean) => void;
 }
 
-export default function Step2ContactPreference({
+export default function ContactPreference({
   formData,
   onNext,
   onBack,
   onContactPreferenceChange,
-}: Step2Props) {
+}: ContactPreferenceProps) {
   return (
     <div className="space-y-6">
       <div>
