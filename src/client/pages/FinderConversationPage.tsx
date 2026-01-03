@@ -339,7 +339,7 @@ export default function FinderConversationPage() {
               <CharacterLimitTextArea
                 value={replyMessage}
                 onChange={setReplyMessage}
-                maxLength={500}
+                maxLength={300}
                 placeholder={getContextualReplyPlaceholder(
                   'owner',
                   {
