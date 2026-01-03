@@ -26,29 +26,41 @@ export default function ContactModal({ shortId, ownerName, onClose }: Props) {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [widgetId, setWidgetId] = useState<string | null>(null);
+
+  const renderWidget = () => {
+    if (window.turnstile) {
+      const container = document.getElementById('turnstile-widget');
+      if (container) {
+        container.innerHTML = '';
+      }
+
+      const id = window.turnstile.render('#turnstile-widget', {
+        sitekey:
+          (import.meta as { env?: Record<string, unknown> }).env
+            ?.VITE_CLOUDFLARE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA',
+        callback: (token: string) => setTurnstileToken(token),
+        theme: 'light',
+      });
+      setWidgetId(id);
+    }
+  };
+
+  const resetWidget = () => {
+    if (window.turnstile) {
+      if (widgetId) {
+        window.turnstile.reset(widgetId);
+      } else {
+        window.turnstile.reset();
+      }
+      setTurnstileToken(null);
+    }
+  };
 
   useEffect(() => {
     const existingScript = document.querySelector(
       'script[src="https://challenges.cloudflare.com/turnstile/v0/api.js"]'
     );
-
-    const renderWidget = () => {
-      if (window.turnstile) {
-        const container = document.getElementById('turnstile-widget');
-        if (container) {
-          container.innerHTML = '';
-        }
-
-        window.turnstile.render('#turnstile-widget', {
-          sitekey:
-            (import.meta as { env?: Record<string, unknown> }).env
-              ?.VITE_CLOUDFLARE_TURNSTILE_SITE_KEY ||
-            '1x00000000000000000000AA',
-          callback: (token: string) => setTurnstileToken(token),
-          theme: 'light',
-        });
-      }
-    };
 
     if (existingScript) {
       if (window.turnstile) {
@@ -95,10 +107,7 @@ export default function ContactModal({ shortId, ownerName, onClose }: Props) {
       setSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to send message');
-      if (window.turnstile) {
-        window.turnstile.reset();
-        setTurnstileToken(null);
-      }
+      resetWidget();
     } finally {
       setLoading(false);
     }

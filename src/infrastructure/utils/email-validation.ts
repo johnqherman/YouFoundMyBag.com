@@ -1,0 +1,172 @@
+import { validate } from 'deep-email-validator';
+import { z } from 'zod';
+import type { Request, Response, NextFunction } from 'express';
+
+export interface EmailValidationResult {
+  valid: boolean;
+  warnings: string[];
+  details: {
+    syntaxValid: boolean;
+    mxRecords: boolean | null;
+    disposableEmail: boolean | null;
+    typoDetected: boolean | null;
+  };
+}
+
+export async function isValidEmail(email: string): Promise<boolean> {
+  const result = await validateEmail(email);
+  return result.valid;
+}
+
+export async function validateEmail(
+  email: string
+): Promise<EmailValidationResult> {
+  const result: EmailValidationResult = {
+    valid: false,
+    warnings: [],
+    details: {
+      syntaxValid: false,
+      mxRecords: null,
+      disposableEmail: null,
+      typoDetected: null,
+    },
+  };
+
+  try {
+    const deepValidation = await validate({
+      email,
+      validateRegex: true,
+      validateMx: true,
+      validateTypo: true,
+      validateDisposable: true,
+      validateSMTP: false,
+    });
+
+    result.details.syntaxValid =
+      deepValidation.validators.regex?.valid ?? false;
+    result.details.mxRecords = deepValidation.validators.mx?.valid ?? null;
+    result.details.disposableEmail =
+      deepValidation.validators.disposable?.valid ?? null;
+    result.details.typoDetected = deepValidation.validators.typo?.valid ?? null;
+
+    if (!result.details.syntaxValid) {
+      result.warnings.push('Email syntax is invalid');
+      return result;
+    }
+
+    if (result.details.mxRecords === false) {
+      result.warnings.push('Please enter a valid email address');
+    }
+
+    if (result.details.disposableEmail === false) {
+      result.warnings.push(
+        'Email appears to be from a disposable email service'
+      );
+    }
+
+    if (result.details.typoDetected === false) {
+      result.warnings.push('Possible typo detected in email address');
+    }
+
+    result.valid =
+      result.details.syntaxValid && result.details.mxRecords !== false;
+
+    return result;
+  } catch (error) {
+    console.error(`Email validation error for ${email}:`, error);
+    result.warnings.push('Email validation service error');
+    return result;
+  }
+}
+
+export const emailSchema = z.string().email().max(254);
+
+export const emailValidationSchema = z.string().refine(
+  async (email) => {
+    try {
+      return await isValidEmail(email);
+    } catch (error) {
+      console.warn(
+        'Email validation check failed, falling back to basic validation:',
+        error
+      );
+      return typeof email === 'string' && email.length > 0;
+    }
+  },
+  { message: 'Please enter a valid email address' }
+);
+
+interface RequestWithEmailValidation extends Request {
+  emailValidation?: Record<string, EmailValidationResult>;
+}
+
+export interface EmailValidationOptions {
+  fields?: string[];
+  mode?: 'strict' | 'advisory';
+}
+
+export const emailValidationMiddleware = (
+  options: EmailValidationOptions = {}
+): ((
+  req: RequestWithEmailValidation,
+  res: Response,
+  next: NextFunction
+) => Promise<void>) => {
+  const { fields = ['email'], mode = 'advisory' } = options;
+
+  return async (
+    req: RequestWithEmailValidation,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const emailValidationResults: Record<string, EmailValidationResult> = {};
+
+      for (const field of fields) {
+        const email = req.body[field];
+
+        if (email && typeof email === 'string') {
+          const result = await validateEmail(email);
+
+          emailValidationResults[field] = result;
+
+          if (mode === 'strict' && !result.valid) {
+            const userFriendlyMessage =
+              result.warnings.length > 0
+                ? result.warnings.join('. ')
+                : 'Please enter a valid email address';
+
+            res.status(400).json({
+              error: 'validation_error',
+              message: userFriendlyMessage,
+            });
+            return;
+          }
+
+          if (result.warnings.length > 0) {
+            console.warn(
+              `Email validation warnings for ${field} (${email}):`,
+              result.warnings
+            );
+          }
+        }
+      }
+
+      req.emailValidation = emailValidationResults;
+
+      return next();
+    } catch (error) {
+      console.error('Email validation middleware error:', error);
+
+      if (mode === 'advisory') {
+        return next();
+      } else {
+        res.status(500).json({
+          error: 'Email validation service error',
+          message: 'Unable to validate email addresses',
+        });
+        return;
+      }
+    }
+  };
+};

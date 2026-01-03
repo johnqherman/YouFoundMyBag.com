@@ -11,11 +11,13 @@ import type {
   StartConversationRequest,
   SendReplyRequest,
 } from '../../client/types/index.js';
+import { emailValidationMiddleware } from '../../infrastructure/utils/email-validation.js';
 
 const router = Router();
 
 router.post(
   '/bags/:shortId/conversations',
+  emailValidationMiddleware({ fields: ['finder_email'], mode: 'strict' }),
   async (req: Request, res: Response): Promise<void> => {
     try {
       const { shortId } = req.params;
@@ -30,7 +32,7 @@ router.post(
         return;
       }
 
-      const bodyResult = startConversationSchema.safeParse(req.body);
+      const bodyResult = await startConversationSchema.safeParseAsync(req.body);
       if (!bodyResult.success) {
         res.status(400).json({
           success: false,

@@ -5,36 +5,42 @@ import {
 } from '../../infrastructure/utils/validation.js';
 import * as bagService from './service.js';
 import * as bagRepository from './repository.js';
+import { emailValidationMiddleware } from '../../infrastructure/utils/email-validation.js';
 
 const router = express.Router();
 
-router.post('/', async (req, res): Promise<void> => {
-  try {
-    const validatedData = createBagSchema.parse(req.body);
-    const clientIp = req.ip || req.connection.remoteAddress || undefined;
-    const result = await bagService.createBagWithQR(validatedData, clientIp);
+router.post(
+  '/',
+  emailValidationMiddleware({ fields: ['owner_email'], mode: 'strict' }),
+  async (req, res): Promise<void> => {
+    try {
+      const validatedData = await createBagSchema.parseAsync(req.body);
+      const clientIp = req.ip || req.connection.remoteAddress || undefined;
+      const result = await bagService.createBagWithQR(validatedData, clientIp);
 
-    res.status(201).json({
-      success: true,
-      data: result,
-    });
-  } catch (error: unknown) {
-    if (error && typeof error === 'object' && 'issues' in error) {
-      res.status(400).json({
-        error: 'Validation failed',
-        message: 'Invalid input data',
-        details: (error as { issues: unknown }).issues,
+      res.status(201).json({
+        success: true,
+        data: result,
       });
-      return;
-    }
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'issues' in error) {
+        res.status(400).json({
+          error: 'Validation failed',
+          message: 'Invalid input data',
+          details: (error as { issues: unknown }).issues,
+        });
+        return;
+      }
 
-    console.error('Failed to create bag:', error);
-    res.status(500).json({
-      error: 'Internal server error',
-      message: error instanceof Error ? error.message : 'Failed to create bag',
-    });
+      console.error('Failed to create bag:', error);
+      res.status(500).json({
+        error: 'Internal server error',
+        message:
+          error instanceof Error ? error.message : 'Failed to create bag',
+      });
+    }
   }
-});
+);
 
 router.get('/:shortId', async (req, res): Promise<void> => {
   try {
