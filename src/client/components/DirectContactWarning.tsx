@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { TIME_CONSTANTS as t } from '../constants/timeConstants';
 
 interface Props {
   isOpen: boolean;
@@ -25,7 +26,7 @@ export default function DirectContactWarning({
 
       const timer = setTimeout(() => {
         setShowDelayedContent(true);
-      }, 10000);
+      }, t.TEN_SECONDS);
 
       const countdown = setInterval(() => {
         setRemainingSeconds((prev) => {
@@ -36,7 +37,7 @@ export default function DirectContactWarning({
           }
           return newValue;
         });
-      }, 1000);
+      }, t.ONE_SECOND);
 
       const handleKeyDown = (e: KeyboardEvent) => {
         if (e.key === 'Escape') {

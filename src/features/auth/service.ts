@@ -2,9 +2,7 @@ import crypto from 'crypto';
 import type { OwnerSession } from '../../client/types/index.js';
 import { sendMagicLinkEmail } from '../../infrastructure/email/index.js';
 import * as authRepository from './repository.js';
-
-const MAGIC_LINK_EXPIRY_HOURS = 24;
-const SESSION_EXPIRY_HOURS = 72;
+import { TIME_CONSTANTS as t } from 'client/constants/timeConstants.js';
 
 export async function generateMagicLinkToken(
   email: string,
@@ -14,9 +12,7 @@ export async function generateMagicLinkToken(
   await authRepository.deleteExpiredSessions();
 
   const magicLinkToken = crypto.randomBytes(32).toString('hex');
-  const expiresAt = new Date(
-    Date.now() + MAGIC_LINK_EXPIRY_HOURS * 60 * 60 * 1000
-  );
+  const expiresAt = new Date(Date.now() + t.ONE_DAY);
 
   let targetBagIds = bagIds;
   if (!targetBagIds) {
@@ -99,9 +95,7 @@ export async function verifyMagicLink(magicLinkToken: string): Promise<{
   console.log(`DEBUG: Found magic session for email: ${magicSession.email}`);
 
   const sessionToken = crypto.randomBytes(32).toString('hex');
-  const sessionExpiresAt = new Date(
-    Date.now() + SESSION_EXPIRY_HOURS * 60 * 60 * 1000
-  );
+  const sessionExpiresAt = new Date(Date.now() + t.THREE_DAYS);
 
   console.log(
     `DEBUG: Creating new session token: ${sessionToken.substring(0, 8)}...`
@@ -155,9 +149,7 @@ export async function generateFinderMagicLinkToken(
   await authRepository.deleteExpiredSessions();
 
   const magicLinkToken = crypto.randomBytes(32).toString('hex');
-  const expiresAt = new Date(
-    Date.now() + MAGIC_LINK_EXPIRY_HOURS * 60 * 60 * 1000
-  );
+  const expiresAt = new Date(Date.now() + t.ONE_DAY);
 
   await authRepository.createOwnerSession(
     email,
@@ -239,9 +231,7 @@ export async function verifyFinderMagicLink(magicLinkToken: string): Promise<{
   }
 
   const sessionToken = crypto.randomBytes(32).toString('hex');
-  const sessionExpiresAt = new Date(
-    Date.now() + SESSION_EXPIRY_HOURS * 60 * 60 * 1000
-  );
+  const sessionExpiresAt = new Date(Date.now() + t.THREE_DAYS);
 
   console.log(
     `DEBUG: Creating new finder session token: ${sessionToken.substring(0, 8)}...`

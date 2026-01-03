@@ -1,12 +1,13 @@
 import { Pool, PoolClient } from 'pg';
 import { config } from '../config/index.js';
+import { TIME_CONSTANTS as t } from '../../client/constants/timeConstants.js'
 
 export const pool = new Pool({
   connectionString: config.DATABASE_URL,
   ssl: config.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
   max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 10000,
+  idleTimeoutMillis: t.THIRTY_SECONDS,
+  connectionTimeoutMillis: t.TEN_SECONDS,
 });
 
 export async function withTransaction<T>(

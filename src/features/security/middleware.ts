@@ -3,9 +3,10 @@ import helmet from 'helmet';
 import { pool } from '../../infrastructure/database/index.js';
 import crypto from 'crypto';
 import type { Request, Response, NextFunction } from 'express';
+import { TIME_CONSTANTS as t } from 'client/constants/timeConstants.js';
 
 export const basicRateLimit = rateLimit({
-  windowMs: 15 * 60 * 1000,
+  windowMs: t.FIFTEEN_MINUTES,
   max: 100,
   message: {
     error: 'Rate limit exceeded',
@@ -18,7 +19,7 @@ export const basicRateLimit = rateLimit({
 });
 
 export const createBagRateLimit = rateLimit({
-  windowMs: 60 * 60 * 1000,
+  windowMs: t.ONE_HOUR,
   max: 5,
   message: {
     error: 'Rate limit exceeded',
@@ -29,7 +30,7 @@ export const createBagRateLimit = rateLimit({
 });
 
 export const sendMessageRateLimit = rateLimit({
-  windowMs: 5 * 60 * 1000,
+  windowMs: t.FIVE_MINUTES,
   max: 3,
   message: {
     error: 'Rate limit exceeded',

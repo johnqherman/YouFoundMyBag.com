@@ -84,7 +84,7 @@ export const shortIdSchema = z
   .regex(/^[23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+$/);
 
 export const startConversationSchema = z.object({
-  finder_message: z.string().min(1).max(1000).trim(),
+  finder_message: z.string().min(1).max(300).trim(),
   finder_email: emailValidationSchema.optional(),
   finder_display_name: z.string().max(30).optional(),
   turnstile_token: z.string().min(1),
@@ -92,7 +92,7 @@ export const startConversationSchema = z.object({
 
 export const sendReplySchema = z.object({
   conversation_id: z.string().uuid(),
-  message_content: z.string().min(1).max(1000).trim(),
+  message_content: z.string().min(1).max(300).trim(),
 });
 
 export const magicLinkSchema = z.object({

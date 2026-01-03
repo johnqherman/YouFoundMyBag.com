@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { TIME_CONSTANTS as t } from '../constants/timeConstants';
 
 export default function AuthVerifyPage() {
   const [searchParams] = useSearchParams();
@@ -47,7 +48,7 @@ export default function AuthVerifyPage() {
           } else {
             navigate('/dashboard');
           }
-        }, 2000);
+        }, t.TWO_SECONDS);
       } catch (err) {
         setStatus('error');
         setError(err instanceof Error ? err.message : 'Verification failed');

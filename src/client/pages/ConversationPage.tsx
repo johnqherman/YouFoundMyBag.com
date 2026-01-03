@@ -133,6 +133,29 @@ export default function ConversationPage() {
 
     setResolving(true);
     try {
+      if (replyMessage.trim()) {
+        const response = await fetch(
+          `/api/conversations/${conversationId}/reply`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              message_content: replyMessage,
+              sender_type: 'owner',
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error('Failed to send reply before resolving');
+        }
+
+        setReplyMessage('');
+      }
+
       await api.resolveConversation(conversationId, token);
       await loadConversation();
     } catch (err) {

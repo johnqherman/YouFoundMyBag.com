@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { CreateBagResponse } from '../types/index.js';
+import { TIME_CONSTANTS as t } from '../constants/timeConstants';
 
 interface Props {
   bagData: CreateBagResponse;
@@ -13,7 +14,7 @@ export default function BagCreated({ bagData, onCreateAnother }: Props) {
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setTimeout(() => setCopied(false), t.TWO_SECONDS);
     } catch (err) {
       console.error('Failed to copy:', err);
     }

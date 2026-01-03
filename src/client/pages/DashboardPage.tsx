@@ -359,9 +359,9 @@ export default function DashboardPage() {
                                 <span>{contextIcon}</span>
                                 <span>{contextLabel}:</span>
                               </span>{' '}
-                              {lastMessage.message_content.length > 100
-                                ? `${lastMessage.message_content.substring(0, 100)}...`
-                                : lastMessage.message_content}
+                              <span className="text-wrap-aggressive line-clamp-1 overflow-hidden text-ellipsis">
+                                {lastMessage.message_content}
+                              </span>
                             </p>
                             <p className="text-xs text-neutral-500 mt-1">
                               {new Date(lastMessage.sent_at).toLocaleString()}
