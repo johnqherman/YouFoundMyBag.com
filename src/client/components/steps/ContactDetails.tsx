@@ -131,7 +131,10 @@ export default function ContactDetails({
                   }
                   onRemove={() => removeContact(index)}
                   availableTypes={getAvailableContactTypes(index)}
-                  showRemoveButton={true}
+                  showRemoveButton={
+                    formData.secure_messaging_enabled ||
+                    formData.contacts.length > 1
+                  }
                 />
               </PhoneInputErrorBoundary>
             ))
