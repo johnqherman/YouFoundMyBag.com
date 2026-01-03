@@ -101,9 +101,8 @@ export default function ContactDetails({
                 : 'All information below will be fully visible to anyone who finds your item.'}
             </strong>
             <br />
-            {formData.secure_messaging_enabled
-              ? 'Finders can always reach you through our secure private messaging system.'
-              : 'We cannot moderate or assist with direct communications.'}
+            {formData.secure_messaging_enabled &&
+              'Finders can always reach you through our secure private messaging system.'}
           </p>
         </div>
 

@@ -220,8 +220,8 @@ export default function ContactModal({ shortId, ownerName, onClose }: Props) {
               required
             />
             <p className="text-xs text-neutral-600 mt-1">
-              Required for secure conversation. You&apos;ll receive a secure
-              link to continue messaging with the owner.
+              Required for secure messaging. You&apos;ll receive a link to keep
+              chatting with the owner.
             </p>
           </div>
 

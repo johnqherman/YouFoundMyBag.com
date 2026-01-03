@@ -38,10 +38,8 @@ export default function ContactPreference({
                 Secure messaging (recommended)
               </div>
               <div className="text-sm text-neutral-400 mt-1">
-                • Protected communication through our platform
-                <br />
-                • Platform dispute resolution available
-                <br />• Requires email address for dashboard access
+                • Protect your identity while messaging
+                <br />• Email needed for dashboard access
               </div>
             </div>
           </label>
@@ -57,9 +55,9 @@ export default function ContactPreference({
             <div className="flex-1">
               <div className="font-medium text-white">Direct contact only</div>
               <div className="text-sm text-neutral-400 mt-1">
-                • Immediate contact information display
+                • Info is fully public for contact
                 <br />
-                • No email required
+                • No email needed
                 <br />• ⚠️{' '}
                 <span className="text-amber-400">
                   View risks and requirements

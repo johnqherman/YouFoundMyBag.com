@@ -14,18 +14,18 @@ export default function DirectContactWarning({
   const [hasReadWarning, setHasReadWarning] = useState(false);
   const [confirmationText, setConfirmationText] = useState('');
   const [showDelayedContent, setShowDelayedContent] = useState(false);
-  const [remainingSeconds, setRemainingSeconds] = useState(15);
+  const [remainingSeconds, setRemainingSeconds] = useState(10);
 
   useEffect(() => {
     if (isOpen) {
       setHasReadWarning(false);
       setConfirmationText('');
       setShowDelayedContent(false);
-      setRemainingSeconds(15);
+      setRemainingSeconds(10);
 
       const timer = setTimeout(() => {
         setShowDelayedContent(true);
-      }, 15000);
+      }, 10000);
 
       const countdown = setInterval(() => {
         setRemainingSeconds((prev) => {
@@ -47,7 +47,7 @@ export default function DirectContactWarning({
   }, [isOpen]);
 
   const isConfirmationValid =
-    confirmationText.toLowerCase().trim() === 'i understand the risks';
+    confirmationText.toLowerCase().trim() === 'i understand';
   const canProceed =
     hasReadWarning && isConfirmationValid && showDelayedContent;
 
@@ -69,23 +69,13 @@ export default function DirectContactWarning({
           <p className="font-semibold mb-3">Choosing direct contact means:</p>
           <ul className="space-y-2 text-sm">
             <li>
-              • Anyone who finds your bag will see your contact information
-              immediately
+              Anyone who finds your bag will see your contact info. You may
+              receive calls, texts, or messages that we cannot filter for spam,
+              inappropriate content, or harassment.
             </li>
-            <li>
-              • You&apos;ll receive contact directly (calls, texts, messages)
-              that we cannot filter
-            </li>
-            <li>
-              • No protection against spam, inappropriate messages, or
-              harassment
-            </li>
-            <li>• No communication record for dispute resolution</li>
-            <li>• You cannot block contacts through our platform</li>
-            <li>• We cannot assist with any communication-related issues</li>
           </ul>
           <p className="mt-3 font-semibold text-amber-100">
-            This choice cannot be changed once someone finds your bag.
+            This choice cannot be undone later.
           </p>
         </div>
 
@@ -107,7 +97,7 @@ export default function DirectContactWarning({
 
             <div>
               <label className="block text-sm text-neutral-400 mb-2">
-                Type &quot;I understand the risks&quot; to continue:
+                Type &quot;I understand&quot; to continue:
               </label>
               <input
                 type="text"

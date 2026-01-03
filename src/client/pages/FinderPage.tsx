@@ -112,23 +112,6 @@ export default function FinderPage() {
                 <p className="text-lg font-semibold text-center mb-6">
                   Contact {data.owner_name || 'me'} directly:
                 </p>
-
-                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
-                  <div className="flex items-start gap-3">
-                    <div className="text-amber-600 text-xl flex-shrink-0">
-                      ⚠️
-                    </div>
-                    <div>
-                      <p className="text-sm text-amber-800 font-medium mb-1">
-                        This owner prefers direct contact
-                      </p>
-                      <p className="text-xs text-amber-700">
-                        YouFoundMyBag cannot assist with communication issues
-                        for direct contact.
-                      </p>
-                    </div>
-                  </div>
-                </div>
               </>
             )}
 
@@ -154,10 +137,6 @@ export default function FinderPage() {
                 <h3 className="font-medium text-neutral-800 mb-2">
                   📞 Direct Contact
                 </h3>
-                <p className="text-sm text-neutral-600 mb-3">
-                  Contact {data.owner_name || 'me'} directly (your info will be
-                  visible)
-                </p>
                 <div className="space-y-2">
                   {data.contact_options
                     .sort(
