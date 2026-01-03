@@ -49,9 +49,9 @@ export async function validateEmail(
     result.valid =
       result.details.syntaxValid &&
       result.details.mxRecords !== false &&
-      result.details.disposableEmail !== true;
+      result.details.disposableEmail !== false;
 
-    if (result.details.disposableEmail === true) {
+    if (result.details.disposableEmail === false) {
       result.warnings.push('Temporary or disposable emails cannot be used');
     } else if (!result.valid) {
       result.warnings.push('Please enter a valid email address');

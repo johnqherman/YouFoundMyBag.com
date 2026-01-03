@@ -39,6 +39,8 @@ export default function ContactPreference({
               </div>
               <div className="text-sm text-neutral-400 mt-1">
                 • Protect your identity while messaging
+                <br />
+                • Other contact methods can also be shared
                 <br />• Email needed for dashboard access
               </div>
             </div>
