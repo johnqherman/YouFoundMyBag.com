@@ -35,10 +35,8 @@ export async function validateEmail(
   try {
     const deepValidation = await validate({
       email,
-      validateRegex: true,
-      validateMx: true,
-      validateTypo: true,
-      validateDisposable: true,
+      validateRegex: false,
+      validateTypo: false,
       validateSMTP: false,
     });
 
@@ -47,29 +45,17 @@ export async function validateEmail(
     result.details.mxRecords = deepValidation.validators.mx?.valid ?? null;
     result.details.disposableEmail =
       deepValidation.validators.disposable?.valid ?? null;
-    result.details.typoDetected = deepValidation.validators.typo?.valid ?? null;
-
-    if (!result.details.syntaxValid) {
-      result.warnings.push('Email syntax is invalid');
-      return result;
-    }
-
-    if (result.details.mxRecords === false) {
-      result.warnings.push('Please enter a valid email address');
-    }
-
-    if (result.details.disposableEmail === false) {
-      result.warnings.push(
-        'Email appears to be from a disposable email service'
-      );
-    }
-
-    if (result.details.typoDetected === false) {
-      result.warnings.push('Possible typo detected in email address');
-    }
 
     result.valid =
-      result.details.syntaxValid && result.details.mxRecords !== false;
+      result.details.syntaxValid &&
+      result.details.mxRecords !== false &&
+      result.details.disposableEmail !== true;
+
+    if (result.details.disposableEmail === true) {
+      result.warnings.push('Temporary or disposable emails cannot be used');
+    } else if (!result.valid) {
+      result.warnings.push('Please enter a valid email address');
+    }
 
     return result;
   } catch (error) {

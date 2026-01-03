@@ -86,6 +86,7 @@ export default function ContactModal({ shortId, ownerName, onClose }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!turnstileToken || !message.trim() || !senderInfo.trim()) {
       setError('Please complete all required fields and security verification');
       return;
