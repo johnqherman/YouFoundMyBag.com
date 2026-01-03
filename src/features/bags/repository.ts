@@ -1,6 +1,6 @@
-import { pool, withTransaction } from '../../infrastructure/database/index.js';
-import type { CreateBagRequest } from '../../client/types/index.js';
-import { formatContactValue } from '../../infrastructure/utils/validation.js';
+import { pool, withTransaction } from '../../infrastructure/database/index';
+import type { CreateBagRequest } from '../../client/types/index';
+import { formatContactValue } from '../../infrastructure/utils/format';
 
 export interface Bag {
   id: string;

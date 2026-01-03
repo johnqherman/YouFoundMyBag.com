@@ -38,13 +38,22 @@ export default function DirectContactWarning({
         });
       }, 1000);
 
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          onCancel();
+        }
+      };
+
+      document.addEventListener('keydown', handleKeyDown);
+
       return () => {
         clearTimeout(timer);
         clearInterval(countdown);
+        document.removeEventListener('keydown', handleKeyDown);
       };
     }
     return undefined;
-  }, [isOpen]);
+  }, [isOpen, onCancel]);
 
   const isConfirmationValid =
     confirmationText.toLowerCase().trim() === 'i understand';
@@ -58,11 +67,30 @@ export default function DirectContactWarning({
       <div className="bg-neutral-800 border border-neutral-700 rounded-xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
         <div className="flex items-start gap-3 mb-4">
           <div className="text-amber-400 text-2xl flex-shrink-0 mt-1">⚠️</div>
-          <div>
+          <div className="flex-1">
             <h2 className="text-xl font-semibold text-white mb-2">
               Important: Direct Contact Warning
             </h2>
           </div>
+          <button
+            onClick={onCancel}
+            className="text-neutral-400 hover:text-white transition-colors p-1"
+            aria-label="Close warning"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
         </div>
 
         <div className="bg-amber-900 border border-amber-700 text-amber-200 p-4 rounded-lg mb-6">

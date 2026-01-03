@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { emailSchema, emailValidationSchema } from './email-validation.js';
+import { emailSchema, emailValidationSchema } from './email-validation';
 
 export const contactTypeSchema = z.enum([
   'sms',
@@ -104,14 +104,3 @@ export const magicLinkSchema = z.object({
 export const verifyMagicLinkSchema = z.object({
   magic_token: z.string().min(32).max(128),
 });
-
-export function formatContactValue(type: string, value: string): string {
-  if (
-    (type === 'instagram' || type === 'telegram') &&
-    value &&
-    !value.startsWith('@')
-  ) {
-    return `@${value}`;
-  }
-  return value;
-}
