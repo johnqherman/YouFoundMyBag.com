@@ -317,26 +317,32 @@ export default function DashboardPage() {
                                   thread.conversation.created_at
                                 ).toLocaleDateString()}
                               </span>
-                              {contextInfo && (
-                                <span
-                                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                                    contextInfo.context === 'initial'
+                              <span
+                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                                  thread.conversation.status === 'resolved'
+                                    ? 'bg-blue-900 text-blue-200'
+                                    : contextInfo?.context === 'initial'
                                       ? 'bg-blue-900 text-blue-200'
-                                      : contextInfo.context === 'follow-up'
+                                      : contextInfo?.context === 'follow-up'
                                         ? 'bg-yellow-900 text-yellow-200'
                                         : 'bg-green-900 text-green-200'
-                                  }`}
-                                >
-                                  <span>{contextIcon}</span>
-                                  <span>
-                                    {contextInfo.context === 'initial'
+                                }`}
+                              >
+                                <span>
+                                  {thread.conversation.status === 'resolved'
+                                    ? '✓'
+                                    : contextIcon}
+                                </span>
+                                <span>
+                                  {thread.conversation.status === 'resolved'
+                                    ? 'Resolved'
+                                    : contextInfo?.context === 'initial'
                                       ? 'New'
-                                      : contextInfo.context === 'follow-up'
+                                      : contextInfo?.context === 'follow-up'
                                         ? 'Follow-up'
                                         : 'Active'}
-                                  </span>
                                 </span>
-                              )}
+                              </span>
                             </div>
                           </div>
                           {unreadCount > 0 && (
