@@ -17,7 +17,7 @@ const router = Router();
 
 router.post(
   '/bags/:shortId/conversations',
-  emailValidationMiddleware({ fields: ['finder_email'], mode: 'strict' }),
+  emailValidationMiddleware({ fields: ['finder_email'] }),
   async (req: Request, res: Response): Promise<void> => {
     try {
       const { shortId } = req.params;

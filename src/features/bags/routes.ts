@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.post(
   '/',
-  emailValidationMiddleware({ fields: ['owner_email'], mode: 'strict' }),
+  emailValidationMiddleware({ fields: ['owner_email'] }),
   async (req, res): Promise<void> => {
     try {
       const validatedData = await createBagSchema.parseAsync(req.body);

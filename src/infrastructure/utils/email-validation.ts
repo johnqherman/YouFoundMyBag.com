@@ -102,7 +102,6 @@ interface RequestWithEmailValidation extends Request {
 
 export interface EmailValidationOptions {
   fields?: string[];
-  mode?: 'strict' | 'advisory';
 }
 
 export const emailValidationMiddleware = (
@@ -112,7 +111,7 @@ export const emailValidationMiddleware = (
   res: Response,
   next: NextFunction
 ) => Promise<void>) => {
-  const { fields = ['email'], mode = 'advisory' } = options;
+  const { fields = ['email'] } = options;
 
   return async (
     req: RequestWithEmailValidation,
@@ -130,7 +129,7 @@ export const emailValidationMiddleware = (
 
           emailValidationResults[field] = result;
 
-          if (mode === 'strict' && !result.valid) {
+          if (!result.valid) {
             const userFriendlyMessage =
               result.warnings.length > 0
                 ? result.warnings.join('. ')
@@ -157,16 +156,11 @@ export const emailValidationMiddleware = (
       return next();
     } catch (error) {
       console.error('Email validation middleware error:', error);
-
-      if (mode === 'advisory') {
-        return next();
-      } else {
-        res.status(500).json({
-          error: 'Email validation service error',
-          message: 'Unable to validate email addresses',
-        });
-        return;
-      }
+      res.status(500).json({
+        error: 'Email validation service error',
+        message: 'Unable to validate email addresses',
+      });
+      return;
     }
   };
 };
