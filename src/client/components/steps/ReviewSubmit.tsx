@@ -1,5 +1,5 @@
 import { ContactWithId } from '../../types';
-import { formatContactValue } from '../../../infrastructure/utils/format';
+import { formatContactValue } from '../../../infrastructure/utils/formatting';
 
 interface ReviewSubmitProps {
   formData: {

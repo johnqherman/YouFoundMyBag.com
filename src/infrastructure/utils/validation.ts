@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { emailSchema, emailValidationSchema } from './email-validation';
+
+export const emailSchema = z.string().email().max(254);
 
 export const contactTypeSchema = z.enum([
   'sms',
@@ -36,8 +37,7 @@ export const contactSchema = z
       if (data.type === 'whatsapp')
         return phoneSchema.safeParse(data.value).success;
       if (data.type === 'email') {
-        const result = await emailValidationSchema.safeParseAsync(data.value);
-        return result.success;
+        return emailSchema.safeParse(data.value).success;
       }
       if (data.type === 'instagram')
         return (
@@ -59,7 +59,7 @@ export const createBagSchema = z
     owner_name: z.string().max(30).optional(),
     bag_name: z.string().max(30).optional(),
     owner_message: z.string().max(150).optional(),
-    owner_email: emailValidationSchema.optional(),
+    owner_email: emailSchema.optional(),
     contacts: z.array(contactSchema).min(0).max(5).default([]),
     secure_messaging_enabled: z.boolean().optional(),
   })
@@ -85,7 +85,7 @@ export const shortIdSchema = z
 
 export const startConversationSchema = z.object({
   finder_message: z.string().min(1).max(300).trim(),
-  finder_email: emailValidationSchema.optional(),
+  finder_email: emailSchema.optional(),
   finder_display_name: z.string().max(30).optional(),
   turnstile_token: z.string().min(1),
 });

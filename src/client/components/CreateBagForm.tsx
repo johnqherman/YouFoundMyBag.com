@@ -8,6 +8,7 @@ import type {
 import DirectContactWarning from './DirectContactWarning';
 import StepIndicator from './StepIndicator';
 import BasicInfo from './steps/BasicInfo';
+import { emailSchema } from '../../infrastructure/utils/validation';
 import ContactPreference from './steps/ContactPreference';
 import ContactDetails from './steps/ContactDetails';
 import ReviewSubmit from './steps/ReviewSubmit';
@@ -137,8 +138,8 @@ export default function CreateBagForm({ onSuccess }: Props) {
             setError('Your email address is required for secure messaging');
             return false;
           }
-          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-          if (!emailRegex.test(formData.owner_email.trim())) {
+          const result = emailSchema.safeParse(formData.owner_email.trim());
+          if (!result.success) {
             setError('Please enter a valid email address');
             return false;
           }
@@ -207,8 +208,8 @@ export default function CreateBagForm({ onSuccess }: Props) {
           return;
         }
 
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(formData.owner_email.trim())) {
+        const result = emailSchema.safeParse(formData.owner_email.trim());
+        if (!result.success) {
           setError('Please enter a valid email address');
           return;
         }
@@ -288,8 +289,8 @@ export default function CreateBagForm({ onSuccess }: Props) {
         }
         break;
       case 'email': {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(value)) {
+        const result = emailSchema.safeParse(value);
+        if (!result.success) {
           return 'Please enter a valid email address';
         }
         break;

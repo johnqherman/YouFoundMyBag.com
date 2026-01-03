@@ -3,6 +3,7 @@ import 'intl-tel-input/styles';
 import IntlTelInput from 'intl-tel-input/reactWithUtils';
 import '../intl-tel-input-dark-theme.css';
 import type { ContactWithId } from '../types/index';
+import { emailSchema } from '../../infrastructure/utils/validation';
 
 interface ContactInputProps {
   contact: ContactWithId;
@@ -87,8 +88,8 @@ export default function ContactInput({
     const errors: string[] = [];
     if (newValue.trim()) {
       if (contact.type === 'email') {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(newValue)) {
+        const result = emailSchema.safeParse(newValue);
+        if (!result.success) {
           errors.push('Please enter a valid email address');
         }
       }

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { api } from '../utils/api';
 import CharacterLimitTextArea from './CharacterLimitTextArea';
 import PrivacyWarning from './PrivacyWarning';
+import { emailSchema } from '../../infrastructure/utils/validation';
 
 interface Props {
   shortId: string;
@@ -90,8 +91,8 @@ export default function ContactModal({ shortId, ownerName, onClose }: Props) {
       return;
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(senderInfo.trim())) {
+    const result = emailSchema.safeParse(senderInfo.trim());
+    if (!result.success) {
       setError('Please enter a valid email address');
       return;
     }

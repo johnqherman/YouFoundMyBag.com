@@ -79,8 +79,6 @@ export async function validateEmail(
   }
 }
 
-export const emailSchema = z.string().email().max(254);
-
 export const emailValidationSchema = z.string().refine(
   async (email) => {
     try {

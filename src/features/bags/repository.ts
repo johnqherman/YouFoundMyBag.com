@@ -1,6 +1,6 @@
 import { pool, withTransaction } from '../../infrastructure/database/index';
 import type { CreateBagRequest } from '../../client/types/index';
-import { formatContactValue } from '../../infrastructure/utils/format';
+import { formatContactValue } from '../../infrastructure/utils/formatting';
 
 export interface Bag {
   id: string;
