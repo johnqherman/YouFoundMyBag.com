@@ -147,16 +147,16 @@ export default function FinderPage() {
                         switch (option.type) {
                           case 'sms':
                             return `tel:${option.value}`;
-                          case 'signal':
-                            return `signal://contact/${option.value}`;
                           case 'whatsapp':
                             return `https://wa.me/${option.value.replace(/\D/g, '')}`;
-                          case 'telegram':
-                            return `tg://resolve?domain=${option.value.replace('@', '')}`;
-                          case 'instagram':
-                            return `https://instagram.com/${option.value.replace('@', '')}`;
                           case 'email':
                             return `mailto:${option.value}`;
+                          case 'instagram':
+                            return `https://instagram.com/${option.value.replace('@', '')}`;
+                          case 'telegram':
+                            return `tg://resolve?domain=${option.value.replace('@', '')}`;
+                          case 'signal':
+                            return `signal://contact/${option.value}`;
                           default:
                             return '#';
                         }
@@ -166,16 +166,16 @@ export default function FinderPage() {
                         switch (option.type) {
                           case 'sms':
                             return '📞';
-                          case 'signal':
-                            return '🔐';
                           case 'whatsapp':
                             return '📱';
-                          case 'telegram':
-                            return '✈️';
-                          case 'instagram':
-                            return '📸';
                           case 'email':
                             return '📧';
+                          case 'instagram':
+                            return '📸';
+                          case 'telegram':
+                            return '✈️';
+                          case 'signal':
+                            return '🔐';
                           case 'other':
                             return '📞';
                           default:

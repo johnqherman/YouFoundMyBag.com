@@ -49,8 +49,8 @@ export default function CreateBagForm({ onSuccess }: Props) {
   const totalSteps = stepNames.length;
 
   const allContactTypes: Array<
-    'sms' | 'signal' | 'whatsapp' | 'telegram' | 'instagram' | 'email' | 'other'
-  > = ['sms', 'signal', 'whatsapp', 'telegram', 'instagram', 'email', 'other'];
+    'sms' | 'whatsapp' | 'email' | 'instagram' | 'telegram' | 'signal' | 'other'
+  > = ['sms', 'whatsapp', 'email', 'instagram', 'telegram', 'signal', 'other'];
 
   const getAvailableContactTypes = (currentIndex: number) => {
     const usedTypes = formData.contacts
@@ -281,17 +281,10 @@ export default function CreateBagForm({ onSuccess }: Props) {
   ): string | null => {
     switch (type) {
       case 'sms':
-      case 'phone':
       case 'whatsapp':
       case 'signal':
         if (!value.startsWith('+') || value.length < 7) {
           return 'Please enter a valid phone number with country code';
-        }
-        break;
-      case 'telegram':
-      case 'instagram':
-        if (!value.startsWith('@')) {
-          return 'Username should start with @';
         }
         break;
       case 'email': {
@@ -301,6 +294,12 @@ export default function CreateBagForm({ onSuccess }: Props) {
         }
         break;
       }
+      case 'instagram':
+      case 'telegram':
+        if (!value.startsWith('@')) {
+          return 'Username should start with @';
+        }
+        break;
       case 'other':
         if (value.length < 3) {
           return 'Contact information should be at least 3 characters';

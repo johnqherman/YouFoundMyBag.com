@@ -9,7 +9,7 @@ interface ContactInputProps {
   onUpdate: (contact: ContactWithId) => void;
   onRemove?: () => void;
   availableTypes: Array<
-    'sms' | 'signal' | 'whatsapp' | 'telegram' | 'instagram' | 'email' | 'other'
+    'sms' | 'whatsapp' | 'email' | 'instagram' | 'telegram' | 'signal' | 'other'
   >;
   showRemoveButton?: boolean;
 }
@@ -126,11 +126,11 @@ export default function ContactInput({
 
   const getPlaceholder = () => {
     switch (contact.type) {
-      case 'telegram':
-      case 'instagram':
-        return '@username';
       case 'email':
         return 'your@email.com';
+      case 'instagram':
+      case 'telegram':
+        return '@username';
       case 'other':
         return 'Contact information';
       default:
@@ -164,11 +164,11 @@ export default function ContactInput({
           {availableTypes.map((type) => (
             <option key={type} value={type}>
               {type === 'sms' && 'Phone Number'}
-              {type === 'signal' && 'Signal'}
               {type === 'whatsapp' && 'WhatsApp'}
-              {type === 'telegram' && 'Telegram'}
-              {type === 'instagram' && 'Instagram'}
               {type === 'email' && 'Email'}
+              {type === 'instagram' && 'Instagram'}
+              {type === 'telegram' && 'Telegram'}
+              {type === 'signal' && 'Signal'}
               {type === 'other' && 'Other'}
             </option>
           ))}

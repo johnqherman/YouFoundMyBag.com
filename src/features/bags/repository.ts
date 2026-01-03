@@ -149,16 +149,16 @@ function getContactLabel(type: string): string {
   switch (type) {
     case 'sms':
       return 'Phone Number';
-    case 'signal':
-      return 'Signal';
     case 'whatsapp':
       return 'WhatsApp';
-    case 'telegram':
-      return 'Telegram';
-    case 'instagram':
-      return 'Instagram';
     case 'email':
       return 'Email';
+    case 'instagram':
+      return 'Instagram';
+    case 'telegram':
+      return 'Telegram';
+    case 'signal':
+      return 'Signal';
     case 'other':
       return 'Contact';
     default:

@@ -31,11 +31,11 @@ CREATE TABLE public.contacts (
   type VARCHAR(20) NOT NULL CHECK (
     type IN (
       'sms',
-      'signal',
       'whatsapp',
-      'telegram',
-      'instagram',
       'email',
+      'instagram',
+      'telegram',
+      'signal',
       'other'
     )
   ),

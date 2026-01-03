@@ -30,11 +30,11 @@ export interface FinderPageData {
     contact_options: Array<{
       type:
         | 'sms'
-        | 'signal'
         | 'whatsapp'
-        | 'telegram'
-        | 'instagram'
         | 'email'
+        | 'instagram'
+        | 'telegram'
+        | 'signal'
         | 'other';
       label: string;
       value: string;
@@ -46,11 +46,11 @@ export interface FinderPageData {
 export interface Contact {
   type:
     | 'sms'
-    | 'signal'
     | 'whatsapp'
-    | 'telegram'
-    | 'instagram'
     | 'email'
+    | 'instagram'
+    | 'telegram'
+    | 'signal'
     | 'other';
   value: string;
   label?: string;

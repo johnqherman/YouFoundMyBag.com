@@ -26,16 +26,16 @@ export default function ReviewSubmit({
     switch (type) {
       case 'sms':
         return '📞';
-      case 'signal':
-        return '🔐';
       case 'whatsapp':
         return '📱';
-      case 'telegram':
-        return '✈️';
-      case 'instagram':
-        return '📸';
       case 'email':
         return '📧';
+      case 'instagram':
+        return '📸';
+      case 'telegram':
+        return '✈️';
+      case 'signal':
+        return '🔐';
       case 'other':
         return '📞';
       default:

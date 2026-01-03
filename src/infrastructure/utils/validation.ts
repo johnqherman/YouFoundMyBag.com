@@ -3,11 +3,11 @@ import { emailSchema, emailValidationSchema } from './email-validation.js';
 
 export const contactTypeSchema = z.enum([
   'sms',
-  'signal',
   'whatsapp',
-  'telegram',
-  'instagram',
   'email',
+  'instagram',
+  'telegram',
+  'signal',
   'other',
 ]);
 
@@ -33,14 +33,18 @@ export const contactSchema = z
   .refine(
     async (data) => {
       if (data.type === 'sms') return phoneSchema.safeParse(data.value).success;
-      if (data.type === 'telegram')
-        return telegramSchema.safeParse(data.value).success;
+      if (data.type === 'whatsapp')
+        return phoneSchema.safeParse(data.value).success;
       if (data.type === 'email') {
         const result = await emailValidationSchema.safeParseAsync(data.value);
         return result.success;
       }
       if (data.type === 'instagram')
         return data.value.startsWith('@') && data.value.length >= 2;
+      if (data.type === 'telegram')
+        return telegramSchema.safeParse(data.value).success;
+      if (data.type === 'signal')
+        return phoneSchema.safeParse(data.value).success;
       return data.value.length >= 1 && data.value.length <= 255;
     },
     { message: 'Invalid contact value for the specified type' }

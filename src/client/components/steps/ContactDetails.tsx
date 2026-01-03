@@ -17,7 +17,7 @@ interface ContactDetailsProps {
   getAvailableContactTypes: (
     currentIndex: number
   ) => Array<
-    'sms' | 'signal' | 'whatsapp' | 'telegram' | 'instagram' | 'email' | 'other'
+    'sms' | 'whatsapp' | 'email' | 'instagram' | 'telegram' | 'signal' | 'other'
   >;
   error?: string | null;
 }
