@@ -1,5 +1,6 @@
 import { pool, withTransaction } from '../../infrastructure/database/index.js';
 import type { CreateBagRequest } from '../../client/types/index.js';
+import { formatContactValue } from '../../infrastructure/utils/validation.js';
 
 export interface Bag {
   id: string;
@@ -21,11 +22,11 @@ export interface Contact {
   bag_id: string;
   type:
     | 'sms'
-    | 'signal'
     | 'whatsapp'
-    | 'telegram'
-    | 'instagram'
     | 'email'
+    | 'instagram'
+    | 'telegram'
+    | 'signal'
     | 'other';
   value: string;
   is_primary?: boolean;
@@ -115,7 +116,7 @@ export async function getFinderPageData(shortId: string) {
       label: string | null;
     }) => ({
       type: contact.type,
-      value: contact.value,
+      value: formatContactValue(contact.type, contact.value),
       label: contact.label || getContactLabel(contact.type),
       is_primary: contact.is_primary || false,
     })

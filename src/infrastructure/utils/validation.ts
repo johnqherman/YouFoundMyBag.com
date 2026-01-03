@@ -19,9 +19,9 @@ export const phoneSchema = z
 
 export const telegramSchema = z
   .string()
-  .min(5)
-  .max(32)
-  .regex(/^@[A-Za-z0-9_]{4,31}$/);
+  .min(4)
+  .max(31)
+  .regex(/^[A-Za-z0-9_]{4,31}$/);
 
 export const contactSchema = z
   .object({
@@ -40,7 +40,11 @@ export const contactSchema = z
         return result.success;
       }
       if (data.type === 'instagram')
-        return data.value.startsWith('@') && data.value.length >= 2;
+        return (
+          data.value.length >= 1 &&
+          data.value.length <= 30 &&
+          /^[A-Za-z0-9_.]{1,30}$/.test(data.value)
+        );
       if (data.type === 'telegram')
         return telegramSchema.safeParse(data.value).success;
       if (data.type === 'signal')
@@ -100,3 +104,14 @@ export const magicLinkSchema = z.object({
 export const verifyMagicLinkSchema = z.object({
   magic_token: z.string().min(32).max(128),
 });
+
+export function formatContactValue(type: string, value: string): string {
+  if (
+    (type === 'instagram' || type === 'telegram') &&
+    value &&
+    !value.startsWith('@')
+  ) {
+    return `@${value}`;
+  }
+  return value;
+}

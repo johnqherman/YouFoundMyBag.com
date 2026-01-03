@@ -86,11 +86,7 @@ export default function ContactInput({
 
     const errors: string[] = [];
     if (newValue.trim()) {
-      if (contact.type === 'telegram' || contact.type === 'instagram') {
-        if (!newValue.startsWith('@')) {
-          errors.push('Username should start with @');
-        }
-      } else if (contact.type === 'email') {
+      if (contact.type === 'email') {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(newValue)) {
           errors.push('Please enter a valid email address');
@@ -130,7 +126,7 @@ export default function ContactInput({
         return 'your@email.com';
       case 'instagram':
       case 'telegram':
-        return '@username';
+        return 'username';
       case 'other':
         return 'Contact information';
       default:
@@ -186,9 +182,13 @@ export default function ContactInput({
         )}
 
         {isPhoneType(contact.type) ? (
-          <div ref={containerRef} className="phone-input-container">
+          <div
+            key={`phone-${contact.id}`}
+            ref={containerRef}
+            className="phone-input-container"
+          >
             <IntlTelInput
-              key={`phone-${contact.id}`}
+              key={`phone-input-${contact.id}`}
               ref={(instance) => {
                 intlTelInputInstanceRef.current = instance;
               }}
@@ -219,8 +219,27 @@ export default function ContactInput({
               }}
             />
           </div>
+        ) : contact.type === 'instagram' || contact.type === 'telegram' ? (
+          <div
+            key={`social-${contact.id}`}
+            className={`relative mb-3 ${errors.length > 0 ? 'border-red-500' : ''}`}
+          >
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none">
+              @
+            </div>
+            <input
+              key={`social-input-${contact.id}`}
+              type={getInputType()}
+              placeholder={getPlaceholder()}
+              value={contact.value}
+              onChange={(e) => handleNonPhoneValueChange(e.target.value)}
+              className={`input-field pl-8 ${errors.length > 0 ? 'border-red-500' : ''}`}
+              required
+            />
+          </div>
         ) : (
           <input
+            key={`text-${contact.id}`}
             type={getInputType()}
             placeholder={getPlaceholder()}
             value={contact.value}

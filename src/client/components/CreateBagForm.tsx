@@ -294,12 +294,6 @@ export default function CreateBagForm({ onSuccess }: Props) {
         }
         break;
       }
-      case 'instagram':
-      case 'telegram':
-        if (!value.startsWith('@')) {
-          return 'Username should start with @';
-        }
-        break;
       case 'other':
         if (value.length < 3) {
           return 'Contact information should be at least 3 characters';

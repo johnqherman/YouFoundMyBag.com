@@ -1,4 +1,5 @@
 import { ContactWithId } from '../../types';
+import { formatContactValue } from '../../../infrastructure/utils/validation';
 
 interface ReviewSubmitProps {
   formData: {
@@ -118,7 +119,9 @@ export default function ReviewSubmit({
                       </span>
                     )}
                   </span>
-                  <span className="text-white">{contact.value}</span>
+                  <span className="text-white">
+                    {formatContactValue(contact.type, contact.value)}
+                  </span>
                 </div>
               ))}
           </div>
