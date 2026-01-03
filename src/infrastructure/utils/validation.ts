@@ -31,12 +31,14 @@ export const contactSchema = z
     is_primary: z.boolean().optional(),
   })
   .refine(
-    (data) => {
+    async (data) => {
       if (data.type === 'sms') return phoneSchema.safeParse(data.value).success;
       if (data.type === 'telegram')
         return telegramSchema.safeParse(data.value).success;
-      if (data.type === 'email')
-        return emailValidationSchema.safeParse(data.value).success;
+      if (data.type === 'email') {
+        const result = await emailValidationSchema.safeParseAsync(data.value);
+        return result.success;
+      }
       if (data.type === 'instagram')
         return data.value.startsWith('@') && data.value.length >= 2;
       return data.value.length >= 1 && data.value.length <= 255;
