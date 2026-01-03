@@ -206,7 +206,7 @@ export default function ContactInput({
                 initialCountry: 'us',
               }}
               inputProps={{
-                className: `input-field mb-3 ${!isPhoneValid && phoneNumber ? 'border-red-500' : ''}`,
+                className: `input-field ${!isPhoneValid && phoneNumber ? 'border-red-500' : ''}`,
                 required: true,
                 onBlur: () => {
                   if (isMountedRef.current) {
