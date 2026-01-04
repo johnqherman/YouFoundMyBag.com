@@ -35,13 +35,13 @@ export default function ContactPreference({
             />
             <div className="flex-1">
               <div className="font-medium text-white">
-                Secure messaging (recommended)
+                Secure Messaging (Recommended)
               </div>
               <div className="text-sm text-neutral-400 mt-1">
-                • Protect your identity while messaging
+                • Message privately without revealing personal contact details
                 <br />
-                • Other contact methods can also be shared
-                <br />• Email needed for dashboard access
+                • Option to share public contact info if you choose
+                <br />• Email required for inbox access
               </div>
             </div>
           </label>
@@ -55,15 +55,12 @@ export default function ContactPreference({
               className="mt-1"
             />
             <div className="flex-1">
-              <div className="font-medium text-white">Direct contact only</div>
+              <div className="font-medium text-white">Direct Contact Only</div>
               <div className="text-sm text-neutral-400 mt-1">
-                • Info is fully public for contact
+                • Public contact details only
                 <br />
-                • No email needed
-                <br />• ⚠️{' '}
-                <span className="text-amber-400">
-                  View risks and requirements
-                </span>
+                • No secure inbox
+                <br />• No email required
               </div>
             </div>
           </label>

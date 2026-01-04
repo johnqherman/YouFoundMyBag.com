@@ -71,7 +71,7 @@ export default function ContactDetails({
         <div className="flex items-center justify-between mb-2">
           <label className="block text-sm font-medium">
             {formData.secure_messaging_enabled
-              ? 'Additional contact methods (optional)'
+              ? 'Direct contact methods (optional)'
               : 'Contact methods *'}
           </label>
           {formData.contacts.length > 0 &&
@@ -96,28 +96,21 @@ export default function ContactDetails({
           <p className="text-xs">
             ⚠️{' '}
             <strong>
-              {formData.secure_messaging_enabled
-                ? 'These will be fully visible to anyone who finds your item.'
-                : 'All information below will be fully visible to anyone who finds your item.'}
+              {formData.secure_messaging_enabled &&
+                'Fully public. Anyone who finds your item can see these.'}
             </strong>
-            <br />
-            {formData.secure_messaging_enabled &&
-              'Finders can always reach you through our secure private messaging system.'}
           </p>
         </div>
 
         <div className="space-y-3">
           {formData.contacts.length === 0 ? (
             <div className="text-center py-6 bg-neutral-900 rounded-xl border-2 border-dashed border-neutral-700">
-              <p className="text-neutral-400 text-sm mb-3">
-                No contact methods added
-              </p>
               <button
                 type="button"
                 onClick={addContact}
                 className="text-sm text-blue-400 hover:text-blue-300"
               >
-                + Add your first contact method
+                + Add direct contact method
               </button>
             </div>
           ) : (

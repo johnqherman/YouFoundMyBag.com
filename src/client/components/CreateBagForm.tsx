@@ -5,7 +5,6 @@ import type {
   CreateBagResponse,
   ContactWithId,
 } from '../types/index';
-import DirectContactWarning from './DirectContactWarning';
 import StepIndicator from './StepIndicator';
 import BasicInfo from './steps/BasicInfo';
 import { emailSchema } from '../../infrastructure/utils/validation';
@@ -38,8 +37,6 @@ export default function CreateBagForm({ onSuccess }: Props) {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showDirectContactWarning, setShowDirectContactWarning] =
-    useState(false);
 
   const stepNames = [
     'Basic Information',
@@ -105,24 +102,20 @@ export default function CreateBagForm({ onSuccess }: Props) {
 
   const handleContactPreferenceChange = (useSecureMessaging: boolean) => {
     if (!useSecureMessaging) {
-      setShowDirectContactWarning(true);
+      setFormData((prev) => ({
+        ...prev,
+        secure_messaging_enabled: false,
+        owner_email: '',
+      }));
+      if (formData.contacts.length === 0) {
+        addContact();
+      }
     } else {
       setFormData((prev) => ({
         ...prev,
         secure_messaging_enabled: true,
+        contacts: [],
       }));
-    }
-  };
-
-  const handleDirectContactConfirm = () => {
-    setFormData((prev) => ({
-      ...prev,
-      secure_messaging_enabled: false,
-      owner_email: '',
-    }));
-    setShowDirectContactWarning(false);
-    if (formData.contacts.length === 0) {
-      addContact();
     }
   };
 
@@ -135,7 +128,7 @@ export default function CreateBagForm({ onSuccess }: Props) {
       case 3: {
         if (formData.secure_messaging_enabled) {
           if (!formData.owner_email.trim()) {
-            setError('Your email address is required for secure messaging');
+            setError('An email address is required for secure messaging');
             return false;
           }
           const result = emailSchema.safeParse(formData.owner_email.trim());
@@ -192,10 +185,6 @@ export default function CreateBagForm({ onSuccess }: Props) {
     setFormData((prev) => ({ ...prev, ...updates }));
   };
 
-  const handleDirectContactCancel = () => {
-    setShowDirectContactWarning(false);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -204,7 +193,7 @@ export default function CreateBagForm({ onSuccess }: Props) {
     try {
       if (formData.secure_messaging_enabled) {
         if (!formData.owner_email.trim()) {
-          setError('Your email address is required for secure messaging');
+          setError('An email address is required for secure messaging');
           return;
         }
 
@@ -374,12 +363,6 @@ export default function CreateBagForm({ onSuccess }: Props) {
       <form onSubmit={handleSubmit} className="space-y-6">
         {renderCurrentStep()}
       </form>
-
-      <DirectContactWarning
-        isOpen={showDirectContactWarning}
-        onConfirm={handleDirectContactConfirm}
-        onCancel={handleDirectContactCancel}
-      />
     </div>
   );
 }
