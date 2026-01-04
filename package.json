@@ -15,7 +15,7 @@
     "start": "node dist/server.js",
     "lint": "eslint src --ext .ts,.tsx",
     "typecheck": "tsc --noEmit",
-    "db:init": "psql ${DATABASE_URL:-postgresql://localhost:5432/youfoundmybag_dev} < src/database/schema.sql"
+    "db:init": "psql ${DATABASE_URL:-postgresql://localhost:5432/youfoundmybag_dev} < database/schema.sql"
   },
   "dependencies": {
     "@types/dompurify": "^3.0.5",
