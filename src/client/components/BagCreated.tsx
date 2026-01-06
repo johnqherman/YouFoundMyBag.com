@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { CreateBagResponse } from '../types/index.js';
-import { TIME_CONSTANTS as t } from '../constants/timeConstants';
+import { TIME_MS as t } from '../constants/timeConstants.js';
 
 interface Props {
   bagData: CreateBagResponse;

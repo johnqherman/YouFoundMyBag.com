@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { TIME_CONSTANTS as t } from '../constants/timeConstants';
+import { TIME_MS as t } from '../constants/timeConstants.js';
 
 export default function AuthVerifyPage() {
   const [searchParams] = useSearchParams();

@@ -1,6 +1,6 @@
 import { Pool, PoolClient } from 'pg';
 import { config } from '../config/index.js';
-import { TIME_CONSTANTS as t } from '../../client/constants/timeConstants.js';
+import { TIME_MS as t } from '../../client/constants/timeConstants.js';
 
 export const pool = new Pool({
   connectionString: config.DATABASE_URL,

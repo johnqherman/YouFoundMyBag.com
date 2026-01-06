@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import type { OwnerSession } from '../../client/types/index.js';
 import { sendMagicLinkEmail } from '../../infrastructure/email/index.js';
 import * as authRepository from './repository.js';
-import { TIME_CONSTANTS as t } from 'client/constants/timeConstants.js';
+import { TIME_MS as t } from 'client/constants/timeConstants.js';
 
 export async function generateMagicLinkToken(
   email: string,

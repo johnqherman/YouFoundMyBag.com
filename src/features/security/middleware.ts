@@ -3,15 +3,18 @@ import helmet from 'helmet';
 import { pool } from '../../infrastructure/database/index.js';
 import crypto from 'crypto';
 import type { Request, Response, NextFunction } from 'express';
-import { TIME_CONSTANTS as t } from 'client/constants/timeConstants.js';
+import {
+  TIME_MS as tm,
+  TIME_SECONDS as ts,
+} from 'client/constants/timeConstants.js';
 
 export const basicRateLimit = rateLimit({
-  windowMs: t.FIFTEEN_MINUTES,
+  windowMs: tm.FIFTEEN_MINUTES,
   max: 100,
   message: {
     error: 'Rate limit exceeded',
     message: 'Too many requests, please try again later',
-    retry_after: 15 * 60,
+    retry_after: ts.FIFTEEN_MINUTES,
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -19,23 +22,23 @@ export const basicRateLimit = rateLimit({
 });
 
 export const createBagRateLimit = rateLimit({
-  windowMs: t.ONE_HOUR,
+  windowMs: tm.ONE_HOUR,
   max: 5,
   message: {
     error: 'Rate limit exceeded',
     message: 'Too many bags created, please try again later',
-    retry_after: 60 * 60,
+    retry_after: ts.ONE_HOUR,
   },
   skip: () => process.env.NODE_ENV === 'development',
 });
 
 export const sendMessageRateLimit = rateLimit({
-  windowMs: t.FIVE_MINUTES,
+  windowMs: tm.FIVE_MINUTES,
   max: 3,
   message: {
     error: 'Rate limit exceeded',
     message: 'Too many messages sent, please try again later',
-    retry_after: 5 * 60,
+    retry_after: ts.FIVE_MINUTES,
   },
   skip: () => process.env.NODE_ENV === 'development',
 });
