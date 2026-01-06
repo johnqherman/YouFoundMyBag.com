@@ -82,6 +82,8 @@ export interface Conversation {
   status: 'active' | 'resolved' | 'archived';
   finder_email?: string;
   finder_display_name?: string;
+  finder_notifications_sent: number;
+  owner_notifications_sent: number;
   last_message_at: string;
   created_at: string;
 }

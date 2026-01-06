@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import LoadingSpinner from '../components/LoadingSpinner';
 import CharacterLimitTextArea from '../components/CharacterLimitTextArea';
@@ -37,6 +37,8 @@ export default function ConversationPage() {
   const [replyMessage, setReplyMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [resolving, setResolving] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const replyInputRef = useRef<HTMLTextAreaElement>(null);
 
   const loadConversation = useCallback(async () => {
     const token = localStorage.getItem('owner_session_token');
@@ -108,6 +110,7 @@ export default function ConversationPage() {
 
       setReplyMessage('');
       await loadConversation();
+      setTimeout(() => replyInputRef.current?.focus(), 0);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to send reply');
     } finally {
@@ -172,6 +175,16 @@ export default function ConversationPage() {
       loadConversation();
     }
   }, [conversationId, loadConversation]);
+
+  useEffect(() => {
+    if (!conversation?.messages.length) return;
+
+    const timeout = setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+    }, 0);
+
+    return () => clearTimeout(timeout);
+  }, [conversation?.messages.length]);
 
   if (loading) {
     return (
@@ -315,6 +328,7 @@ export default function ConversationPage() {
               </p>
             </div>
           ))}
+          <div ref={messagesEndRef} />
         </div>
 
         {conversation.conversation.status === 'active' && (
@@ -322,6 +336,7 @@ export default function ConversationPage() {
             <h3 className="text-lg font-semibold mb-4">Send a Reply</h3>
             <div onKeyDown={handleKeyDown}>
               <CharacterLimitTextArea
+                ref={replyInputRef}
                 value={replyMessage}
                 onChange={setReplyMessage}
                 maxLength={300}

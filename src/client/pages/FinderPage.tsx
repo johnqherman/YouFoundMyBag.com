@@ -232,6 +232,7 @@ export default function FinderPage() {
           shortId={shortId}
           onClose={() => setShowContactModal(false)}
           ownerName={data.owner_name}
+          bagName={data.bag_name}
         />
       )}
     </div>

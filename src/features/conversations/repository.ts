@@ -103,6 +103,8 @@ export async function getConversationsByOwnerEmail(
       status: row.status,
       finder_email: row.finder_email,
       finder_display_name: row.finder_display_name,
+      finder_notifications_sent: row.finder_notifications_sent,
+      owner_notifications_sent: row.owner_notifications_sent,
       last_message_at: row.last_message_at,
       created_at: row.created_at,
     },
@@ -153,6 +155,8 @@ export async function getConversationById(
       status: row.status,
       finder_email: row.finder_email,
       finder_display_name: row.finder_display_name,
+      finder_notifications_sent: row.finder_notifications_sent,
+      owner_notifications_sent: row.owner_notifications_sent,
       last_message_at: row.last_message_at,
       created_at: row.created_at,
     },
@@ -202,4 +206,46 @@ export async function getUnreadMessageCount(bagId: string): Promise<number> {
   );
 
   return parseInt(result.rows[0].unread_count);
+}
+
+export async function getNotificationCounters(conversationId: string): Promise<{
+  finder_notifications_sent: number;
+  owner_notifications_sent: number;
+}> {
+  const result = await pool.query(
+    'SELECT finder_notifications_sent, owner_notifications_sent FROM conversations WHERE id = $1',
+    [conversationId]
+  );
+
+  if (result.rows.length === 0) {
+    throw new Error('Conversation not found');
+  }
+
+  return result.rows[0];
+}
+
+export async function incrementNotificationCounter(
+  conversationId: string,
+  recipientType: 'finder' | 'owner'
+): Promise<void> {
+  await pool.query(
+    `UPDATE conversations
+     SET finder_notifications_sent = CASE WHEN $2 = 'finder' THEN finder_notifications_sent + 1 ELSE finder_notifications_sent END,
+         owner_notifications_sent = CASE WHEN $2 = 'owner' THEN owner_notifications_sent + 1 ELSE owner_notifications_sent END
+     WHERE id = $1`,
+    [conversationId, recipientType]
+  );
+}
+
+export async function resetNotificationCounter(
+  conversationId: string,
+  senderType: 'finder' | 'owner'
+): Promise<void> {
+  await pool.query(
+    `UPDATE conversations
+     SET finder_notifications_sent = CASE WHEN $2 = 'finder' THEN 0 ELSE finder_notifications_sent END,
+         owner_notifications_sent = CASE WHEN $2 = 'owner' THEN 0 ELSE owner_notifications_sent END
+     WHERE id = $1`,
+    [conversationId, senderType]
+  );
 }

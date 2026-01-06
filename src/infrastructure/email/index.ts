@@ -5,6 +5,7 @@ import {
   generateFinderMagicLinkToken,
 } from '../../features/auth/service.js';
 import { secureEmailContent } from '../security/sanitization.js';
+import { lowercaseBagName } from '../utils/formatting.js';
 
 let transporter: nodemailer.Transporter | null = null;
 
@@ -127,11 +128,13 @@ export async function sendMagicLinkEmail({
   magicLinkToken,
   conversationId,
   bagIds: _bagIds,
+  bagName,
 }: {
   email: string;
   magicLinkToken: string;
   conversationId?: string;
   bagIds?: string[];
+  bagName?: string;
 }): Promise<void> {
   const emailer = getTransporter();
   if (!emailer) {
@@ -148,19 +151,21 @@ export async function sendMagicLinkEmail({
     `DEBUG: Generated owner magic link URL: ${magicLinkUrl.substring(0, 80)}...`
   );
 
+  const bagType = lowercaseBagName(bagName);
+
   const subject = conversationId
-    ? 'Someone found your bag! Click to respond'
+    ? `Someone found your ${bagType}! Click to respond`
     : 'Access your YouFoundMyBag dashboard';
 
   const textBody = `
-${conversationId ? '🎒 Great news! Someone found your bag and wants to return it.' : 'Access your YouFoundMyBag dashboard'}
+${conversationId ? `🎒 Great news! Someone found your ${bagType} and wants to return it.` : 'Access your YouFoundMyBag dashboard'}
 
 Click this secure link to ${conversationId ? 'respond to the finder' : 'access your dashboard'}:
 ${magicLinkUrl}
 
 This link will expire in 24 hours.
 
-${conversationId ? 'You can securely communicate with the finder to arrange the return of your bag.' : 'You can view all your bags and manage any messages from finders.'}
+${conversationId ? `You can securely communicate with the finder to arrange the return of your ${bagType}.` : 'You can view all your bags and manage any messages from finders.'}
 
 If you didn't request this access, you can safely ignore this email.
 
@@ -171,14 +176,14 @@ YouFoundMyBag.com - Privacy-first lost item recovery
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="text-align: center; margin-bottom: 30px;">
         <h1 style="color: #2563eb; font-size: 24px;">
-          ${conversationId ? '🎒 Someone found your bag!' : '🔐 Access your dashboard'}
+          ${conversationId ? `🎒 Someone found your ${bagType}!` : '🔐 Access your dashboard'}
         </h1>
       </div>
 
       <p style="color: #4b5563; margin-bottom: 20px;">
         ${
           conversationId
-            ? 'Great news! Someone found your bag and wants to return it. Click the secure link below to respond to the finder.'
+            ? `Great news! Someone found your ${bagType} and wants to return it. Click the secure link below to respond to the finder.`
             : 'Click the secure link below to view all your bags and manage any messages from finders.'
         }
       </p>
@@ -780,7 +785,8 @@ export async function sendConversationResolvedNotification({
   const dashboardUrl = getDashboardUrl();
   const magicLinkUrl = `${dashboardUrl}/finder/conversation/${conversationId}?token=${magicLinkToken}`;
 
-  const { content: safeBagName } = secureEmailContent(names.bagName || '');
+  const lowercasedBagName = lowercaseBagName(names.bagName);
+  const { content: safeBagName } = secureEmailContent(lowercasedBagName);
   const { content: safeOwnerName } = secureEmailContent(names.ownerName || '');
 
   const bagDisplayName = names.bagName

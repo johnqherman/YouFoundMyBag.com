@@ -42,7 +42,8 @@ export async function generateMagicLinkToken(
 export async function generateMagicLink(
   email: string,
   conversationId?: string,
-  bagIds?: string[]
+  bagIds?: string[],
+  bagName?: string
 ): Promise<{ magicLinkToken: string; expiresAt: Date }> {
   const { magicLinkToken, expiresAt } = await generateMagicLinkToken(
     email,
@@ -61,6 +62,7 @@ export async function generateMagicLink(
       magicLinkToken,
       conversationId,
       bagIds: targetBagIds,
+      bagName,
     });
     console.log(`Magic link sent to ${email}`);
   } catch (emailError) {

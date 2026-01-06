@@ -68,6 +68,8 @@ CREATE TABLE public.conversations (
   status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'resolved', 'archived')),
   finder_email VARCHAR(254),
   finder_display_name VARCHAR(30),
+  finder_notifications_sent INTEGER DEFAULT 0 NOT NULL,
+  owner_notifications_sent INTEGER DEFAULT 0 NOT NULL,
   last_message_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

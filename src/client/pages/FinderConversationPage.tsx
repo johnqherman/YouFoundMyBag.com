@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import LoadingSpinner from '../components/LoadingSpinner';
 import CharacterLimitTextArea from '../components/CharacterLimitTextArea';
@@ -36,6 +36,8 @@ export default function FinderConversationPage() {
   const [replyMessage, setReplyMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [authenticating, setAuthenticating] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const replyInputRef = useRef<HTMLTextAreaElement>(null);
 
   const loadConversation = useCallback(async () => {
     const token = localStorage.getItem('finder_session_token');
@@ -148,6 +150,7 @@ export default function FinderConversationPage() {
 
       setReplyMessage('');
       await loadConversation();
+      setTimeout(() => replyInputRef.current?.focus(), 0);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to send reply');
     } finally {
@@ -185,6 +188,16 @@ export default function FinderConversationPage() {
     authenticateWithMagicLink,
     loadConversation,
   ]);
+
+  useEffect(() => {
+    if (!conversation?.messages.length) return;
+
+    const timeout = setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+    }, 0);
+
+    return () => clearTimeout(timeout);
+  }, [conversation?.messages.length]);
 
   if (loading || authenticating) {
     return (
@@ -325,6 +338,7 @@ export default function FinderConversationPage() {
               </p>
             </div>
           ))}
+          <div ref={messagesEndRef} />
         </div>
 
         {conversation.conversation.status === 'active' && (
@@ -337,6 +351,7 @@ export default function FinderConversationPage() {
             </h3>
             <div onKeyDown={handleKeyDown}>
               <CharacterLimitTextArea
+                ref={replyInputRef}
                 value={replyMessage}
                 onChange={setReplyMessage}
                 maxLength={300}

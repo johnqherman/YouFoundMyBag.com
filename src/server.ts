@@ -18,6 +18,7 @@ import { finderRoutes } from './features/conversations/finderRoutes.js';
 import { authRoutes } from './features/auth/index.js';
 
 const app = express();
+
 if (config.NODE_ENV === 'production') {
   app.set('trust proxy', true);
 }
@@ -35,14 +36,6 @@ app.use(
 app.use(basicRateLimit);
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
-
-app.get('/health', (req, res) => {
-  res.json({
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-  });
-});
 
 app.use('/api/bags', createBagRateLimit, dbRateLimit(5, 60), bagRoutes);
 app.use('/api/bags', sendMessageRateLimit, dbRateLimit(3, 5), messagingRoutes);

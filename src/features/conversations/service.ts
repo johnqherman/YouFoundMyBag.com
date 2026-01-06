@@ -73,6 +73,21 @@ export function analyzeMessageContext(
   };
 }
 
+async function shouldSendNotification(
+  conversationId: string,
+  senderType: 'finder' | 'owner'
+): Promise<boolean> {
+  const counters =
+    await conversationRepository.getNotificationCounters(conversationId);
+
+  const recipientCounter =
+    senderType === 'finder'
+      ? counters.owner_notifications_sent
+      : counters.finder_notifications_sent;
+
+  return recipientCounter < 2;
+}
+
 export function getMessageContextLabel(
   context: MessageContext,
   senderType: 'finder' | 'owner',
@@ -130,7 +145,18 @@ export async function startConversation(
 
   if (bag.owner_email) {
     try {
-      await generateMagicLink(bag.owner_email, conversation.id, [bag.id]);
+      await generateMagicLink(
+        bag.owner_email,
+        conversation.id,
+        [bag.id],
+        bag.bag_name
+      );
+
+      await conversationRepository.incrementNotificationCounter(
+        conversation.id,
+        'owner'
+      );
+
       console.log(
         `Magic link sent to owner for bag ${shortId}, conversation ${conversation.id}`
       );
@@ -172,8 +198,17 @@ export async function sendReply(
     throw new Error('Conversation not found');
   }
 
+  if (conversationThread.conversation.status === 'resolved') {
+    throw new Error('Cannot send messages in a resolved conversation');
+  }
+
   const messageContext = analyzeMessageContext(
     conversationThread.messages,
+    senderType
+  );
+
+  await conversationRepository.resetNotificationCounter(
+    conversationId,
     senderType
   );
 
@@ -183,56 +218,71 @@ export async function sendReply(
     replyData.message_content
   );
 
-  try {
-    const names: NameInfo = {
-      ownerName: conversationThread.bag.owner_name,
-      bagName: conversationThread.bag.bag_name,
-      finderName: conversationThread.conversation.finder_display_name,
-    };
+  const shouldNotify = await shouldSendNotification(conversationId, senderType);
 
-    if (
-      senderType === 'owner' &&
-      conversationThread.conversation.finder_email
-    ) {
-      const senderName = getContextualSenderName(
-        senderType,
-        names,
-        messageContext.context
-      );
-      await sendContextualFinderNotification({
-        finderEmail: conversationThread.conversation.finder_email,
-        senderName,
-        message: replyData.message_content,
-        conversationId,
-        context: messageContext.context,
-        names,
-      });
-    } else if (senderType === 'finder') {
-      const bag = await getBagByShortId(conversationThread.bag.short_id);
-      if (bag?.owner_email) {
+  if (shouldNotify) {
+    try {
+      const names: NameInfo = {
+        ownerName: conversationThread.bag.owner_name,
+        bagName: conversationThread.bag.bag_name,
+        finderName: conversationThread.conversation.finder_display_name,
+      };
+
+      if (
+        senderType === 'owner' &&
+        conversationThread.conversation.finder_email
+      ) {
         const senderName = getContextualSenderName(
           senderType,
           names,
           messageContext.context
         );
-        await sendContextualOwnerNotification({
-          ownerEmail: bag.owner_email,
+        await sendContextualFinderNotification({
+          finderEmail: conversationThread.conversation.finder_email,
           senderName,
           message: replyData.message_content,
           conversationId,
-          bagIds: [bag.id],
           context: messageContext.context,
           names,
         });
+      } else if (senderType === 'finder') {
+        const bag = await getBagByShortId(conversationThread.bag.short_id);
+        if (bag?.owner_email) {
+          const senderName = getContextualSenderName(
+            senderType,
+            names,
+            messageContext.context
+          );
+          await sendContextualOwnerNotification({
+            ownerEmail: bag.owner_email,
+            senderName,
+            message: replyData.message_content,
+            conversationId,
+            bagIds: [bag.id],
+            context: messageContext.context,
+            names,
+          });
+        }
       }
+
+      const recipientType = senderType === 'finder' ? 'owner' : 'finder';
+      await conversationRepository.incrementNotificationCounter(
+        conversationId,
+        recipientType
+      );
+
+      console.log(
+        `Contextual ${messageContext.context} notification sent for conversation ${conversationId}`
+      );
+    } catch (emailError) {
+      console.error(
+        `Failed to send ${messageContext.context} email for conversation ${conversationId}:`,
+        emailError
+      );
     }
+  } else {
     console.log(
-      `Contextual ${messageContext.context} notification sent for conversation ${conversationId}`
-    );
-  } catch (emailError) {
-    console.error(
-      `Failed to send ${messageContext.context} email for conversation ${conversationId}:`,
-      emailError
+      `Notification limit reached for conversation ${conversationId}, skipping email`
     );
   }
 

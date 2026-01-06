@@ -1,4 +1,5 @@
 import type { MessageContext } from '../../features/conversations/service.js';
+import { lowercaseBagName } from './formatting';
 
 export interface PersonalizationContext {
   context: MessageContext;
@@ -90,7 +91,7 @@ export function getContextualSubject(
 
   if (context === 'initial') {
     if (senderType === 'finder') {
-      const bagType = names.bagName || 'bag';
+      const bagType = lowercaseBagName(names.bagName);
       return `Someone found your ${bagType}!`;
     } else {
       return `The bag owner responded to you!`;
@@ -108,8 +109,8 @@ export function getContextualSubject(
 
   if (context === 'follow-up') {
     return senderType === 'finder'
-      ? `${senderName} sent another message about your ${bagReference}`
-      : `${senderName} sent you another message`;
+      ? `${senderName} sent you another message about your ${lowercaseBagName(bagReference)}!`
+      : `${senderName} sent you another message!`;
   }
 
   return `${senderName} replied to your message!`;
@@ -123,7 +124,7 @@ export function getContextualGreeting(
 
   if (context === 'initial') {
     if (senderType === 'finder') {
-      const bagType = names.bagName || 'bag';
+      const bagType = lowercaseBagName(names.bagName);
       return `🎒 Someone found your ${bagType}!`;
     } else {
       return `📬 The bag owner responded!`;
@@ -149,7 +150,7 @@ export function getContextualDescription(
 
   if (context === 'initial') {
     if (senderType === 'finder') {
-      const bagType = names.bagName || 'bag';
+      const bagType = lowercaseBagName(names.bagName);
       return `Great news! Someone found your ${bagType} and wants to return it. Click the secure link below to respond to the finder.`;
     } else {
       return 'The bag owner responded to your message. Click the secure link below to continue the conversation and arrange the bag return.';
@@ -159,7 +160,7 @@ export function getContextualDescription(
   const senderName = getContextualSenderName(senderType, names, context);
 
   if (context === 'follow-up') {
-    const bagType = names.bagName || 'bag';
+    const bagType = lowercaseBagName(names.bagName);
     return senderType === 'finder'
       ? `${senderName} sent you another message about your ${bagType}. Click the secure link below to view the message and respond.`
       : `${senderName} sent you a follow-up message. Click the secure link below to continue the conversation.`;

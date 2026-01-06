@@ -3,10 +3,12 @@ import { api } from '../utils/api';
 import CharacterLimitTextArea from './CharacterLimitTextArea';
 import PrivacyWarning from './PrivacyWarning';
 import { emailSchema } from '../../infrastructure/utils/validation';
+import { lowercaseBagName } from '../../infrastructure/utils/formatting';
 
 interface Props {
   shortId: string;
   ownerName?: string;
+  bagName?: string;
   onClose: () => void;
 }
 
@@ -19,7 +21,12 @@ declare global {
   }
 }
 
-export default function ContactModal({ shortId, ownerName, onClose }: Props) {
+export default function ContactModal({
+  shortId,
+  ownerName,
+  bagName,
+  onClose,
+}: Props) {
   const [message, setMessage] = useState('');
   const [senderInfo, setSenderInfo] = useState('');
   const [senderName, setSenderName] = useState('');
@@ -174,7 +181,7 @@ export default function ContactModal({ shortId, ownerName, onClose }: Props) {
               value={message}
               onChange={setMessage}
               maxLength={300}
-              placeholder="Hi! I found your bag. Let me know how to return it."
+              placeholder={`Hi! I found your ${lowercaseBagName(bagName)}. Let me know how to return it.`}
               rows={4}
               required
               variant="light"
