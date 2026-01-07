@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import { config } from './infrastructure/config/index.js';
+import { logger } from './infrastructure/logger/index.js';
 import { initializeDatabase } from './infrastructure/database/index.js';
 import {
   basicRateLimit,
@@ -71,7 +72,7 @@ app.use(
     res: express.Response,
     _next: express.NextFunction
   ) => {
-    console.error('Unhandled error:', err);
+    logger.error('Unhandled error:', err);
     res.status(500).json({
       error: 'Internal server error',
       message:
@@ -87,25 +88,25 @@ async function startServer() {
     await initializeDatabase();
 
     app.listen(config.PORT, () => {
-      console.log(`Server running on port ${config.PORT}`);
-      console.log(`Environment: ${config.NODE_ENV}`);
-      console.log(
+      logger.info(`Server running on port ${config.PORT}`);
+      logger.info(`Environment: ${config.NODE_ENV}`);
+      logger.info(
         `Database: ${config.DATABASE_URL ? 'configured' : 'using default'}`
       );
     });
   } catch (error) {
-    console.error('Failed to start server:', error);
+    logger.error('Failed to start server:', error);
     process.exit(1);
   }
 }
 
 process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully');
+  logger.info('SIGTERM received, shutting down gracefully');
   process.exit(0);
 });
 
 process.on('SIGINT', () => {
-  console.log('SIGINT received, shutting down gracefully');
+  logger.info('SIGINT received, shutting down gracefully');
   process.exit(0);
 });
 

@@ -1,6 +1,7 @@
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import { pool } from '../../infrastructure/database/index.js';
+import { logger } from '../../infrastructure/logger/index.js';
 import crypto from 'crypto';
 import type { Request, Response, NextFunction } from 'express';
 import {
@@ -98,7 +99,7 @@ export function dbRateLimit(maxRequests: number, windowMinutes: number) {
 
       return next();
     } catch (error) {
-      console.error('Rate limit check failed:', error);
+      logger.error('Rate limit check failed:', error);
       return next();
     }
   };

@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import { config } from '../config/index.js';
+import { logger } from '../logger/index.js';
 import {
   generateMagicLinkToken,
   generateFinderMagicLinkToken,
@@ -84,7 +85,7 @@ export async function sendReplyEmail({
 }): Promise<void> {
   const emailer = getTransporter();
   if (!emailer) {
-    console.log('Email not configured - reply email not sent');
+    logger.info('Email not configured - reply email not sent');
     return;
   }
 
@@ -152,9 +153,9 @@ ${htmlFooter}
       text: textBody,
       html: htmlBody,
     });
-    console.log(`Reply email sent to ${recipientEmail}`);
+    logger.info(`Reply email sent to ${recipientEmail}`);
   } catch (error) {
-    console.error(`Reply email failed to ${recipientEmail}:`, error);
+    logger.error(`Reply email failed to ${recipientEmail}:`, error);
     throw error;
   }
 }
@@ -174,7 +175,7 @@ export async function sendMagicLinkEmail({
 }): Promise<void> {
   const emailer = getTransporter();
   if (!emailer) {
-    console.log('Email not configured - magic link email not sent');
+    logger.info('Email not configured - magic link email not sent');
     return;
   }
 
@@ -183,7 +184,7 @@ export async function sendMagicLinkEmail({
     conversationId ? `&conversation=${conversationId}` : ''
   }`;
 
-  console.log(
+  logger.debug(
     `DEBUG: Generated owner magic link URL: ${magicLinkUrl.substring(0, 80)}...`
   );
 
@@ -252,9 +253,9 @@ ${htmlFooter}
       text: textBody,
       html: htmlBody,
     });
-    console.log(`Magic link email sent to ${email}`);
+    logger.info(`Magic link email sent to ${email}`);
   } catch (error) {
-    console.error(`Magic link email failed to ${email}:`, error);
+    logger.error(`Magic link email failed to ${email}:`, error);
     throw error;
   }
 }
@@ -270,14 +271,14 @@ export async function sendFinderMagicLinkEmail({
 }): Promise<void> {
   const emailer = getTransporter();
   if (!emailer) {
-    console.log('Email not configured - finder magic link email not sent');
+    logger.info('Email not configured - finder magic link email not sent');
     return;
   }
 
   const dashboardUrl = getDashboardUrl();
   const magicLinkUrl = `${dashboardUrl}/finder/conversation/${conversationId}?token=${magicLinkToken}`;
 
-  console.log(
+  logger.debug(
     `DEBUG: Generated finder magic link URL: ${magicLinkUrl.substring(0, 80)}...`
   );
 
@@ -338,9 +339,9 @@ ${htmlFooter}
       text: textBody,
       html: htmlBody,
     });
-    console.log(`Finder magic link email sent to ${email}`);
+    logger.info(`Finder magic link email sent to ${email}`);
   } catch (error) {
-    console.error(`Finder magic link email failed to ${email}:`, error);
+    logger.error(`Finder magic link email failed to ${email}:`, error);
     throw error;
   }
 }
@@ -358,7 +359,7 @@ export async function sendFinderReplyNotification({
 }): Promise<void> {
   const canSend = await shouldSendEmail(finderEmail, 'reply_notification');
   if (!canSend) {
-    console.log(
+    logger.info(
       `Skipping reply notification to ${finderEmail} - user has disabled this notification`
     );
     return;
@@ -371,7 +372,7 @@ export async function sendFinderReplyNotification({
 
   const emailer = getTransporter();
   if (!emailer) {
-    console.log('Email not configured - finder reply notification not sent');
+    logger.info('Email not configured - finder reply notification not sent');
     return;
   }
 
@@ -434,9 +435,9 @@ ${htmlFooter}
       text: textBody,
       html: htmlBody,
     });
-    console.log(`Finder reply notification sent to ${finderEmail}`);
+    logger.info(`Finder reply notification sent to ${finderEmail}`);
   } catch (error) {
-    console.error(`Finder reply notification failed to ${finderEmail}:`, error);
+    logger.error(`Finder reply notification failed to ${finderEmail}:`, error);
     throw error;
   }
 }
@@ -456,7 +457,7 @@ export async function sendOwnerReplyNotification({
 }): Promise<void> {
   const canSend = await shouldSendEmail(ownerEmail, 'reply_notification');
   if (!canSend) {
-    console.log(
+    logger.info(
       `Skipping reply notification to ${ownerEmail} - user has disabled this notification`
     );
     return;
@@ -470,7 +471,7 @@ export async function sendOwnerReplyNotification({
 
   const emailer = getTransporter();
   if (!emailer) {
-    console.log('Email not configured - owner reply notification not sent');
+    logger.info('Email not configured - owner reply notification not sent');
     return;
   }
 
@@ -533,9 +534,9 @@ ${htmlFooter}
       text: textBody,
       html: htmlBody,
     });
-    console.log(`Owner reply notification sent to ${ownerEmail}`);
+    logger.info(`Owner reply notification sent to ${ownerEmail}`);
   } catch (error) {
-    console.error(`Owner reply notification failed to ${ownerEmail}:`, error);
+    logger.error(`Owner reply notification failed to ${ownerEmail}:`, error);
     throw error;
   }
 }
@@ -569,7 +570,7 @@ export async function sendContextualFinderNotification({
     'conversation_notification'
   );
   if (!canSend) {
-    console.log(
+    logger.info(
       `Skipping conversation notification to ${finderEmail} - user has disabled this notification`
     );
     return;
@@ -582,7 +583,7 @@ export async function sendContextualFinderNotification({
 
   const emailer = getTransporter();
   if (!emailer) {
-    console.log(
+    logger.info(
       'Email not configured - finder contextual notification not sent'
     );
     return;
@@ -591,7 +592,7 @@ export async function sendContextualFinderNotification({
   const dashboardUrl = getDashboardUrl();
   const magicLinkUrl = `${dashboardUrl}/finder/conversation/${conversationId}?token=${magicLinkToken}`;
 
-  console.log(
+  logger.debug(
     `DEBUG: Generated contextual finder notification URL: ${magicLinkUrl.substring(0, 80)}...`
   );
 
@@ -666,11 +667,11 @@ ${htmlFooter}
       text: textBody,
       html: htmlBody,
     });
-    console.log(
+    logger.info(
       `Contextual ${context} notification sent to finder ${finderEmail}`
     );
   } catch (error) {
-    console.error(
+    logger.error(
       `Contextual finder notification failed to ${finderEmail}:`,
       error
     );
@@ -700,7 +701,7 @@ export async function sendContextualOwnerNotification({
     'conversation_notification'
   );
   if (!canSend) {
-    console.log(
+    logger.info(
       `Skipping conversation notification to ${ownerEmail} - user has disabled this notification`
     );
     return;
@@ -714,7 +715,7 @@ export async function sendContextualOwnerNotification({
 
   const emailer = getTransporter();
   if (!emailer) {
-    console.log(
+    logger.info(
       'Email not configured - owner contextual notification not sent'
     );
     return;
@@ -794,11 +795,11 @@ ${htmlFooter}
       text: textBody,
       html: htmlBody,
     });
-    console.log(
+    logger.info(
       `Contextual ${context} notification sent to owner ${ownerEmail}`
     );
   } catch (error) {
-    console.error(
+    logger.error(
       `Contextual owner notification failed to ${ownerEmail}:`,
       error
     );
@@ -820,7 +821,7 @@ export async function sendConversationResolvedNotification({
     'conversation_notification'
   );
   if (!canSend) {
-    console.log(
+    logger.info(
       `Skipping conversation resolved notification to ${finderEmail} - user has disabled this notification`
     );
     return;
@@ -833,7 +834,7 @@ export async function sendConversationResolvedNotification({
 
   const emailer = getTransporter();
   if (!emailer) {
-    console.log(
+    logger.info(
       'Email not configured - conversation resolved notification not sent'
     );
     return;
@@ -921,11 +922,11 @@ ${htmlFooter}
       text: textBody,
       html: htmlBody,
     });
-    console.log(
+    logger.info(
       `Conversation resolved notification sent to finder ${finderEmail}`
     );
   } catch (error) {
-    console.error(
+    logger.error(
       `Conversation resolved notification failed to ${finderEmail}:`,
       error
     );
@@ -948,7 +949,7 @@ export async function sendBagCreatedEmail({
 }): Promise<void> {
   const canSend = await shouldSendEmail(email, 'bag_created');
   if (!canSend) {
-    console.log(
+    logger.info(
       `Skipping bag created email to ${email} - user has disabled this notification`
     );
     return;
@@ -956,7 +957,7 @@ export async function sendBagCreatedEmail({
 
   const emailer = getTransporter();
   if (!emailer) {
-    console.log('Email not configured - bag created email not sent');
+    logger.info('Email not configured - bag created email not sent');
     return;
   }
 
@@ -1048,9 +1049,9 @@ ${htmlFooter}
       text: textBody,
       html: htmlBody,
     });
-    console.log(`Bag created email sent to ${email}`);
+    logger.info(`Bag created email sent to ${email}`);
   } catch (error) {
-    console.error(`Bag created email failed to ${email}:`, error);
+    logger.error(`Bag created email failed to ${email}:`, error);
     throw error;
   }
 }

@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
+import { logger } from '../../infrastructure/logger/index.js';
 import * as conversationService from './service.js';
 import { verifyOwnerSession } from '../auth/service.js';
 import {
@@ -59,7 +60,7 @@ router.post(
         },
       });
     } catch (error) {
-      console.error('Error starting conversation:', error);
+      logger.error('Error starting conversation:', error);
       res.status(400).json({
         success: false,
         error: 'conversation_error',
@@ -156,7 +157,7 @@ router.post(
         },
       });
     } catch (error) {
-      console.error('Error sending reply:', error);
+      logger.error('Error sending reply:', error);
       res.status(400).json({
         success: false,
         error: 'reply_error',
@@ -222,7 +223,7 @@ router.get(
         }
 
         sessionEmail = session.email;
-        console.log(`DEBUG: Using session email for access: ${sessionEmail}`);
+        logger.debug(`DEBUG: Using session email for access: ${sessionEmail}`);
       }
 
       const thread = await conversationService.getConversationThread(
@@ -245,7 +246,7 @@ router.get(
         data: thread,
       });
     } catch (error) {
-      console.error('Error getting conversation:', error);
+      logger.error('Error getting conversation:', error);
       const status =
         error instanceof Error && error.message === 'Access denied' ? 403 : 500;
       res.status(status).json({
@@ -304,7 +305,7 @@ router.post(
         message: 'Conversation resolved successfully',
       });
     } catch (error) {
-      console.error('Error resolving conversation:', error);
+      logger.error('Error resolving conversation:', error);
       const status =
         error instanceof Error && error.message === 'Access denied' ? 403 : 500;
       res.status(status).json({

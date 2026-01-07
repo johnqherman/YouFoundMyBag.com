@@ -1,5 +1,6 @@
 import { Pool, PoolClient } from 'pg';
 import { config } from '../config/index.js';
+import { logger } from '../logger/index.js';
 import { TIME_MS as t } from '../../client/constants/timeConstants.js';
 
 export const pool = new Pool({
@@ -32,9 +33,9 @@ export async function initializeDatabase(): Promise<void> {
     const client = await pool.connect();
     await client.query('SELECT NOW()');
     client.release();
-    console.log('Database connected');
+    logger.info('Database connected');
   } catch (error) {
-    console.error('Database connection failed:', error);
+    logger.error('Database connection failed:', error);
     process.exit(1);
   }
 }

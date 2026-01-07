@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import type { Request } from 'express';
+import { logger } from '../../infrastructure/logger/index.js';
 import type {
   StartConversationRequest,
   SendReplyRequest,
@@ -157,28 +158,25 @@ export async function startConversation(
         'owner'
       );
 
-      console.log(
+      logger.info(
         `Magic link sent to owner for bag ${shortId}, conversation ${conversation.id}`
       );
     } catch (emailError) {
-      console.error(
-        `Failed to send magic link for bag ${shortId}:`,
-        emailError
-      );
+      logger.error(`Failed to send magic link for bag ${shortId}:`, emailError);
     }
   } else {
-    console.log(
+    logger.info(
       `Skipped magic link for bag ${shortId} - owner opted for direct contact only`
     );
   }
 
   try {
     await generateFinderMagicLink(messageData.finder_email!, conversation.id);
-    console.log(
+    logger.info(
       `Finder magic link sent to ${messageData.finder_email} for conversation ${conversation.id}`
     );
   } catch (emailError) {
-    console.error(
+    logger.error(
       `Failed to send finder magic link to ${messageData.finder_email}:`,
       emailError
     );
@@ -271,17 +269,17 @@ export async function sendReply(
         recipientType
       );
 
-      console.log(
+      logger.info(
         `Contextual ${messageContext.context} notification sent for conversation ${conversationId}`
       );
     } catch (emailError) {
-      console.error(
+      logger.error(
         `Failed to send ${messageContext.context} email for conversation ${conversationId}:`,
         emailError
       );
     }
   } else {
-    console.log(
+    logger.info(
       `Notification limit reached for conversation ${conversationId}, skipping email`
     );
   }
@@ -358,17 +356,17 @@ export async function resolveConversation(
         conversationId,
         names,
       });
-      console.log(
+      logger.info(
         `Conversation resolved notification sent to finder for conversation ${conversationId}`
       );
     } catch (emailError) {
-      console.error(
+      logger.error(
         `Failed to send conversation resolved notification for conversation ${conversationId}:`,
         emailError
       );
     }
   } else {
-    console.log(
+    logger.info(
       `Skipped conversation resolved notification for conversation ${conversationId} - no finder email`
     );
   }

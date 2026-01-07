@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import type { OwnerSession } from '../../client/types/index.js';
+import { logger } from '../../infrastructure/logger/index.js';
 import { sendMagicLinkEmail } from '../../infrastructure/email/index.js';
 import * as authRepository from './repository.js';
 import { TIME_MS as t } from 'client/constants/timeConstants.js';
@@ -64,9 +65,9 @@ export async function generateMagicLink(
       bagIds: targetBagIds,
       bagName,
     });
-    console.log(`Magic link sent to ${email}`);
+    logger.info(`Magic link sent to ${email}`);
   } catch (emailError) {
-    console.error(`Failed to send magic link to ${email}:`, emailError);
+    logger.error(`Failed to send magic link to ${email}:`, emailError);
     throw new Error('Failed to send magic link email');
   }
 
@@ -77,11 +78,11 @@ export async function verifyMagicLink(magicLinkToken: string): Promise<{
   sessionToken: string;
   session: OwnerSession;
 }> {
-  console.log(
+  logger.debug(
     `DEBUG: Verifying magic link token: ${magicLinkToken.substring(0, 8)}...`
   );
-  console.log(`DEBUG: Token length: ${magicLinkToken.length}`);
-  console.log(
+  logger.debug(`DEBUG: Token length: ${magicLinkToken.length}`);
+  logger.debug(
     `DEBUG: Looking for session key: magic_${magicLinkToken.substring(0, 8)}...`
   );
 
@@ -89,17 +90,17 @@ export async function verifyMagicLink(magicLinkToken: string): Promise<{
     `magic_${magicLinkToken}`
   );
   if (!magicSession) {
-    console.log(`DEBUG: Magic link token not found in database`);
-    console.log(`DEBUG: Searched for session key: magic_${magicLinkToken}`);
+    logger.debug(`DEBUG: Magic link token not found in database`);
+    logger.debug(`DEBUG: Searched for session key: magic_${magicLinkToken}`);
     throw new Error('Invalid or expired magic link');
   }
 
-  console.log(`DEBUG: Found magic session for email: ${magicSession.email}`);
+  logger.debug(`DEBUG: Found magic session for email: ${magicSession.email}`);
 
   const sessionToken = crypto.randomBytes(32).toString('hex');
   const sessionExpiresAt = new Date(Date.now() + t.THREE_DAYS);
 
-  console.log(
+  logger.debug(
     `DEBUG: Creating new session token: ${sessionToken.substring(0, 8)}...`
   );
 
@@ -112,7 +113,7 @@ export async function verifyMagicLink(magicLinkToken: string): Promise<{
     'owner'
   );
 
-  console.log(
+  logger.debug(
     `DEBUG: Session created successfully for email: ${session.email}`
   );
   return { sessionToken, session };
@@ -183,9 +184,9 @@ export async function generateFinderMagicLink(
           conversationId,
         })
     );
-    console.log(`Finder magic link sent to ${email}`);
+    logger.info(`Finder magic link sent to ${email}`);
   } catch (emailError) {
-    console.error(`Failed to send finder magic link to ${email}:`, emailError);
+    logger.error(`Failed to send finder magic link to ${email}:`, emailError);
     throw new Error('Failed to send finder magic link email');
   }
 
@@ -197,11 +198,11 @@ export async function verifyFinderMagicLink(magicLinkToken: string): Promise<{
   finderEmail: string;
   conversationId: string;
 }> {
-  console.log(
+  logger.debug(
     `DEBUG: Verifying finder magic link token: ${magicLinkToken.substring(0, 8)}...`
   );
-  console.log(`DEBUG: Finder token length: ${magicLinkToken.length}`);
-  console.log(
+  logger.debug(`DEBUG: Finder token length: ${magicLinkToken.length}`);
+  logger.debug(
     `DEBUG: Looking for finder session key: finder_magic_${magicLinkToken.substring(0, 8)}...`
   );
 
@@ -209,14 +210,14 @@ export async function verifyFinderMagicLink(magicLinkToken: string): Promise<{
     `finder_magic_${magicLinkToken}`
   );
   if (!magicSession) {
-    console.log(`DEBUG: Finder magic link token not found in database`);
-    console.log(
+    logger.debug(`DEBUG: Finder magic link token not found in database`);
+    logger.debug(
       `DEBUG: Searched for finder session key: finder_magic_${magicLinkToken}`
     );
     throw new Error('Invalid or expired magic link');
   }
 
-  console.log(
+  logger.debug(
     `DEBUG: Found finder magic session for email: ${magicSession.email}`
   );
 
@@ -235,7 +236,7 @@ export async function verifyFinderMagicLink(magicLinkToken: string): Promise<{
   const sessionToken = crypto.randomBytes(32).toString('hex');
   const sessionExpiresAt = new Date(Date.now() + t.THREE_DAYS);
 
-  console.log(
+  logger.debug(
     `DEBUG: Creating new finder session token: ${sessionToken.substring(0, 8)}...`
   );
 
@@ -248,7 +249,7 @@ export async function verifyFinderMagicLink(magicLinkToken: string): Promise<{
     'finder'
   );
 
-  console.log(
+  logger.debug(
     `DEBUG: Finder session created successfully for email: ${magicSession.email}, conversation: ${magicSession.conversation_id}`
   );
 
@@ -276,6 +277,6 @@ export function extractEmailFromConversationAccess(
   conversationId: string,
   ownerEmail?: string
 ): string | null {
-  console.log(`Extracting email for conversation: ${conversationId}`);
+  logger.info(`Extracting email for conversation: ${conversationId}`);
   return ownerEmail || null;
 }

@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import type { Request } from 'express';
+import { logger } from '../../infrastructure/logger/index.js';
 
 export function getClientIpHash(
   req: Pick<Request, 'ip'> & { connection?: { remoteAddress?: string } }
@@ -17,13 +18,13 @@ export async function verifyTurnstile(
   remoteip?: string
 ): Promise<boolean> {
   if (process.env.NODE_ENV === 'development') {
-    console.log('Development mode: skipping Turnstile verification');
+    logger.info('Development mode: skipping Turnstile verification');
     return true;
   }
 
   const secretKey = process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY;
   if (!secretKey) {
-    console.warn('Turnstile secret key not configured');
+    logger.warn('Turnstile secret key not configured');
     return true;
   }
 
@@ -44,7 +45,7 @@ export async function verifyTurnstile(
     const result = await response.json();
     return result.success === true;
   } catch (error) {
-    console.error('Turnstile verification failed:', error);
+    logger.error('Turnstile verification failed:', error);
     return false;
   }
 }

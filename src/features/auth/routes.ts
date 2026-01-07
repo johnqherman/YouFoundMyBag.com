@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
+import { logger } from '../../infrastructure/logger/index.js';
 import * as authService from './service.js';
 import * as conversationService from '../conversations/service.js';
 import {
@@ -33,7 +34,7 @@ router.post(
         message: 'Magic link sent! Check your email to access your dashboard.',
       });
     } catch (error) {
-      console.error('Error generating magic link:', error);
+      logger.error('Error generating magic link:', error);
       res.status(400).json({
         success: false,
         error: 'magic_link_error',
@@ -50,13 +51,13 @@ router.post(
   '/auth/verify',
   async (req: Request, res: Response): Promise<void> => {
     try {
-      console.log('DEBUG: Auth verify request received');
-      console.log('DEBUG: Request body keys:', Object.keys(req.body));
+      logger.debug('DEBUG: Auth verify request received');
+      logger.debug('DEBUG: Request body keys:', Object.keys(req.body));
 
       const bodyResult = verifyMagicLinkSchema.safeParse(req.body);
       if (!bodyResult.success) {
-        console.log('DEBUG: Validation failed for magic link token');
-        console.log('DEBUG: Validation errors:', bodyResult.error.issues);
+        logger.debug('DEBUG: Validation failed for magic link token');
+        logger.debug('DEBUG: Validation errors:', bodyResult.error.issues);
         res.status(400).json({
           success: false,
           error: 'validation_error',
@@ -67,14 +68,14 @@ router.post(
       }
 
       const { magic_token } = bodyResult.data;
-      console.log(
+      logger.debug(
         `DEBUG: Processing magic token: ${magic_token.substring(0, 8)}...`
       );
 
       const { sessionToken, session } =
         await authService.verifyMagicLink(magic_token);
 
-      console.log(
+      logger.debug(
         `DEBUG: Magic link verification successful for email: ${session.email}`
       );
       res.json({
@@ -86,12 +87,12 @@ router.post(
         },
       });
     } catch (error) {
-      console.error('DEBUG: Error verifying magic link:', error);
-      console.error(
+      logger.debug('DEBUG: Error verifying magic link:', error);
+      logger.debug(
         'DEBUG: Error type:',
         error instanceof Error ? error.constructor.name : typeof error
       );
-      console.error(
+      logger.debug(
         'DEBUG: Error message:',
         error instanceof Error ? error.message : String(error)
       );
@@ -198,7 +199,7 @@ router.get(
         },
       });
     } catch (error) {
-      console.error('Error getting dashboard:', error);
+      logger.error('Error getting dashboard:', error);
       res.status(500).json({
         success: false,
         error: 'dashboard_error',
@@ -230,7 +231,7 @@ router.post(
         message: 'Logged out successfully',
       });
     } catch (error) {
-      console.error('Error logging out:', error);
+      logger.error('Error logging out:', error);
       res.status(500).json({
         success: false,
         error: 'logout_error',

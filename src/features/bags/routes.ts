@@ -1,4 +1,5 @@
 import express from 'express';
+import { logger } from '../../infrastructure/logger/index.js';
 import {
   createBagSchema,
   shortIdSchema,
@@ -32,7 +33,7 @@ router.post(
         return;
       }
 
-      console.error('Failed to create bag:', error);
+      logger.error('Failed to create bag:', error);
       res.status(500).json({
         error: 'Internal server error',
         message:
@@ -72,7 +73,7 @@ router.get('/:shortId', async (req, res): Promise<void> => {
       data: finderData,
     });
   } catch (error) {
-    console.error('Failed to get bag data:', error);
+    logger.error('Failed to get bag data:', error);
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to load bag information',

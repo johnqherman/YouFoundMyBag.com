@@ -1,6 +1,7 @@
 import { validate } from 'deep-email-validator';
 import { z } from 'zod';
 import type { Request, Response, NextFunction } from 'express';
+import { logger } from '../logger/index.js';
 
 export interface EmailValidationResult {
   valid: boolean;
@@ -59,7 +60,7 @@ export async function validateEmail(
 
     return result;
   } catch (error) {
-    console.error(`Email validation error for ${email}:`, error);
+    logger.error(`Email validation error for ${email}:`, error);
     result.warnings.push('Email validation service error');
     return result;
   }
@@ -70,7 +71,7 @@ export const emailValidationSchema = z.string().refine(
     try {
       return await isValidEmail(email);
     } catch (error) {
-      console.warn(
+      logger.warn(
         'Email validation check failed, falling back to basic validation:',
         error
       );
@@ -127,7 +128,7 @@ export const emailValidationMiddleware = (
           }
 
           if (result.warnings.length > 0) {
-            console.warn(
+            logger.warn(
               `Email validation warnings for ${field} (${email}):`,
               result.warnings
             );
@@ -139,7 +140,7 @@ export const emailValidationMiddleware = (
 
       return next();
     } catch (error) {
-      console.error('Email validation middleware error:', error);
+      logger.error('Email validation middleware error:', error);
       res.status(500).json({
         error: 'Email validation service error',
         message: 'Unable to validate email addresses',

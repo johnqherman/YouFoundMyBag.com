@@ -1,5 +1,6 @@
 import { JSDOM } from 'jsdom';
 import DOMPurify from 'dompurify';
+import { logger } from '../logger/index.js';
 
 const window = new JSDOM('').window;
 const purify = DOMPurify(window as unknown as Window & typeof globalThis);
@@ -98,7 +99,7 @@ export function secureEmailContent(input: string): {
   const wasSanitized = sanitized !== input;
 
   if (!isValid || wasSanitized) {
-    console.warn('Email content sanitized', {
+    logger.warn('Email content sanitized', {
       originalLength: input.length,
       sanitizedLength: sanitized.length,
       wasSanitized,

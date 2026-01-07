@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
+import { logger } from '../../infrastructure/logger/index.js';
 import { verifyFinderMagicLink, verifyFinderSession } from '../auth/service.js';
 import * as conversationService from './service.js';
 import { verifyMagicLinkSchema } from '../../infrastructure/utils/validation.js';
@@ -10,13 +11,13 @@ router.post(
   '/finder/auth/verify',
   async (req: Request, res: Response): Promise<void> => {
     try {
-      console.log('DEBUG: Finder auth verify request received');
-      console.log('DEBUG: Request body keys:', Object.keys(req.body));
+      logger.debug('DEBUG: Finder auth verify request received');
+      logger.debug('DEBUG: Request body keys:', Object.keys(req.body));
 
       const bodyResult = verifyMagicLinkSchema.safeParse(req.body);
       if (!bodyResult.success) {
-        console.log('DEBUG: Finder validation failed for magic link token');
-        console.log('DEBUG: Validation errors:', bodyResult.error.issues);
+        logger.debug('DEBUG: Finder validation failed for magic link token');
+        logger.debug('DEBUG: Validation errors:', bodyResult.error.issues);
         res.status(400).json({
           success: false,
           error: 'validation_error',
@@ -27,14 +28,14 @@ router.post(
       }
 
       const { magic_token } = bodyResult.data;
-      console.log(
+      logger.debug(
         `DEBUG: Processing finder magic token: ${magic_token.substring(0, 8)}...`
       );
 
       const { sessionToken, finderEmail, conversationId } =
         await verifyFinderMagicLink(magic_token);
 
-      console.log(
+      logger.debug(
         `DEBUG: Finder magic link verification successful for email: ${finderEmail}, conversation: ${conversationId}`
       );
       res.json({
@@ -46,12 +47,12 @@ router.post(
         },
       });
     } catch (error) {
-      console.error('DEBUG: Error verifying finder magic link:', error);
-      console.error(
+      logger.debug('DEBUG: Error verifying finder magic link:', error);
+      logger.debug(
         'DEBUG: Error type:',
         error instanceof Error ? error.constructor.name : typeof error
       );
-      console.error(
+      logger.debug(
         'DEBUG: Error message:',
         error instanceof Error ? error.message : String(error)
       );
@@ -123,7 +124,7 @@ router.get(
         data: thread,
       });
     } catch (error) {
-      console.error('Error getting finder conversation:', error);
+      logger.error('Error getting finder conversation:', error);
       res.status(500).json({
         success: false,
         error: 'conversation_error',
@@ -190,7 +191,7 @@ router.post(
         data: reply,
       });
     } catch (error) {
-      console.error('Error sending finder reply:', error);
+      logger.error('Error sending finder reply:', error);
       res.status(500).json({
         success: false,
         error: 'reply_error',

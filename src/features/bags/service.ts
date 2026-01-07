@@ -1,5 +1,6 @@
 import QRCode from 'qrcode';
 import { config } from '../../infrastructure/config/index.js';
+import { logger } from '../../infrastructure/logger/index.js';
 import { createReadableShortId } from '../../infrastructure/utils/short-id.js';
 import * as repository from './repository.js';
 import type { CreateBagRequest } from '../../client/types/index.js';
@@ -44,7 +45,7 @@ export async function createBagWithQR(
         bagUrl,
       });
     } catch (emailError) {
-      console.error(
+      logger.error(
         `Failed to send bag created email to ${bag.owner_email}:`,
         emailError
       );

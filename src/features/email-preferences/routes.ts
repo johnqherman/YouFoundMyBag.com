@@ -1,4 +1,5 @@
 import express from 'express';
+import { logger } from '../../infrastructure/logger/index.js';
 import * as emailPreferencesService from './service.js';
 
 const router = express.Router();
@@ -13,7 +14,7 @@ router.get('/:token', async (req, res): Promise<void> => {
       data: preferences,
     });
   } catch (error) {
-    console.error('Failed to get email preferences:', error);
+    logger.error('Failed to get email preferences:', error);
     res.status(404).json({
       error: 'Not found',
       message:
@@ -46,7 +47,7 @@ router.put('/:token', async (req, res): Promise<void> => {
       data: preferences,
     });
   } catch (error) {
-    console.error('Failed to update email preferences:', error);
+    logger.error('Failed to update email preferences:', error);
     res.status(400).json({
       error: 'Update failed',
       message:
@@ -67,7 +68,7 @@ router.post('/:token/unsubscribe', async (req, res): Promise<void> => {
       data: preferences,
     });
   } catch (error) {
-    console.error('Failed to unsubscribe:', error);
+    logger.error('Failed to unsubscribe:', error);
     res.status(400).json({
       error: 'Unsubscribe failed',
       message: error instanceof Error ? error.message : 'Failed to unsubscribe',
