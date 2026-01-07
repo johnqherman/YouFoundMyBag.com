@@ -185,6 +185,14 @@ export default function CreateBagForm({ onSuccess }: Props) {
     setFormData((prev) => ({ ...prev, ...updates }));
   };
 
+  const handleContactsReorder = (reorderedContacts: ContactWithId[]) => {
+    const updatedContacts = reorderedContacts.map((contact, index) => ({
+      ...contact,
+      is_primary: index === 0,
+    }));
+    setFormData((prev) => ({ ...prev, contacts: updatedContacts }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -244,11 +252,11 @@ export default function CreateBagForm({ onSuccess }: Props) {
         bag_name: formData.bag_name?.trim() || undefined,
         owner_message: formData.owner_message?.trim() || undefined,
         secure_messaging_enabled: formData.secure_messaging_enabled,
-        contacts: validContacts.map(({ type, value, label, is_primary }) => ({
+        contacts: validContacts.map(({ type, value, label }, index) => ({
           type,
           value,
           label,
-          is_primary,
+          is_primary: index === 0,
         })),
       };
 
@@ -343,6 +351,7 @@ export default function CreateBagForm({ onSuccess }: Props) {
             formData={formData}
             onBack={prevStep}
             onSubmit={handleSubmit}
+            onContactsReorder={handleContactsReorder}
             loading={loading}
             error={error}
           />

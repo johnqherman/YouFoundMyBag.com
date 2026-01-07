@@ -10,6 +10,7 @@ import {
   InstagramIcon,
   brandColors,
 } from './icons/BrandIcons';
+import { MailIcon, PhoneContactIcon } from './icons/AppIcons';
 
 interface ContactInputProps {
   contact: ContactWithId;
@@ -35,6 +36,7 @@ export default function ContactInput({
   const intlTelInputInstanceRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const isMountedRef = useRef(true);
+  const isUpdatingFromPropRef = useRef(false);
 
   const [phoneNumber, setPhoneNumber] = useState(contact.value || '');
   const [isPhoneValid, setIsPhoneValid] = useState(true);
@@ -54,10 +56,18 @@ export default function ContactInput({
   }, []);
 
   useEffect(() => {
-    if (isMountedRef.current && isPhoneType(contact.type)) {
+    if (
+      isMountedRef.current &&
+      isPhoneType(contact.type) &&
+      contact.value !== phoneNumber
+    ) {
+      isUpdatingFromPropRef.current = true;
       setPhoneNumber(contact.value || '');
+      setTimeout(() => {
+        isUpdatingFromPropRef.current = false;
+      }, 0);
     }
-  }, [contact.value, contact.type]);
+  }, [contact.value, contact.type, phoneNumber]);
 
   const isPhoneType = (type: string) => {
     return ['sms', 'whatsapp', 'signal'].includes(type);
@@ -148,6 +158,10 @@ export default function ContactInput({
   const getContactTypeIcon = (type: string) => {
     const iconProps = { size: 18, className: '' };
     switch (type) {
+      case 'sms':
+        return <PhoneContactIcon color="currentColor" />;
+      case 'email':
+        return <MailIcon color="currentColor" />;
       case 'signal':
         return (
           <SignalIcon {...iconProps} style={{ color: brandColors.signal }} />
@@ -226,6 +240,8 @@ export default function ContactInput({
             className="contact-type-dropdown input-field w-auto appearance-none pr-8"
             style={{
               paddingLeft:
+                contact.type === 'sms' ||
+                contact.type === 'email' ||
                 contact.type === 'signal' ||
                 contact.type === 'whatsapp' ||
                 contact.type === 'telegram' ||
@@ -279,9 +295,16 @@ export default function ContactInput({
               ref={(instance) => {
                 intlTelInputInstanceRef.current = instance;
               }}
+              initialValue={phoneNumber}
               onChangeNumber={(number) => {
-                if (isMountedRef.current) {
+                if (isMountedRef.current && !isUpdatingFromPropRef.current) {
                   setPhoneNumber(number);
+                  if (number !== contact.value) {
+                    onUpdate({
+                      ...contact,
+                      value: number,
+                    });
+                  }
                 }
               }}
               onChangeValidity={(isValid) => {
@@ -295,15 +318,26 @@ export default function ContactInput({
               inputProps={{
                 className: `input-field ${!isPhoneValid && phoneNumber ? 'border-cinnabar-500' : ''}`,
                 required: true,
-                onBlur: () => {
-                  if (isMountedRef.current) {
-                    onUpdate({
-                      ...contact,
-                      value: phoneNumber,
-                    });
-                  }
-                },
               }}
+            />
+          </div>
+        ) : contact.type === 'email' ? (
+          <div
+            key={`email-${contact.id}`}
+            className={`relative mb-3 ${errors.length > 0 ? 'border-cinnabar-500' : ''}`}
+          >
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none z-10 flex items-center gap-1.5">
+              {getContactTypeIcon(contact.type)}
+            </div>
+            <input
+              key={`email-input-${contact.id}`}
+              type={getInputType()}
+              placeholder={getPlaceholder()}
+              value={contact.value}
+              onChange={(e) => handleNonPhoneValueChange(e.target.value)}
+              className={`contact-input-with-icon input-field transition-all duration-200 ${errors.length > 0 ? 'border-cinnabar-500' : ''}`}
+              style={{ paddingLeft: '2.5rem' }}
+              required
             />
           </div>
         ) : contact.type === 'instagram' || contact.type === 'telegram' ? (
@@ -346,7 +380,9 @@ export default function ContactInput({
               onChange={(e) => handlePrimaryChange(e.target.checked)}
               className="rounded border-regal-navy-300 bg-white text-regal-navy-600 focus:ring-regal-navy-500"
             />
-            <span className="text-regal-navy-700">Primary contact method</span>
+            <span className="text-regal-navy-700 select-none">
+              Primary contact method
+            </span>
           </label>
         </div>
 
