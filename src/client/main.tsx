@@ -13,7 +13,7 @@ import EmailPreferencesPage from './pages/EmailPreferencesPage';
 
 function App() {
   return (
-    <Router>
+    <Router future={{ v7_relativeSplatPath: true }}>
       <div className="min-h-screen">
         <Routes>
           <Route path="/" element={<HomePage />} />
