@@ -18,6 +18,7 @@
     "db:init": "psql ${DATABASE_URL:-postgresql://localhost:5432/youfoundmybag_dev} < database/schema.sql"
   },
   "dependencies": {
+    "@atlaskit/icon": "^29.3.2",
     "@types/dompurify": "^3.0.5",
     "@types/jsdom": "^27.0.0",
     "bcrypt": "^5.1.1",
@@ -30,6 +31,7 @@
     "helmet": "^7.1.0",
     "intl-tel-input": "^25.14.0",
     "jsdom": "^27.4.0",
+    "libphonenumber-js": "^1.12.33",
     "nanoid": "^5.0.4",
     "nodemailer": "^7.0.12",
     "pg": "^8.11.3",
@@ -53,6 +55,7 @@
     "@typescript-eslint/parser": "^7.18.0",
     "autoprefixer": "^10.4.16",
     "concurrently": "^8.2.2",
+    "copy-webpack-plugin": "^13.0.1",
     "css-loader": "^6.8.1",
     "eslint": "^8.57.0",
     "eslint-plugin-react": "^7.35.0",

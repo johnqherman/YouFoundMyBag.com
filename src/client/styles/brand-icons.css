@@ -1,0 +1,151 @@
+.brand-icon {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-block;
+}
+
+.brand-icon-interactive {
+  cursor: pointer;
+}
+
+.brand-icon-interactive:hover {
+  transform: scale(1.1);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.contact-type-select:focus-within {
+  transition: all 0.15s ease-in-out;
+}
+
+@keyframes signal-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.contact-input-wrapper[data-type='signal'] .brand-icon {
+  animation: signal-pulse 2s ease-in-out infinite;
+}
+
+.contact-input-wrapper[data-type='whatsapp']:hover .brand-icon {
+  filter: brightness(1.1);
+}
+
+.contact-input-wrapper[data-type='telegram']:hover .brand-icon {
+  filter: brightness(1.1);
+}
+
+.contact-input-wrapper[data-type='instagram'] .brand-icon {
+  position: relative;
+}
+
+.contact-input-wrapper[data-type='instagram']:hover .brand-icon {
+  filter: saturate(1.2) brightness(1.05);
+}
+
+.contact-type-dropdown {
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.contact-type-dropdown:focus {
+  outline: none;
+  border-color: var(--color-regal-navy-400);
+  box-shadow: 0 0 0 3px rgba(71, 85, 105, 0.1);
+}
+
+@keyframes icon-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.brand-icon-appear {
+  animation: icon-fade-in 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.contact-input-with-icon:focus {
+  padding-left: 2.75rem;
+  transition: padding-left 0.2s ease;
+}
+
+@keyframes dropdown-bounce {
+  0%,
+  100% {
+    transform: translateY(-50%);
+  }
+  50% {
+    transform: translateY(-40%);
+  }
+}
+
+.dropdown-arrow-active {
+  animation: dropdown-bounce 0.5s ease-in-out;
+}
+
+.contact-input-wrapper[data-type='signal'] input:focus {
+  border-color: #3a76f0;
+  box-shadow: 0 0 0 3px rgba(58, 118, 240, 0.1);
+}
+
+.contact-input-wrapper[data-type='whatsapp'] input:focus {
+  border-color: #25d366;
+  box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.1);
+}
+
+.contact-input-wrapper[data-type='telegram'] input:focus {
+  border-color: #26a5e4;
+  box-shadow: 0 0 0 3px rgba(38, 165, 228, 0.1);
+}
+
+.contact-input-wrapper[data-type='instagram'] input:focus {
+  border-color: #e4405f;
+  box-shadow: 0 0 0 3px rgba(228, 64, 95, 0.1);
+}
+
+.brand-icon svg {
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
+}
+
+.contact-method-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.contact-method-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+@keyframes icon-loading {
+  0% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.4;
+  }
+}
+
+.brand-icon-loading {
+  animation: icon-loading 1.5s ease-in-out infinite;
+}

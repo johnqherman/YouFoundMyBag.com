@@ -31,15 +31,15 @@ export default function PrivacyWarning({
     flex items-start gap-2 p-3 rounded-lg text-sm border
     ${
       variant === 'light'
-        ? 'bg-yellow-50 border-yellow-200 text-yellow-800'
-        : 'bg-yellow-900/20 border-yellow-600/30 text-yellow-300'
+        ? 'bg-saffron-50 border-saffron-200 text-saffron-900'
+        : 'bg-saffron-900/20 border-saffron-600/30 text-saffron-200'
     }
     ${className}
   `.trim();
 
   const buttonClasses = `
-    text-xs opacity-70 hover:opacity-100 ml-auto flex-shrink-0 font-bold
-    ${variant === 'light' ? 'text-yellow-700' : 'text-yellow-200'}
+    text-xs opacity-70 hover:opacity-100 ml-auto flex-shrink-0 font-bold transition-opacity
+    ${variant === 'light' ? 'text-saffron-700' : 'text-saffron-200'}
   `;
 
   return (

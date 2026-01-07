@@ -44,22 +44,24 @@ export default function CharacterLimitInput({
   };
 
   const getCounterColor = () => {
-    if (isAtLimit) return 'text-red-400';
-    if (isNearLimit) return 'text-yellow-400';
-    return 'text-neutral-400';
+    if (isAtLimit) return 'text-cinnabar-600';
+    if (isNearLimit) return 'text-saffron-700';
+    return 'text-regal-navy-500';
   };
 
   const getBorderColor = () => {
     if (disabled) return '';
-    if (isAtLimit) return 'border-red-500 focus:ring-red-500';
-    if (isNearLimit) return 'border-yellow-500 focus:ring-yellow-500';
-    return 'border-neutral-600 focus:ring-blue-500';
+    if (isAtLimit) return 'border-cinnabar-500 focus:ring-cinnabar-500';
+    if (isNearLimit) return 'border-saffron-500 focus:ring-saffron-500';
+    return '';
   };
 
   const baseClasses = `
-    w-full p-3 bg-neutral-700 rounded-lg resize-none
-    focus:ring-2 focus:border-transparent transition-colors
-    disabled:bg-neutral-600 disabled:cursor-not-allowed
+    w-full px-3 py-2.5 bg-white border border-regal-navy-200 rounded-lg resize-none
+    text-regal-navy-900 placeholder-regal-navy-400
+    transition-all duration-150
+    focus:outline-none focus:ring-2 focus:ring-regal-navy-500 focus:border-regal-navy-500
+    disabled:bg-regal-navy-50 disabled:text-regal-navy-500 disabled:cursor-not-allowed
     ${getBorderColor()}
     ${className}
   `.trim();
@@ -80,7 +82,7 @@ export default function CharacterLimitInput({
       />
 
       <div
-        className={`absolute bottom-3 right-3 text-sm font-mono ${getCounterColor()}`}
+        className={`absolute bottom-2.5 right-3 text-xs font-medium ${getCounterColor()}`}
       >
         {value.length}/{maxLength}
       </div>

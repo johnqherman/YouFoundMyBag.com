@@ -4,6 +4,7 @@ import CharacterLimitTextArea from './CharacterLimitTextArea';
 import PrivacyWarning from './PrivacyWarning';
 import { emailSchema } from '../../infrastructure/utils/validation';
 import { lowercaseBagName } from '../../infrastructure/utils/formatting';
+import { SuccessIcon } from './icons/AppIcons';
 
 interface Props {
   shortId: string;
@@ -124,22 +125,29 @@ export default function ContactModal({
 
   if (success) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div className="bg-white rounded-2xl p-6 w-full max-w-md">
+      <div className="fixed inset-0 bg-regal-navy-900 bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="bg-white rounded-lg p-8 w-full max-w-md shadow-soft-lg">
           <div className="text-center">
-            <div className="text-6xl mb-4">✅</div>
-            <h2 className="text-2xl font-bold text-green-600 mb-4">
+            <div
+              className="mb-4 flex justify-center text-medium-jungle-700"
+              style={{ fontSize: '4rem' }}
+            >
+              <SuccessIcon color="currentColor" />
+            </div>
+            <h2 className="text-2xl font-semibold text-medium-jungle-700 mb-4">
               Message Sent!
             </h2>
-            <p className="text-neutral-700 mb-6">
+            <p className="text-regal-navy-700 mb-6 leading-relaxed">
               Your message has been sent to {ownerName || 'the owner'}!
               <br />
               <br />
-              <strong>Check your email ({senderInfo})</strong> for a secure link
-              to continue the conversation. Both you and the owner can
-              communicate safely through our private messaging system.
+              <strong className="text-regal-navy-900">
+                Check your email ({senderInfo})
+              </strong>{' '}
+              for a secure link to continue the conversation. Both you and the
+              owner can communicate safely through our private messaging system.
             </p>
-            <button onClick={onClose} className="finder-btn w-full">
+            <button onClick={onClose} className="btn-primary w-full">
               Close
             </button>
           </div>
@@ -149,27 +157,27 @@ export default function ContactModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-2xl p-6 w-full max-w-md">
+    <div className="fixed inset-0 bg-regal-navy-900 bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-soft-lg">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold text-black">
+          <h2 className="text-xl font-semibold text-regal-navy-900">
             Contact {ownerName || 'Owner'}
           </h2>
           <button
             onClick={onClose}
-            className="text-neutral-500 hover:text-neutral-700 text-2xl"
+            className="text-regal-navy-500 hover:text-regal-navy-700 text-2xl leading-none transition-colors"
           >
             ×
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label
               htmlFor="message"
-              className="block text-sm font-medium text-black mb-2"
+              className="block text-sm font-medium text-regal-navy-800 mb-2"
             >
-              Your message *
+              Your message <span className="text-cinnabar-600">*</span>
             </label>
             <PrivacyWarning
               message="Avoid sharing personal contact details here."
@@ -185,16 +193,19 @@ export default function ContactModal({
               rows={4}
               required
               variant="light"
-              className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-black"
+              className="input-field"
             />
           </div>
 
           <div>
             <label
               htmlFor="senderName"
-              className="block text-sm font-medium text-black mb-2"
+              className="block text-sm font-medium text-regal-navy-800 mb-2"
             >
-              Your name (optional)
+              Your name{' '}
+              <span className="text-regal-navy-500 font-normal">
+                (optional)
+              </span>
             </label>
             <input
               id="senderName"
@@ -202,21 +213,17 @@ export default function ContactModal({
               placeholder="Your name"
               value={senderName}
               onChange={(e) => setSenderName(e.target.value)}
-              className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-black"
+              className="input-field"
               maxLength={30}
             />
-            {/* TODO: Change or remove this copy. End users never see each other's email addresses. */}
-            {/* <p className="text-xs text-neutral-600 mt-1">
-              This will be shown to the owner instead of your email address.
-            </p> */}
           </div>
 
           <div>
             <label
               htmlFor="senderInfo"
-              className="block text-sm font-medium text-black mb-2"
+              className="block text-sm font-medium text-regal-navy-800 mb-2"
             >
-              Your email address *
+              Your email address <span className="text-cinnabar-600">*</span>
             </label>
             <input
               id="senderInfo"
@@ -224,36 +231,34 @@ export default function ContactModal({
               placeholder="your@email.com"
               value={senderInfo}
               onChange={(e) => setSenderInfo(e.target.value)}
-              className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-black"
+              className="input-field"
               maxLength={254}
               required
             />
-            <p className="text-xs text-neutral-600 mt-1">
+            <p className="text-xs text-regal-navy-600 mt-1.5">
               Required for secure messaging. You&apos;ll receive a link to keep
               chatting with the owner.
             </p>
           </div>
 
-          <div id="turnstile-widget"></div>
+          <div className="h-[65px] flex items-center justify-left">
+            <div id="turnstile-widget"></div>
+          </div>
 
-          {error && (
-            <div className="bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded-lg">
-              {error}
-            </div>
-          )}
+          {error && <div className="alert-error">{error}</div>}
 
-          <div className="flex space-x-3">
+          <div className="flex gap-3 pt-1">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-3 px-4 bg-neutral-200 text-neutral-700 rounded-lg"
+              className="btn-secondary flex-1"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading || !turnstileToken}
-              className="flex-1 py-3 px-4 bg-black text-white rounded-lg disabled:opacity-50"
+              className="btn-primary flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Sending...' : 'Send Message'}
             </button>

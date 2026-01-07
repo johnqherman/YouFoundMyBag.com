@@ -1,6 +1,7 @@
 import { ContactWithId } from '../../types';
 import ContactInput from '../ContactInput';
 import PhoneInputErrorBoundary from '../PhoneInputErrorBoundary';
+import { AlertIcon } from '../icons/AppIcons';
 
 interface ContactDetailsProps {
   formData: {
@@ -36,21 +37,23 @@ export default function ContactDetails({
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold mb-4">Contact Details</h3>
-        {!formData.secure_messaging_enabled && (
-          <p className="text-sm text-neutral-400 mb-6">
-            Provide at least one contact method for finders to reach you.
-          </p>
-        )}
+        <h3 className="text-xl font-semibold mb-1 text-regal-navy-900">
+          Contact Details
+        </h3>
+        <p className="text-sm text-regal-navy-600">
+          {!formData.secure_messaging_enabled
+            ? 'Provide at least one contact method for finders to reach you'
+            : 'How finders can reach you'}
+        </p>
       </div>
 
       {formData.secure_messaging_enabled && (
         <div>
           <label
             htmlFor="owner_email"
-            className="block text-sm font-medium mb-2"
+            className="block text-sm font-medium mb-2 text-regal-navy-800"
           >
-            Your email address *
+            Your email address <span className="text-cinnabar-600">*</span>
           </label>
           <input
             type="email"
@@ -61,54 +64,57 @@ export default function ContactDetails({
             className="input-field"
             maxLength={254}
           />
-          <p className="text-xs text-neutral-400 mt-1">
+          <p className="text-xs text-regal-navy-600 mt-1.5">
             Used to access your secure inbox
           </p>
         </div>
       )}
 
       <div>
-        <div className="flex items-center justify-between mb-2">
-          <label className="block text-sm font-medium">
+        <div className="mb-2">
+          <label className="block text-sm font-medium text-regal-navy-800">
             {formData.secure_messaging_enabled
-              ? 'Direct contact methods (optional)'
-              : 'Contact methods *'}
-          </label>
-          {formData.contacts.length > 0 &&
-            getAvailableContactTypes(-1).length > 0 && (
-              <button
-                type="button"
-                onClick={addContact}
-                className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1"
-              >
-                + Add contact method
-              </button>
+              ? 'Direct contact methods'
+              : 'Contact methods'}{' '}
+            {formData.secure_messaging_enabled ? (
+              <span className="text-regal-navy-500 font-normal">
+                (optional)
+              </span>
+            ) : (
+              <span className="text-cinnabar-600">*</span>
             )}
+          </label>
         </div>
 
-        <div
-          className={`px-3 py-2 rounded-lg mb-4 ${
-            formData.secure_messaging_enabled
-              ? 'bg-amber-900 border border-amber-700 text-amber-200'
-              : 'bg-red-900 border border-red-700 text-red-200'
-          }`}
-        >
-          <p className="text-xs">
-            ⚠️{' '}
-            <strong>
-              {formData.secure_messaging_enabled &&
-                'Fully public. Anyone who finds your item can see these.'}
-            </strong>
+        <div className="alert-warning mb-3">
+          <p className="text-xs font-medium flex items-center gap-2">
+            <AlertIcon color="currentColor" />
+            {formData.secure_messaging_enabled
+              ? 'Fully public. Anyone who finds your item can see these.'
+              : 'These contact details will be publicly visible to anyone who finds your item.'}
           </p>
         </div>
 
-        <div className="space-y-3">
-          {formData.contacts.length === 0 ? (
-            <div className="text-center py-6 bg-neutral-900 rounded-xl border-2 border-dashed border-neutral-700">
+        {formData.contacts.length > 0 &&
+          getAvailableContactTypes(-1).length > 0 && (
+            <div className="mb-3">
               <button
                 type="button"
                 onClick={addContact}
-                className="text-sm text-blue-400 hover:text-blue-300"
+                className="text-sm link flex items-center gap-1"
+              >
+                + Add contact method
+              </button>
+            </div>
+          )}
+
+        <div className="space-y-3">
+          {formData.contacts.length === 0 ? (
+            <div className="text-center py-8 bg-white rounded-lg border-2 border-dashed border-regal-navy-300">
+              <button
+                type="button"
+                onClick={addContact}
+                className="text-sm link"
               >
                 + Add direct contact method
               </button>
@@ -135,18 +141,10 @@ export default function ContactDetails({
         </div>
       </div>
 
-      {error && (
-        <div className="bg-red-900 border border-red-700 text-red-200 px-4 py-3 rounded-xl">
-          {error}
-        </div>
-      )}
+      {error && <div className="alert-error">{error}</div>}
 
-      <div className="flex justify-between">
-        <button
-          type="button"
-          onClick={onBack}
-          className="px-4 py-2 text-neutral-400 hover:text-white"
-        >
+      <div className="flex justify-between pt-2">
+        <button type="button" onClick={onBack} className="btn-ghost">
           ← Back
         </button>
         <button type="button" onClick={onNext} className="btn-primary">

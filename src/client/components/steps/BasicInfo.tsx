@@ -20,12 +20,19 @@ export default function BasicInfo({
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold mb-4">Basic Information</h3>
+        <h3 className="text-xl font-semibold mb-1 text-regal-navy-900">
+          Basic Information
+        </h3>
+        <p className="text-sm text-regal-navy-600">Tell us about your item</p>
       </div>
 
       <div>
-        <label htmlFor="owner_name" className="block text-sm font-medium mb-2">
-          Your name (optional)
+        <label
+          htmlFor="owner_name"
+          className="block text-sm font-medium mb-2 text-regal-navy-800"
+        >
+          Your name{' '}
+          <span className="text-regal-navy-500 font-normal">(optional)</span>
         </label>
         <CharacterLimitInput
           value={formData.owner_name}
@@ -37,8 +44,12 @@ export default function BasicInfo({
       </div>
 
       <div>
-        <label htmlFor="bag_name" className="block text-sm font-medium mb-2">
-          Bag type (optional)
+        <label
+          htmlFor="bag_name"
+          className="block text-sm font-medium mb-2 text-regal-navy-800"
+        >
+          Bag type{' '}
+          <span className="text-regal-navy-500 font-normal">(optional)</span>
         </label>
         <CharacterLimitInput
           value={formData.bag_name}
@@ -52,14 +63,15 @@ export default function BasicInfo({
       <div>
         <label
           htmlFor="owner_message"
-          className="block text-sm font-medium mb-2"
+          className="block text-sm font-medium mb-2 text-regal-navy-800"
         >
-          Message for finder (optional)
+          Message for finder{' '}
+          <span className="text-regal-navy-500 font-normal">(optional)</span>
         </label>
         <PrivacyWarning
           message="Avoid sharing personal contact details here."
           storageKey="create-bag-message-privacy-tip"
-          variant="dark"
+          variant="light"
           className="mb-3"
         />
         <CharacterLimitTextArea
@@ -72,7 +84,7 @@ export default function BasicInfo({
         />
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex justify-end pt-2">
         <button type="button" onClick={onNext} className="btn-primary">
           Next: Contact Preferences
         </button>

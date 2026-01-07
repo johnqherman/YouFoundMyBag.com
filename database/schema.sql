@@ -1,5 +1,7 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
 CREATE TABLE public.bags (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
   short_id VARCHAR(6) UNIQUE NOT NULL,
@@ -128,6 +130,48 @@ CREATE INDEX idx_owner_sessions_conversation ON public.owner_sessions (conversat
 CREATE INDEX idx_owner_sessions_type ON public.owner_sessions (session_type);
 
 CREATE INDEX idx_rate_limits_window ON public.rate_limits (window_start);
+
+CREATE TABLE public.email_preferences (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
+  email VARCHAR(254) UNIQUE NOT NULL,
+  unsubscribe_token VARCHAR(64) UNIQUE NOT NULL,
+  all_emails_enabled BOOLEAN DEFAULT TRUE,
+  bag_created_enabled BOOLEAN DEFAULT TRUE,
+  conversation_notifications_enabled BOOLEAN DEFAULT TRUE,
+  reply_notifications_enabled BOOLEAN DEFAULT TRUE,
+  unsubscribed_at TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_email_preferences_email ON public.email_preferences (email);
+
+CREATE INDEX idx_email_preferences_token ON public.email_preferences (unsubscribe_token);
+
+CREATE INDEX idx_email_preferences_unsubscribed ON public.email_preferences (unsubscribed_at);
+
+CREATE OR REPLACE FUNCTION generate_unsubscribe_token () RETURNS VARCHAR(64) AS $$
+BEGIN
+  RETURN encode(gen_random_bytes(32), 'hex');
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION update_email_preferences_updated_at () RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER email_preferences_updated_at BEFORE
+UPDATE ON public.email_preferences FOR EACH ROW
+EXECUTE FUNCTION update_email_preferences_updated_at ();
+
+GRANT ALL ON public.email_preferences TO PUBLIC;
+
+GRANT USAGE,
+SELECT
+  ON ALL SEQUENCES IN SCHEMA public TO PUBLIC;
 
 CREATE OR REPLACE FUNCTION check_rate_limit (
   limit_key TEXT,

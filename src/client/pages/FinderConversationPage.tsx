@@ -7,6 +7,7 @@ import {
   formatConversationParticipant,
   getContextualReplyPlaceholder,
 } from '../../infrastructure/utils/personalization';
+import { ErrorIcon, PrivacyIcon } from '../components/icons/AppIcons';
 
 function formatBagDisplayName(
   ownerName?: string,
@@ -217,7 +218,12 @@ export default function FinderConversationPage() {
       <div className="min-h-screen bg-neutral-950 text-neutral-100">
         <div className="max-w-readable mx-auto p-6">
           <div className="text-center">
-            <div className="text-6xl mb-4">❌</div>
+            <div
+              className="mb-4 flex justify-center text-red-400"
+              style={{ fontSize: '4rem' }}
+            >
+              <ErrorIcon color="currentColor" />
+            </div>
             <h1 className="text-2xl font-bold text-red-400 mb-4">
               Access Error
             </h1>
@@ -402,8 +408,8 @@ export default function FinderConversationPage() {
         )}
 
         <div className="mt-6 p-4 bg-blue-100 border-2 border-blue-500 rounded-lg">
-          <h4 className="text-sm font-bold text-blue-900 mb-2">
-            🔒 Privacy Notice
+          <h4 className="text-sm font-bold text-blue-900 mb-2 flex items-center gap-2">
+            <PrivacyIcon color="currentColor" /> Privacy Notice
           </h4>
           <p className="text-xs text-blue-800 font-medium">
             This conversation is secure and private. Only you and the item owner

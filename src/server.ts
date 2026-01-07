@@ -16,6 +16,7 @@ import { routes as messagingRoutes } from './features/messaging/index.js';
 import { conversationRoutes } from './features/conversations/index.js';
 import { finderRoutes } from './features/conversations/finderRoutes.js';
 import { authRoutes } from './features/auth/index.js';
+import { routes as emailPreferencesRoutes } from './features/email-preferences/index.js';
 
 const app = express();
 
@@ -42,6 +43,12 @@ app.use('/api/bags', sendMessageRateLimit, dbRateLimit(3, 5), messagingRoutes);
 app.use('/api', sendMessageRateLimit, dbRateLimit(5, 60), conversationRoutes);
 app.use('/api', basicRateLimit, dbRateLimit(3, 60), finderRoutes);
 app.use('/api', basicRateLimit, dbRateLimit(3, 60), authRoutes);
+app.use(
+  '/api/email-preferences',
+  basicRateLimit,
+  dbRateLimit(10, 60),
+  emailPreferencesRoutes
+);
 
 if (config.NODE_ENV === 'production') {
   app.use(express.static('dist/frontend'));

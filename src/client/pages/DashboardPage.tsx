@@ -7,6 +7,7 @@ import type {
   MessageContextInfo,
 } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { MessageIcon } from '../components/icons/AppIcons';
 
 function formatBagDisplayName(
   ownerName?: string,
@@ -95,16 +96,10 @@ function getMessageContextLabel(
 }
 
 function getMessageContextIcon(
-  context: MessageContext,
-  senderType: 'finder' | 'owner'
-): string {
-  if (context === 'initial') {
-    return senderType === 'finder' ? '🔍' : '👋';
-  } else if (context === 'follow-up') {
-    return senderType === 'finder' ? '📢' : '🔄';
-  } else {
-    return '💬';
-  }
+  _context: MessageContext,
+  _senderType: 'finder' | 'owner'
+): typeof MessageIcon {
+  return MessageIcon;
 }
 
 export default function DashboardPage() {
@@ -151,7 +146,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-neutral-950 text-neutral-100 flex items-center justify-center">
+      <div className="min-h-screen bg-regal-navy-50 text-regal-navy-900 flex items-center justify-center">
         <LoadingSpinner />
       </div>
     );
@@ -159,16 +154,16 @@ export default function DashboardPage() {
 
   if (error || !dashboardData) {
     return (
-      <div className="min-h-screen bg-neutral-950 text-neutral-100">
+      <div className="min-h-screen bg-regal-navy-50 text-regal-navy-900">
         <div className="max-w-4xl mx-auto p-6">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-red-400 mb-4">
+            <h1 className="text-2xl font-semibold text-cinnabar-600 mb-4">
               Dashboard Error
             </h1>
-            <p className="text-neutral-400 mb-6">
+            <p className="text-regal-navy-600 mb-6">
               {error || 'Unable to load your dashboard.'}
             </p>
-            <a href="/" className="text-blue-400 hover:text-blue-300 underline">
+            <a href="/" className="link">
               Return to homepage
             </a>
           </div>
@@ -178,29 +173,26 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100">
+    <div className="min-h-screen bg-regal-navy-50 text-regal-navy-900">
       <div className="max-w-6xl mx-auto p-6">
         <header className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">
+          <h1 className="text-3xl font-semibold mb-2">
             Your YouFoundMyBag Dashboard
           </h1>
-          <p className="text-neutral-400">
+          <p className="text-regal-navy-600">
             Manage your bags and respond to messages from people who find them.
           </p>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1">
-            <div className="bg-neutral-900 rounded-xl p-6">
-              <h2 className="text-xl font-bold mb-4">Your Bags</h2>
+            <div className="card">
+              <h2 className="text-xl font-semibold mb-4">Your Bags</h2>
 
               {dashboardData.bags.length === 0 ? (
-                <div className="text-center text-neutral-500 py-8">
+                <div className="text-center text-regal-navy-500 py-8">
                   <p>No bags created yet.</p>
-                  <a
-                    href="/"
-                    className="text-blue-400 hover:text-blue-300 underline mt-2 inline-block"
-                  >
+                  <a href="/" className="link mt-2 inline-block">
                     Create your first bag
                   </a>
                 </div>
@@ -209,10 +201,10 @@ export default function DashboardPage() {
                   {dashboardData.bags.map((bag) => (
                     <div
                       key={bag.id}
-                      className="bg-neutral-800 rounded-lg p-4 border border-neutral-700"
+                      className="bg-regal-navy-50 rounded-lg p-4 border border-regal-navy-200"
                     >
                       <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-medium">
+                        <h3 className="font-medium text-regal-navy-900">
                           {formatBagDisplayName(
                             bag.owner_name,
                             bag.bag_name,
@@ -220,24 +212,24 @@ export default function DashboardPage() {
                           )}
                         </h3>
                         <span
-                          className={`text-xs px-2 py-1 rounded-full ${
+                          className={`badge ${
                             bag.status === 'active'
-                              ? 'bg-green-900 text-green-200'
-                              : 'bg-neutral-700 text-neutral-300'
+                              ? 'badge-success'
+                              : 'badge-neutral'
                           }`}
                         >
                           {bag.status}
                         </span>
                       </div>
 
-                      <p className="text-sm text-neutral-400 mb-3">
+                      <p className="text-sm text-regal-navy-600 mb-3">
                         ID: {bag.short_id}
                       </p>
 
-                      <div className="flex justify-between text-xs text-neutral-500">
+                      <div className="flex justify-between text-xs text-regal-navy-600">
                         <span>{bag.conversation_count} conversations</span>
                         {bag.unread_count > 0 && (
-                          <span className="bg-red-600 text-white px-2 py-1 rounded-full">
+                          <span className="badge badge-error">
                             {bag.unread_count} unread
                           </span>
                         )}
@@ -250,13 +242,15 @@ export default function DashboardPage() {
           </div>
 
           <div className="lg:col-span-2">
-            <div className="bg-neutral-900 rounded-xl p-6">
-              <h2 className="text-xl font-bold mb-4">Recent Messages</h2>
+            <div className="card">
+              <h2 className="text-xl font-semibold mb-4">Recent Messages</h2>
 
               {dashboardData.conversations.length === 0 ? (
-                <div className="text-center text-neutral-500 py-8">
-                  <div className="text-4xl mb-4">📭</div>
-                  <p className="text-lg mb-2">No messages yet</p>
+                <div className="text-center text-regal-navy-500 py-12">
+                  <div className="text-5xl mb-4">📭</div>
+                  <p className="text-lg mb-2 font-medium text-regal-navy-700">
+                    No messages yet
+                  </p>
                   <p className="text-sm">
                     When someone finds your bag and sends a message, it will
                     appear here.
@@ -273,7 +267,7 @@ export default function DashboardPage() {
 
                     let contextInfo: MessageContextInfo | null = null;
                     let contextLabel = '';
-                    let contextIcon = '';
+                    let ContextIcon = MessageIcon;
 
                     if (lastMessage) {
                       contextInfo = analyzeMessageContext(
@@ -285,7 +279,7 @@ export default function DashboardPage() {
                         lastMessage.sender_type,
                         'owner'
                       );
-                      contextIcon = getMessageContextIcon(
+                      ContextIcon = getMessageContextIcon(
                         contextInfo.context,
                         lastMessage.sender_type
                       );
@@ -294,23 +288,23 @@ export default function DashboardPage() {
                     return (
                       <div
                         key={thread.conversation.id}
-                        className="bg-neutral-800 rounded-lg p-4 border border-neutral-700 hover:border-neutral-600 cursor-pointer transition-colors"
+                        className="bg-white rounded-lg p-5 border border-regal-navy-200 hover:border-regal-navy-400 cursor-pointer transition-all duration-150 hover:shadow-soft-md"
                         onClick={() =>
                           navigate(
                             `/dashboard/conversation/${thread.conversation.id}`
                           )
                         }
                       >
-                        <div className="flex justify-between items-start mb-2">
+                        <div className="flex justify-between items-start mb-3">
                           <div>
-                            <h3 className="font-medium">
+                            <h3 className="font-medium text-regal-navy-900">
                               {formatBagDisplayName(
                                 thread.bag.owner_name,
                                 thread.bag.bag_name,
                                 thread.bag.short_id
                               )}
                             </h3>
-                            <div className="flex items-center gap-2 text-sm text-neutral-400">
+                            <div className="flex items-center gap-2 text-sm text-regal-navy-600 mt-1">
                               <span>
                                 Conversation started{' '}
                                 {new Date(
@@ -318,22 +312,24 @@ export default function DashboardPage() {
                                 ).toLocaleDateString()}
                               </span>
                               <span
-                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                                className={`badge ${
                                   thread.conversation.status === 'resolved'
-                                    ? 'bg-blue-900 text-blue-200'
+                                    ? 'badge-neutral'
                                     : contextInfo?.context === 'initial'
-                                      ? 'bg-blue-900 text-blue-200'
+                                      ? 'bg-regal-navy-100 text-regal-navy-700'
                                       : contextInfo?.context === 'follow-up'
-                                        ? 'bg-yellow-900 text-yellow-200'
-                                        : 'bg-green-900 text-green-200'
+                                        ? 'badge-warning'
+                                        : 'badge-success'
                                 }`}
                               >
-                                <span>
-                                  {thread.conversation.status === 'resolved'
-                                    ? '✓'
-                                    : contextIcon}
+                                <span className="inline-flex">
+                                  {thread.conversation.status === 'resolved' ? (
+                                    '✓'
+                                  ) : (
+                                    <ContextIcon color="currentColor" />
+                                  )}
                                 </span>
-                                <span>
+                                <span className="ml-1">
                                   {thread.conversation.status === 'resolved'
                                     ? 'Resolved'
                                     : contextInfo?.context === 'initial'
@@ -346,24 +342,24 @@ export default function DashboardPage() {
                             </div>
                           </div>
                           {unreadCount > 0 && (
-                            <span className="bg-red-600 text-white text-xs px-2 py-1 rounded-full">
+                            <span className="badge badge-error">
                               {unreadCount} new
                             </span>
                           )}
                         </div>
 
                         {lastMessage && (
-                          <div className="bg-neutral-700 rounded p-3 mt-3">
-                            <p className="text-sm text-neutral-300">
+                          <div className="bg-regal-navy-50 rounded-lg p-3 mt-3">
+                            <p className="text-sm text-regal-navy-800">
                               <span className="font-medium inline-flex items-center gap-1">
-                                <span>{contextIcon}</span>
+                                <ContextIcon color="currentColor" />
                                 <span>{contextLabel}:</span>
                               </span>{' '}
                               <span className="text-wrap-aggressive line-clamp-1 overflow-hidden text-ellipsis">
                                 {lastMessage.message_content}
                               </span>
                             </p>
-                            <p className="text-xs text-neutral-500 mt-1">
+                            <p className="text-xs text-regal-navy-500 mt-1.5">
                               {new Date(lastMessage.sent_at).toLocaleString()}
                             </p>
                           </div>
@@ -377,20 +373,17 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <footer className="text-center mt-12 text-neutral-500 text-sm">
-          <a
-            href="/"
-            className="text-blue-400 hover:text-blue-300 underline mr-4"
-          >
+        <footer className="text-center mt-12 text-regal-navy-600 text-sm">
+          <a href="/" className="link mr-4">
             Create another bag
           </a>
-          |
+          <span className="text-regal-navy-300">|</span>
           <button
             onClick={() => {
               localStorage.removeItem('owner_session_token');
               window.location.href = '/';
             }}
-            className="text-neutral-400 hover:text-neutral-300 underline ml-4"
+            className="link ml-4"
           >
             Logout
           </button>

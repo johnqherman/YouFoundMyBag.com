@@ -10,12 +10,12 @@ export default function StepIndicator({
   stepNames,
 }: StepIndicatorProps) {
   return (
-    <div className="mb-4">
+    <div className="mb-8">
       <div className="relative">
-        <div className="absolute top-1.5 left-1.5 right-1.5 h-px bg-neutral-700" />
+        <div className="absolute top-1.5 left-1.5 right-1.5 h-0.5 bg-regal-navy-200" />
 
         <div
-          className="absolute top-1.5 left-1.5 h-px bg-neutral-400 transition-all duration-300 ease-in-out"
+          className="absolute top-1.5 left-1.5 h-0.5 bg-regal-navy-600 transition-all duration-300 ease-in-out"
           style={{
             width: `${Math.max(0, ((currentStep - 1) / (totalSteps - 1)) * 100)}%`,
             maxWidth: 'calc(100% - 0.75rem)',
@@ -31,16 +31,16 @@ export default function StepIndicator({
             return (
               <div key={index} className="group relative" title={name}>
                 <div
-                  className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                  className={`w-3 h-3 rounded-full transition-all duration-200 border-2 ${
                     isCompleted
-                      ? 'bg-neutral-300'
+                      ? 'bg-regal-navy-600 border-regal-navy-600'
                       : isActive
-                        ? 'bg-white'
-                        : 'bg-neutral-600'
+                        ? 'bg-white border-regal-navy-600'
+                        : 'bg-white border-regal-navy-300'
                   }`}
                 />
 
-                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-neutral-800 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2.5 py-1 bg-regal-navy-900 text-white text-xs rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none shadow-soft-md">
                   {name}
                 </div>
               </div>

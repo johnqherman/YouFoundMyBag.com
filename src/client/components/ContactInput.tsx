@@ -1,9 +1,15 @@
 import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import 'intl-tel-input/styles';
 import IntlTelInput from 'intl-tel-input/reactWithUtils';
-import '../intl-tel-input-dark-theme.css';
 import type { ContactWithId } from '../types/index';
 import { emailSchema } from '../../infrastructure/utils/validation';
+import {
+  SignalIcon,
+  WhatsAppIcon,
+  TelegramIcon,
+  InstagramIcon,
+  brandColors,
+} from './icons/BrandIcons';
 
 interface ContactInputProps {
   contact: ContactWithId;
@@ -139,13 +145,70 @@ export default function ContactInput({
     return 'text';
   };
 
+  const getContactTypeIcon = (type: string) => {
+    const iconProps = { size: 18, className: '' };
+    switch (type) {
+      case 'signal':
+        return (
+          <SignalIcon {...iconProps} style={{ color: brandColors.signal }} />
+        );
+      case 'whatsapp':
+        return (
+          <WhatsAppIcon
+            {...iconProps}
+            style={{ color: brandColors.whatsapp }}
+          />
+        );
+      case 'telegram':
+        return (
+          <TelegramIcon
+            {...iconProps}
+            style={{ color: brandColors.telegram }}
+          />
+        );
+      case 'instagram':
+        return (
+          <InstagramIcon
+            {...iconProps}
+            style={{ color: brandColors.instagram }}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
+  const getContactTypeLabel = (type: string) => {
+    switch (type) {
+      case 'sms':
+        return 'Phone Number';
+      case 'whatsapp':
+        return 'WhatsApp';
+      case 'email':
+        return 'Email';
+      case 'instagram':
+        return 'Instagram';
+      case 'telegram':
+        return 'Telegram';
+      case 'signal':
+        return 'Signal';
+      case 'other':
+        return 'Other';
+      default:
+        return type;
+    }
+  };
+
   return (
-    <div className="bg-neutral-800 rounded-xl p-4 relative">
+    <div
+      className="contact-input-wrapper bg-regal-navy-50 border border-regal-navy-200 rounded-lg p-4 relative transition-all duration-200 hover:border-regal-navy-300 hover:shadow-md"
+      data-type={contact.type}
+    >
       {showRemoveButton && (
         <button
           type="button"
           onClick={onRemove}
-          className="absolute top-2 right-2 text-red-400 hover:text-red-300 text-sm font-bold w-6 h-6 flex items-center justify-center rounded-full hover:bg-red-900/20"
+          className="absolute top-2 right-2 text-cinnabar-600 hover:text-cinnabar-700 text-xl font-bold w-6 h-6 flex items-center justify-center rounded-full hover:bg-cinnabar-50 transition-all duration-200 hover:scale-110"
           aria-label="Remove contact"
         >
           ×
@@ -153,23 +216,46 @@ export default function ContactInput({
       )}
 
       <div className="pr-8">
-        <select
-          value={contact.type}
-          onChange={(e) => handleTypeChange(e.target.value)}
-          className="input-field w-auto mb-3"
-        >
-          {availableTypes.map((type) => (
-            <option key={type} value={type}>
-              {type === 'sms' && 'Phone Number'}
-              {type === 'whatsapp' && 'WhatsApp'}
-              {type === 'email' && 'Email'}
-              {type === 'instagram' && 'Instagram'}
-              {type === 'telegram' && 'Telegram'}
-              {type === 'signal' && 'Signal'}
-              {type === 'other' && 'Other'}
-            </option>
-          ))}
-        </select>
+        <div className="relative mb-3 w-fit">
+          <div className="absolute left-3 top-0 bottom-0 pointer-events-none z-10 flex items-center brand-icon-appear">
+            {getContactTypeIcon(contact.type)}
+          </div>
+          <select
+            value={contact.type}
+            onChange={(e) => handleTypeChange(e.target.value)}
+            className="contact-type-dropdown input-field w-auto appearance-none pr-8"
+            style={{
+              paddingLeft:
+                contact.type === 'signal' ||
+                contact.type === 'whatsapp' ||
+                contact.type === 'telegram' ||
+                contact.type === 'instagram'
+                  ? '2.5rem'
+                  : '0.75rem',
+            }}
+          >
+            {availableTypes.map((type) => (
+              <option key={type} value={type}>
+                {getContactTypeLabel(type)}
+              </option>
+            ))}
+          </select>
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none transition-transform duration-200">
+            <svg
+              className="w-4 h-4 text-regal-navy-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </div>
+        </div>
 
         {contact.type === 'other' && (
           <input
@@ -207,7 +293,7 @@ export default function ContactInput({
                 initialCountry: 'us',
               }}
               inputProps={{
-                className: `input-field ${!isPhoneValid && phoneNumber ? 'border-red-500' : ''}`,
+                className: `input-field ${!isPhoneValid && phoneNumber ? 'border-cinnabar-500' : ''}`,
                 required: true,
                 onBlur: () => {
                   if (isMountedRef.current) {
@@ -223,10 +309,11 @@ export default function ContactInput({
         ) : contact.type === 'instagram' || contact.type === 'telegram' ? (
           <div
             key={`social-${contact.id}`}
-            className={`relative mb-3 ${errors.length > 0 ? 'border-red-500' : ''}`}
+            className={`relative mb-3 ${errors.length > 0 ? 'border-cinnabar-500' : ''}`}
           >
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none">
-              @
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none z-10 flex items-center gap-1.5">
+              {getContactTypeIcon(contact.type)}
+              <span className="text-regal-navy-500 font-medium">@</span>
             </div>
             <input
               key={`social-input-${contact.id}`}
@@ -234,7 +321,8 @@ export default function ContactInput({
               placeholder={getPlaceholder()}
               value={contact.value}
               onChange={(e) => handleNonPhoneValueChange(e.target.value)}
-              className={`input-field pl-8 ${errors.length > 0 ? 'border-red-500' : ''}`}
+              className={`contact-input-with-icon input-field transition-all duration-200 ${errors.length > 0 ? 'border-cinnabar-500' : ''}`}
+              style={{ paddingLeft: '3.5rem' }}
               required
             />
           </div>
@@ -245,7 +333,7 @@ export default function ContactInput({
             placeholder={getPlaceholder()}
             value={contact.value}
             onChange={(e) => handleNonPhoneValueChange(e.target.value)}
-            className={`input-field mb-3 ${errors.length > 0 ? 'border-red-500' : ''}`}
+            className={`input-field mb-3 ${errors.length > 0 ? 'border-cinnabar-500' : ''}`}
             required
           />
         )}
@@ -256,16 +344,16 @@ export default function ContactInput({
               type="checkbox"
               checked={contact.is_primary || false}
               onChange={(e) => handlePrimaryChange(e.target.checked)}
-              className="rounded border-neutral-600 bg-neutral-700 text-blue-500"
+              className="rounded border-regal-navy-300 bg-white text-regal-navy-600 focus:ring-regal-navy-500"
             />
-            <span className="text-neutral-400">Primary contact method</span>
+            <span className="text-regal-navy-700">Primary contact method</span>
           </label>
         </div>
 
         {errors.length > 0 && (
-          <div className="mb-3">
+          <div className="mt-2">
             {errors.map((error, index) => (
-              <p key={index} className="text-red-400 text-xs">
+              <p key={index} className="text-cinnabar-600 text-xs">
                 {error}
               </p>
             ))}
@@ -273,8 +361,8 @@ export default function ContactInput({
         )}
 
         {isPhoneType(contact.type) && !isPhoneValid && phoneNumber.trim() && (
-          <div className="mb-3">
-            <p className="text-red-400 text-xs">
+          <div className="mt-2">
+            <p className="text-cinnabar-600 text-xs">
               Please enter a valid phone number
             </p>
           </div>

@@ -3,6 +3,7 @@ import { config } from '../../infrastructure/config/index.js';
 import { createReadableShortId } from '../../infrastructure/utils/short-id.js';
 import * as repository from './repository.js';
 import type { CreateBagRequest } from '../../client/types/index.js';
+import { sendBagCreatedEmail } from '../../infrastructure/email/index.js';
 
 export async function createBagWithQR(
   data: CreateBagRequest,
@@ -32,6 +33,23 @@ export async function createBagWithQR(
     margin: 2,
     color: { dark: '#000000', light: '#ffffff' },
   });
+
+  if (bag.owner_email && bag.secure_messaging_enabled) {
+    try {
+      await sendBagCreatedEmail({
+        email: bag.owner_email,
+        ownerName: bag.owner_name,
+        bagName: bag.bag_name,
+        shortId: bag.short_id,
+        bagUrl,
+      });
+    } catch (emailError) {
+      console.error(
+        `Failed to send bag created email to ${bag.owner_email}:`,
+        emailError
+      );
+    }
+  }
 
   return {
     short_id: bag.short_id,

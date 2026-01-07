@@ -16,19 +16,19 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 pb-20">
+    <div className="min-h-screen bg-regal-navy-50 text-regal-navy-900 pb-20">
       <div className="max-w-md mx-auto p-6 lg:max-w-2xl">
-        <header className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-4">
-            YouFoundMyBag!
-            <span className="text-xl text-neutral-500 font-normal ml-0.5">
+        <header className="text-center mb-12 mt-4">
+          <h1 className="text-4xl font-semibold mb-3 text-regal-navy-900">
+            YouFoundMyBag
+            <span className="text-xl text-regal-navy-500 font-normal ml-1">
               .com
             </span>
           </h1>
-          <p className="text-neutral-300 text-lg">
+          <p className="text-regal-navy-700 text-lg font-medium mb-2">
             Protect your belongings with smart recovery tags.
           </p>
-          <p className="text-neutral-400 mt-2">
+          <p className="text-regal-navy-600 mt-3 max-w-lg mx-auto leading-relaxed">
             Create a QR code for your bags, backpacks, and valuables. If someone
             finds them, they can contact you safely without seeing your personal
             info.
@@ -40,14 +40,14 @@ export default function HomePage() {
         </main>
       </div>
 
-      <footer className="fixed bottom-0 left-0 right-0 bg-neutral-950/80 backdrop-blur-sm text-center py-6 text-neutral-500 text-sm">
+      <footer className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-sm border-t border-regal-navy-100 text-center py-4 text-regal-navy-500 text-sm">
         <p>
           Privacy-first • No tracking •{' '}
           <a
             href="https://github.com/johnqherman/YouFoundMyBag.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-neutral-400 transition-colors duration-200"
+            className="link hover:text-regal-navy-700"
           >
             Open source
           </a>

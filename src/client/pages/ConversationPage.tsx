@@ -8,6 +8,11 @@ import {
   formatConversationParticipant,
   getContextualReplyPlaceholder,
 } from '../../infrastructure/utils/personalization';
+import {
+  ErrorIcon,
+  QuestionIcon,
+  CheckIcon,
+} from '../components/icons/AppIcons';
 
 function formatBagDisplayName(
   ownerName?: string,
@@ -188,10 +193,10 @@ export default function ConversationPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-neutral-950 text-neutral-100 flex items-center justify-center">
+      <div className="min-h-screen bg-regal-navy-50 text-regal-navy-900 flex items-center justify-center">
         <div className="text-center">
           <LoadingSpinner />
-          <p className="mt-4 text-neutral-400">Loading conversation...</p>
+          <p className="mt-4 text-regal-navy-600">Loading conversation...</p>
         </div>
       </div>
     );
@@ -199,18 +204,20 @@ export default function ConversationPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-neutral-950 text-neutral-100">
+      <div className="min-h-screen bg-regal-navy-50 text-regal-navy-900">
         <div className="max-w-readable mx-auto p-6">
           <div className="text-center">
-            <div className="text-6xl mb-4">❌</div>
-            <h1 className="text-2xl font-bold text-red-400 mb-4">
+            <div
+              className="mb-4 flex justify-center text-cinnabar-600"
+              style={{ fontSize: '4rem' }}
+            >
+              <ErrorIcon color="currentColor" />
+            </div>
+            <h1 className="text-2xl font-semibold text-cinnabar-600 mb-4">
               Error Loading Conversation
             </h1>
-            <p className="text-neutral-400 mb-6">{error}</p>
-            <Link
-              to="/dashboard"
-              className="text-blue-400 hover:text-blue-300 underline"
-            >
+            <p className="text-regal-navy-600 mb-6">{error}</p>
+            <Link to="/dashboard" className="link">
               Return to Dashboard
             </Link>
           </div>
@@ -221,21 +228,23 @@ export default function ConversationPage() {
 
   if (!conversation) {
     return (
-      <div className="min-h-screen bg-neutral-950 text-neutral-100">
+      <div className="min-h-screen bg-regal-navy-50 text-regal-navy-900">
         <div className="max-w-readable mx-auto p-6">
           <div className="text-center">
-            <div className="text-6xl mb-4">❓</div>
-            <h1 className="text-2xl font-bold text-yellow-400 mb-4">
+            <div
+              className="mb-4 flex justify-center text-saffron-700"
+              style={{ fontSize: '4rem' }}
+            >
+              <QuestionIcon color="currentColor" />
+            </div>
+            <h1 className="text-2xl font-semibold text-saffron-700 mb-4">
               Conversation Not Found
             </h1>
-            <p className="text-neutral-400 mb-6">
+            <p className="text-regal-navy-600 mb-6">
               The conversation you&apos;re looking for doesn&apos;t exist or you
               don&apos;t have access to it.
             </p>
-            <Link
-              to="/dashboard"
-              className="text-blue-400 hover:text-blue-300 underline"
-            >
+            <Link to="/dashboard" className="link">
               Return to Dashboard
             </Link>
           </div>
@@ -245,16 +254,13 @@ export default function ConversationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100">
+    <div className="min-h-screen bg-regal-navy-50 text-regal-navy-900">
       <div className="max-w-4xl mx-auto p-6">
         <div className="mb-6">
-          <Link
-            to="/dashboard"
-            className="text-blue-400 hover:text-blue-300 underline mb-4 inline-block"
-          >
+          <Link to="/dashboard" className="link mb-4 inline-block">
             ← Back to Dashboard
           </Link>
-          <h1 className="text-3xl font-bold mb-2">
+          <h1 className="text-3xl font-semibold mb-2">
             Conversation about{' '}
             {formatBagDisplayName(
               conversation.bag.owner_name,
@@ -262,15 +268,15 @@ export default function ConversationPage() {
               conversation.bag.short_id
             )}
           </h1>
-          <p className="text-neutral-400">
+          <p className="text-regal-navy-600">
             Status:{' '}
             <span
-              className={`font-medium ${
+              className={`badge ${
                 conversation.conversation.status === 'active'
-                  ? 'text-green-400'
+                  ? 'badge-success'
                   : conversation.conversation.status === 'resolved'
-                    ? 'text-blue-400'
-                    : 'text-neutral-400'
+                    ? 'badge-neutral'
+                    : 'badge-neutral'
               }`}
             >
               {conversation.conversation.status === 'resolved'
@@ -285,18 +291,18 @@ export default function ConversationPage() {
           </p>
         </div>
 
-        <div className="space-y-4 mb-6">
+        <div className="space-y-3 mb-6">
           {conversation.messages.map((message: ConversationMessage) => (
             <div
               key={message.id}
               className={`p-4 rounded-lg ${
                 message.sender_type === 'owner'
-                  ? 'bg-blue-500 text-white ml-8'
-                  : 'bg-neutral-200 text-neutral-900 mr-8'
+                  ? 'bg-regal-navy-600 text-white ml-12 shadow-soft'
+                  : 'bg-white border border-regal-navy-200 text-regal-navy-900 mr-12 shadow-soft'
               }`}
             >
               <div className="flex justify-between items-start mb-2">
-                <span className="font-medium">
+                <span className="font-medium text-sm">
                   {formatConversationParticipant(
                     message.sender_type,
                     {
@@ -308,22 +314,16 @@ export default function ConversationPage() {
                   )}
                 </span>
                 <span
-                  className={`text-sm ${
+                  className={`text-xs ${
                     message.sender_type === 'owner'
-                      ? 'text-blue-100'
-                      : 'text-neutral-600'
+                      ? 'text-regal-navy-200'
+                      : 'text-regal-navy-500'
                   }`}
                 >
                   {new Date(message.sent_at).toLocaleString()}
                 </span>
               </div>
-              <p
-                className={`text-wrap-aggressive ${
-                  message.sender_type === 'owner'
-                    ? 'text-white'
-                    : 'text-neutral-900'
-                }`}
-              >
+              <p className="text-wrap-aggressive leading-relaxed">
                 {message.message_content}
               </p>
             </div>
@@ -332,8 +332,10 @@ export default function ConversationPage() {
         </div>
 
         {conversation.conversation.status === 'active' && (
-          <form onSubmit={sendReply} className="bg-neutral-800 rounded-lg p-4">
-            <h3 className="text-lg font-semibold mb-4">Send a Reply</h3>
+          <form onSubmit={sendReply} className="card">
+            <h3 className="text-lg font-semibold mb-4 text-regal-navy-900">
+              Send a Reply
+            </h3>
             <div onKeyDown={handleKeyDown}>
               <CharacterLimitTextArea
                 ref={replyInputRef}
@@ -353,11 +355,11 @@ export default function ConversationPage() {
                 disabled={sending}
               />
             </div>
-            <div className="mt-4 flex justify-between">
+            <div className="mt-4 flex justify-between gap-3">
               <button
                 type="button"
                 onClick={handleResolveConversation}
-                className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-neutral-600 text-white rounded-lg"
+                className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={sending || resolving}
               >
                 {resolving ? 'Resolving...' : 'Mark as Resolved'}
@@ -365,7 +367,7 @@ export default function ConversationPage() {
               <button
                 type="submit"
                 disabled={!replyMessage.trim() || sending}
-                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-neutral-600 text-white rounded-lg"
+                className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {sending ? 'Sending...' : 'Send Reply'}
               </button>
@@ -374,22 +376,20 @@ export default function ConversationPage() {
         )}
 
         {conversation.conversation.status === 'resolved' && (
-          <div className="bg-blue-900/20 border border-blue-400/30 rounded-lg p-4 text-center">
-            <div className="text-blue-400 text-lg mb-2">✓</div>
-            <p className="text-blue-300 font-medium">
+          <div className="alert-success text-center">
+            <div className="mb-2 flex justify-center">
+              <CheckIcon color="currentColor" />
+            </div>
+            <p className="font-medium mb-1">
               This conversation has been resolved.
             </p>
-            <p className="text-neutral-400 text-sm mt-1">
-              No further replies can be sent.
-            </p>
+            <p className="text-sm">No further replies can be sent.</p>
           </div>
         )}
 
         {conversation.conversation.status === 'archived' && (
-          <div className="bg-neutral-800 rounded-lg p-4 text-center">
-            <p className="text-neutral-400">
-              This conversation has been archived.
-            </p>
+          <div className="alert-info text-center">
+            <p>This conversation has been archived.</p>
           </div>
         )}
       </div>

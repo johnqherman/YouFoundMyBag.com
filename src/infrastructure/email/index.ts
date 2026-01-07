@@ -6,6 +6,10 @@ import {
 } from '../../features/auth/service.js';
 import { secureEmailContent } from '../security/sanitization.js';
 import { lowercaseBagName } from '../utils/formatting.js';
+import {
+  getUnsubscribeToken,
+  shouldSendEmail,
+} from '../../features/email-preferences/service.js';
 
 let transporter: nodemailer.Transporter | null = null;
 
@@ -32,6 +36,35 @@ function getTransporter() {
 
 function getDashboardUrl(): string {
   return process.env.APP_URL || 'http://localhost:3000';
+}
+
+async function getEmailFooter(email: string): Promise<{
+  textFooter: string;
+  htmlFooter: string;
+}> {
+  const unsubscribeToken = await getUnsubscribeToken(email);
+  const dashboardUrl = getDashboardUrl();
+  const preferencesUrl = `${dashboardUrl}/email-preferences/${unsubscribeToken}`;
+
+  const textFooter = `
+
+---
+YouFoundMyBag.com - Privacy-first lost item recovery
+
+Manage your email preferences: ${preferencesUrl}`;
+
+  const htmlFooter = `
+      <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+
+      <p style="color: #6b7280; font-size: 12px; text-align: center; margin-bottom: 8px;">
+        YouFoundMyBag.com - Privacy-first lost item recovery
+      </p>
+
+      <p style="color: #6b7280; font-size: 12px; text-align: center;">
+        <a href="${preferencesUrl}" style="color: #6b7280; text-decoration: underline;">Manage your email preferences</a>
+      </p>`;
+
+  return { textFooter, htmlFooter };
 }
 
 export async function sendReplyEmail({
@@ -68,6 +101,8 @@ export async function sendReplyEmail({
     ? `${dashboardUrl}/finder/${bagShortId}?conversation=${conversationId}`
     : `${dashboardUrl}/dashboard/conversation/${conversationId}`;
 
+  const { textFooter, htmlFooter } = await getEmailFooter(recipientEmail);
+
   const textBody = `
 ${isFromOwner ? '📬 The bag owner responded to you!' : '💬 New message about your bag'}
 
@@ -77,7 +112,7 @@ ${safeSenderName} wrote:
 To continue the conversation, click here:
 ${continueUrl}
 
-This message was sent through YouFoundMyBag.com's secure messaging system.
+This message was sent through YouFoundMyBag.com's secure messaging system.${textFooter}
   `;
 
   const htmlBody = `
@@ -105,6 +140,7 @@ This message was sent through YouFoundMyBag.com's secure messaging system.
       <p style="color: #6b7280; font-size: 12px; text-align: center;">
         This message was sent through YouFoundMyBag.com's secure messaging system.
       </p>
+${htmlFooter}
     </div>
   `;
 
@@ -157,6 +193,8 @@ export async function sendMagicLinkEmail({
     ? `Someone found your ${bagType}! Click to respond`
     : 'Access your YouFoundMyBag dashboard';
 
+  const { textFooter, htmlFooter } = await getEmailFooter(email);
+
   const textBody = `
 ${conversationId ? `🎒 Great news! Someone found your ${bagType} and wants to return it.` : 'Access your YouFoundMyBag dashboard'}
 
@@ -167,9 +205,7 @@ This link will expire in 24 hours.
 
 ${conversationId ? `You can securely communicate with the finder to arrange the return of your ${bagType}.` : 'You can view all your bags and manage any messages from finders.'}
 
-If you didn't request this access, you can safely ignore this email.
-
-YouFoundMyBag.com - Privacy-first lost item recovery
+If you didn't request this access, you can safely ignore this email.${textFooter}
   `;
 
   const htmlBody = `
@@ -204,12 +240,7 @@ YouFoundMyBag.com - Privacy-first lost item recovery
       <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
         If you didn't request this access, you can safely ignore this email.
       </p>
-
-      <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
-
-      <p style="color: #6b7280; font-size: 12px; text-align: center;">
-        YouFoundMyBag.com - Privacy-first lost item recovery
-      </p>
+${htmlFooter}
     </div>
   `;
 
@@ -252,6 +283,8 @@ export async function sendFinderMagicLinkEmail({
 
   const subject = 'Your message was sent! Continue the conversation';
 
+  const { textFooter, htmlFooter } = await getEmailFooter(email);
+
   const textBody = `
 ✅ Your message was sent to the bag owner!
 
@@ -262,7 +295,7 @@ This link will expire in 24 hours.
 
 You can communicate securely with the owner to arrange the bag return.
 
-YouFoundMyBag.com - Privacy-first lost item recovery
+Save this email to easily access the conversation later.${textFooter}
   `;
 
   const htmlBody = `
@@ -293,12 +326,7 @@ YouFoundMyBag.com - Privacy-first lost item recovery
       <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
         Save this email to easily access the conversation later.
       </p>
-
-      <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
-
-      <p style="color: #6b7280; font-size: 12px; text-align: center;">
-        YouFoundMyBag.com - Privacy-first lost item recovery
-      </p>
+${htmlFooter}
     </div>
   `;
 
@@ -328,6 +356,14 @@ export async function sendFinderReplyNotification({
   message: string;
   conversationId: string;
 }): Promise<void> {
+  const canSend = await shouldSendEmail(finderEmail, 'reply_notification');
+  if (!canSend) {
+    console.log(
+      `Skipping reply notification to ${finderEmail} - user has disabled this notification`
+    );
+    return;
+  }
+
   const { magicLinkToken } = await generateFinderMagicLinkToken(
     finderEmail,
     conversationId
@@ -347,6 +383,8 @@ export async function sendFinderReplyNotification({
 
   const subject = `${safeSenderName} responded to you!`;
 
+  const { textFooter, htmlFooter } = await getEmailFooter(finderEmail);
+
   const textBody = `
 📬 ${safeSenderName} responded to you!
 
@@ -356,9 +394,7 @@ ${safeSenderName} wrote:
 Click this secure link to continue the conversation:
 ${magicLinkUrl}
 
-This link will expire in 24 hours.
-
-YouFoundMyBag.com - Privacy-first lost item recovery
+This link will expire in 24 hours.${textFooter}
   `;
 
   const htmlBody = `
@@ -386,12 +422,7 @@ YouFoundMyBag.com - Privacy-first lost item recovery
           🔒 <strong>Security Notice:</strong> This link expires in 24 hours.
         </p>
       </div>
-
-      <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
-
-      <p style="color: #6b7280; font-size: 12px; text-align: center;">
-        YouFoundMyBag.com - Privacy-first lost item recovery
-      </p>
+${htmlFooter}
     </div>
   `;
 
@@ -423,6 +454,14 @@ export async function sendOwnerReplyNotification({
   conversationId: string;
   bagIds: string[];
 }): Promise<void> {
+  const canSend = await shouldSendEmail(ownerEmail, 'reply_notification');
+  if (!canSend) {
+    console.log(
+      `Skipping reply notification to ${ownerEmail} - user has disabled this notification`
+    );
+    return;
+  }
+
   const { magicLinkToken } = await generateMagicLinkToken(
     ownerEmail,
     conversationId,
@@ -443,6 +482,8 @@ export async function sendOwnerReplyNotification({
 
   const subject = `${safeSenderName} responded to you!`;
 
+  const { textFooter, htmlFooter } = await getEmailFooter(ownerEmail);
+
   const textBody = `
 💬 ${safeSenderName} responded to you!
 
@@ -452,9 +493,7 @@ ${safeSenderName} wrote:
 Click this secure link to continue the conversation:
 ${magicLinkUrl}
 
-This link will expire in 24 hours.
-
-YouFoundMyBag.com - Privacy-first lost item recovery
+This link will expire in 24 hours.${textFooter}
   `;
 
   const htmlBody = `
@@ -482,12 +521,7 @@ YouFoundMyBag.com - Privacy-first lost item recovery
           🔒 <strong>Security Notice:</strong> This link expires in 24 hours.
         </p>
       </div>
-
-      <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
-
-      <p style="color: #6b7280; font-size: 12px; text-align: center;">
-        YouFoundMyBag.com - Privacy-first lost item recovery
-      </p>
+${htmlFooter}
     </div>
   `;
 
@@ -530,6 +564,17 @@ export async function sendContextualFinderNotification({
   context: MessageContext;
   names: NameInfo;
 }): Promise<void> {
+  const canSend = await shouldSendEmail(
+    finderEmail,
+    'conversation_notification'
+  );
+  if (!canSend) {
+    console.log(
+      `Skipping conversation notification to ${finderEmail} - user has disabled this notification`
+    );
+    return;
+  }
+
   const { magicLinkToken } = await generateFinderMagicLinkToken(
     finderEmail,
     conversationId
@@ -566,6 +611,8 @@ export async function sendContextualFinderNotification({
     names
   );
 
+  const { textFooter, htmlFooter } = await getEmailFooter(finderEmail);
+
   const textBody = `
 ${greeting}
 
@@ -575,9 +622,7 @@ ${safeSenderName} wrote:
 Click this secure link to continue the conversation:
 ${magicLinkUrl}
 
-This link will expire in 24 hours.
-
-YouFoundMyBag.com - Privacy-first lost item recovery
+This link will expire in 24 hours.${textFooter}
   `;
 
   const htmlBody = `
@@ -609,12 +654,7 @@ YouFoundMyBag.com - Privacy-first lost item recovery
           🔒 <strong>Security Notice:</strong> This link expires in 24 hours.
         </p>
       </div>
-
-      <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
-
-      <p style="color: #6b7280; font-size: 12px; text-align: center;">
-        YouFoundMyBag.com - Privacy-first lost item recovery
-      </p>
+${htmlFooter}
     </div>
   `;
 
@@ -655,6 +695,17 @@ export async function sendContextualOwnerNotification({
   context: MessageContext;
   names: NameInfo;
 }): Promise<void> {
+  const canSend = await shouldSendEmail(
+    ownerEmail,
+    'conversation_notification'
+  );
+  if (!canSend) {
+    console.log(
+      `Skipping conversation notification to ${ownerEmail} - user has disabled this notification`
+    );
+    return;
+  }
+
   const { magicLinkToken } = await generateMagicLinkToken(
     ownerEmail,
     conversationId,
@@ -688,6 +739,8 @@ export async function sendContextualOwnerNotification({
     names
   );
 
+  const { textFooter, htmlFooter } = await getEmailFooter(ownerEmail);
+
   const textBody = `
 ${greeting}
 
@@ -697,9 +750,7 @@ ${safeSenderName} wrote:
 Click this secure link to continue the conversation:
 ${magicLinkUrl}
 
-This link will expire in 24 hours.
-
-YouFoundMyBag.com - Privacy-first lost item recovery
+This link will expire in 24 hours.${textFooter}
   `;
 
   const htmlBody = `
@@ -731,12 +782,7 @@ YouFoundMyBag.com - Privacy-first lost item recovery
           🔒 <strong>Security Notice:</strong> This link expires in 24 hours.
         </p>
       </div>
-
-      <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
-
-      <p style="color: #6b7280; font-size: 12px; text-align: center;">
-        YouFoundMyBag.com - Privacy-first lost item recovery
-      </p>
+${htmlFooter}
     </div>
   `;
 
@@ -769,6 +815,17 @@ export async function sendConversationResolvedNotification({
   conversationId: string;
   names: NameInfo;
 }): Promise<void> {
+  const canSend = await shouldSendEmail(
+    finderEmail,
+    'conversation_notification'
+  );
+  if (!canSend) {
+    console.log(
+      `Skipping conversation resolved notification to ${finderEmail} - user has disabled this notification`
+    );
+    return;
+  }
+
   const { magicLinkToken } = await generateFinderMagicLinkToken(
     finderEmail,
     conversationId
@@ -799,6 +856,8 @@ export async function sendConversationResolvedNotification({
 
   const subject = `Conversation about ${bagDisplayName} has been resolved`;
 
+  const { textFooter, htmlFooter } = await getEmailFooter(finderEmail);
+
   const textBody = `
 ✅ Good news! The conversation about ${bagDisplayName} has been marked as resolved.
 
@@ -809,9 +868,7 @@ ${magicLinkUrl}
 
 This link will expire in 24 hours.
 
-Thank you for using YouFoundMyBag.com to help reunite lost items with their owners!
-
-YouFoundMyBag.com - Privacy-first lost item recovery
+Thank you for using YouFoundMyBag.com to help reunite lost items with their owners!${textFooter}
   `;
 
   const htmlBody = `
@@ -852,12 +909,7 @@ YouFoundMyBag.com - Privacy-first lost item recovery
       <p style="color: #4b5563; text-align: center; margin: 30px 0;">
         Thank you for using YouFoundMyBag.com to help reunite lost items with their owners!
       </p>
-
-      <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
-
-      <p style="color: #6b7280; font-size: 12px; text-align: center;">
-        YouFoundMyBag.com - Privacy-first lost item recovery
-      </p>
+${htmlFooter}
     </div>
   `;
 
@@ -877,6 +929,128 @@ YouFoundMyBag.com - Privacy-first lost item recovery
       `Conversation resolved notification failed to ${finderEmail}:`,
       error
     );
+    throw error;
+  }
+}
+
+export async function sendBagCreatedEmail({
+  email,
+  ownerName,
+  bagName,
+  shortId,
+  bagUrl,
+}: {
+  email: string;
+  ownerName?: string;
+  bagName?: string;
+  shortId: string;
+  bagUrl: string;
+}): Promise<void> {
+  const canSend = await shouldSendEmail(email, 'bag_created');
+  if (!canSend) {
+    console.log(
+      `Skipping bag created email to ${email} - user has disabled this notification`
+    );
+    return;
+  }
+
+  const emailer = getTransporter();
+  if (!emailer) {
+    console.log('Email not configured - bag created email not sent');
+    return;
+  }
+
+  const { magicLinkToken } = await generateMagicLinkToken(email);
+
+  const dashboardUrl = getDashboardUrl();
+  const magicLinkUrl = `${dashboardUrl}/auth/verify?token=${magicLinkToken}`;
+
+  const { content: safeOwnerName } = secureEmailContent(ownerName || '');
+  const bagType = lowercaseBagName(bagName);
+  const { content: safeBagType } = secureEmailContent(bagType);
+
+  const greeting = ownerName ? `Hi ${safeOwnerName}` : 'Hi';
+  const yourBag = bagName ? `your ${safeBagType}` : 'your bag';
+
+  const subject = `Your ${bagType} tag is ready! Access your dashboard`;
+
+  const { textFooter, htmlFooter } = await getEmailFooter(email);
+
+  const textBody = `
+${greeting},
+
+Your ${bagType} tag (${shortId}) has been successfully created!
+
+Your bag's unique page: ${bagUrl}
+
+What's next?
+• Print and attach the QR code to ${yourBag}
+• If someone finds ${yourBag}, they'll scan the code and can contact you securely
+• Access your dashboard anytime to manage ${yourBag} and view messages
+
+Click this secure link to access your dashboard:
+${magicLinkUrl}
+
+This link will expire in 24 hours. You can request a new one anytime.${textFooter}
+  `;
+
+  const htmlBody = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: #2563eb; font-size: 24px;">
+          Your ${safeBagType} tag is ready!
+        </h1>
+      </div>
+
+      <p style="color: #4b5563; margin-bottom: 20px;">
+        ${greeting},
+      </p>
+
+      <p style="color: #4b5563; margin-bottom: 20px;">
+        Your ${safeBagType} tag <strong>(${shortId})</strong> has been successfully created!
+      </p>
+
+      <div style="background-color: #f8fafc; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+        <p style="margin: 0 0 10px 0; color: #374151; font-weight: bold;">Your bag's unique page:</p>
+        <a href="${bagUrl}" style="color: #2563eb; word-break: break-all;">${bagUrl}</a>
+      </div>
+
+      <div style="background-color: #eff6ff; border-left: 4px solid #2563eb; padding: 15px; margin: 20px 0;">
+        <h3 style="margin: 0 0 10px 0; color: #1e40af; font-size: 16px;">What's next?</h3>
+        <ul style="margin: 0; padding-left: 20px; color: #4b5563;">
+          <li style="margin-bottom: 8px;">Print and attach the QR code to ${yourBag}</li>
+          <li style="margin-bottom: 8px;">If someone finds ${yourBag}, they'll scan the code and can contact you securely</li>
+          <li>Access your dashboard anytime to manage ${yourBag} and view messages</li>
+        </ul>
+      </div>
+
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${magicLinkUrl}"
+           style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
+          Access Your Dashboard
+        </a>
+      </div>
+
+      <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
+        <p style="margin: 0; color: #92400e; font-size: 14px;">
+          🔒 <strong>Security Notice:</strong> This link expires in 24 hours. You can request a new one anytime.
+        </p>
+      </div>
+${htmlFooter}
+    </div>
+  `;
+
+  try {
+    await emailer.sendMail({
+      from: config.SMTP_FROM,
+      to: email,
+      subject,
+      text: textBody,
+      html: htmlBody,
+    });
+    console.log(`Bag created email sent to ${email}`);
+  } catch (error) {
+    console.error(`Bag created email failed to ${email}:`, error);
     throw error;
   }
 }

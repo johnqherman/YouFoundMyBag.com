@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { TIME_MS as t } from '../constants/timeConstants';
+import { SuccessIcon, ErrorIcon } from '../components/icons/AppIcons';
 
 export default function AuthVerifyPage() {
   const [searchParams] = useSearchParams();
@@ -73,7 +74,12 @@ export default function AuthVerifyPage() {
     return (
       <div className="min-h-screen bg-neutral-950 text-neutral-100 flex items-center justify-center">
         <div className="text-center">
-          <div className="text-6xl mb-4">✅</div>
+          <div
+            className="mb-4 flex justify-center text-green-400"
+            style={{ fontSize: '4rem' }}
+          >
+            <SuccessIcon color="currentColor" />
+          </div>
           <h1 className="text-2xl font-bold text-green-400 mb-4">
             Access Granted!
           </h1>
@@ -89,7 +95,12 @@ export default function AuthVerifyPage() {
     <div className="min-h-screen bg-neutral-950 text-neutral-100">
       <div className="max-w-md mx-auto p-6 lg:max-w-2xl">
         <div className="text-center">
-          <div className="text-6xl mb-4">❌</div>
+          <div
+            className="mb-4 flex justify-center text-red-400"
+            style={{ fontSize: '4rem' }}
+          >
+            <ErrorIcon color="currentColor" />
+          </div>
           <h1 className="text-2xl font-bold text-red-400 mb-4">
             Verification Failed
           </h1>

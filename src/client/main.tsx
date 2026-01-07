@@ -9,6 +9,7 @@ import DashboardPage from './pages/DashboardPage';
 import AuthVerifyPage from './pages/AuthVerifyPage';
 import ConversationPage from './pages/ConversationPage';
 import FinderConversationPage from './pages/FinderConversationPage';
+import EmailPreferencesPage from './pages/EmailPreferencesPage';
 
 function App() {
   return (
@@ -27,6 +28,10 @@ function App() {
             element={<FinderConversationPage />}
           />
           <Route path="/auth/verify" element={<AuthVerifyPage />} />
+          <Route
+            path="/email-preferences/:token"
+            element={<EmailPreferencesPage />}
+          />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </div>
