@@ -1,11 +1,54 @@
 import { Pool, PoolClient } from 'pg';
+import fs from 'fs';
 import { config } from '../config/index.js';
 import { logger } from '../logger/index.js';
 import { TIME_MS as t } from '../../client/constants/timeConstants.js';
 
+interface DatabaseSSLConfig {
+  rejectUnauthorized: boolean;
+  ca?: string;
+  cert?: string;
+  key?: string;
+}
+
+function getDatabaseSSLConfig(): DatabaseSSLConfig | false {
+  const sslMode = config.DATABASE_SSL_MODE;
+
+  if (sslMode === 'disable') {
+    return false;
+  }
+
+  const sslConfig: DatabaseSSLConfig = {
+    rejectUnauthorized: true,
+  };
+
+  if (sslMode === 'verify-ca' || sslMode === 'verify-full') {
+    if (config.DATABASE_SSL_CA_PATH) {
+      sslConfig.ca = fs.readFileSync(config.DATABASE_SSL_CA_PATH).toString();
+    }
+  }
+
+  if (config.DATABASE_SSL_CERT_PATH) {
+    sslConfig.cert = fs.readFileSync(config.DATABASE_SSL_CERT_PATH).toString();
+  }
+
+  if (config.DATABASE_SSL_KEY_PATH) {
+    sslConfig.key = fs.readFileSync(config.DATABASE_SSL_KEY_PATH).toString();
+  }
+
+  if (config.NODE_ENV === 'development' && !config.DATABASE_SSL_CA_PATH) {
+    logger.warn(
+      'Development mode: Database SSL certificate verification disabled (no CA certificate provided)'
+    );
+    sslConfig.rejectUnauthorized = false;
+  }
+
+  return sslConfig;
+}
+
 export const pool = new Pool({
   connectionString: config.DATABASE_URL,
-  ssl: config.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  ssl: getDatabaseSSLConfig(),
   max: 20,
   idleTimeoutMillis: t.THIRTY_SECONDS,
   connectionTimeoutMillis: t.TEN_SECONDS,

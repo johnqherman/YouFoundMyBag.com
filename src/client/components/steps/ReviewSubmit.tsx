@@ -56,7 +56,7 @@ interface SortableContactItemProps {
 
 function SortableContactItem({
   contact,
-  index,
+  index: _index,
   isDragDisabled,
 }: SortableContactItemProps) {
   const {

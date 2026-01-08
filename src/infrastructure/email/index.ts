@@ -12,6 +12,23 @@ import {
   shouldSendEmail,
 } from '../../features/email-preferences/service.js';
 
+interface SMTPTLSConfig {
+  rejectUnauthorized?: boolean;
+  minVersion?: string;
+}
+
+interface SMTPTransportConfig {
+  host?: string;
+  port?: number;
+  secure?: boolean;
+  auth?: {
+    user?: string;
+    pass?: string;
+  };
+  requireTLS?: boolean;
+  tls?: SMTPTLSConfig;
+}
+
 let transporter: nodemailer.Transporter | null = null;
 
 function getTransporter() {
@@ -19,17 +36,41 @@ function getTransporter() {
     const needsAuth = config.SMTP_HOST !== 'localhost';
 
     if (!needsAuth || (config.SMTP_USER && config.SMTP_PASS)) {
-      transporter = nodemailer.createTransport({
+      const transportConfig: SMTPTransportConfig = {
         host: config.SMTP_HOST,
         port: config.SMTP_PORT,
-        secure: false,
-        auth: needsAuth
-          ? {
-              user: config.SMTP_USER,
-              pass: config.SMTP_PASS,
-            }
-          : undefined,
-      });
+        secure: config.SMTP_SECURE,
+      };
+
+      if (needsAuth) {
+        transportConfig.auth = {
+          user: config.SMTP_USER,
+          pass: config.SMTP_PASS,
+        };
+      }
+
+      if (!config.SMTP_SECURE && config.SMTP_REQUIRE_TLS) {
+        transportConfig.requireTLS = true;
+        transportConfig.tls = {
+          rejectUnauthorized: config.SMTP_REJECT_UNAUTHORIZED,
+          minVersion: 'TLSv1.2',
+        };
+      } else if (config.SMTP_SECURE) {
+        transportConfig.tls = {
+          rejectUnauthorized: config.SMTP_REJECT_UNAUTHORIZED,
+          minVersion: 'TLSv1.2',
+        };
+      }
+
+      transporter = nodemailer.createTransport(
+        transportConfig as nodemailer.TransportOptions
+      );
+
+      if (config.NODE_ENV === 'development') {
+        logger.debug(
+          `SMTP configured: ${config.SMTP_HOST}:${config.SMTP_PORT}, secure=${config.SMTP_SECURE}, requireTLS=${config.SMTP_REQUIRE_TLS}`
+        );
+      }
     }
   }
   return transporter;
