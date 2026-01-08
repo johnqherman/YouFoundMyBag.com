@@ -34,12 +34,13 @@ let transporter: nodemailer.Transporter | null = null;
 function getTransporter() {
   if (!transporter && config.SMTP_HOST) {
     const needsAuth = config.SMTP_HOST !== 'localhost';
+    const isSecure = config.NODE_ENV === 'development' ? false : config.SMTP_SECURE
 
     if (!needsAuth || (config.SMTP_USER && config.SMTP_PASS)) {
       const transportConfig: SMTPTransportConfig = {
         host: config.SMTP_HOST,
         port: config.SMTP_PORT,
-        secure: config.SMTP_SECURE,
+        secure: isSecure,
       };
 
       if (needsAuth) {
@@ -49,17 +50,19 @@ function getTransporter() {
         };
       }
 
-      if (!config.SMTP_SECURE && config.SMTP_REQUIRE_TLS) {
-        transportConfig.requireTLS = true;
-        transportConfig.tls = {
-          rejectUnauthorized: config.SMTP_REJECT_UNAUTHORIZED,
-          minVersion: 'TLSv1.2',
-        };
-      } else if (config.SMTP_SECURE) {
-        transportConfig.tls = {
-          rejectUnauthorized: config.SMTP_REJECT_UNAUTHORIZED,
-          minVersion: 'TLSv1.2',
-        };
+      if (config.NODE_ENV !== 'development') {
+        if (!config.SMTP_SECURE && config.SMTP_REQUIRE_TLS) {
+          transportConfig.requireTLS = true;
+          transportConfig.tls = {
+            rejectUnauthorized: config.SMTP_REJECT_UNAUTHORIZED,
+            minVersion: 'TLSv1.2',
+          };
+        } else if (config.SMTP_SECURE) {
+          transportConfig.tls = {
+            rejectUnauthorized: config.SMTP_REJECT_UNAUTHORIZED,
+            minVersion: 'TLSv1.2',
+          };
+        }
       }
 
       transporter = nodemailer.createTransport(

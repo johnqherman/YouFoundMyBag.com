@@ -4,6 +4,7 @@ import { formatContactValue } from '../../infrastructure/utils/formatting';
 import {
   encryptField,
   decryptField,
+  hashForLookup,
 } from '../../infrastructure/security/encryption.js';
 
 export interface Bag {
@@ -49,17 +50,22 @@ export async function createBag(
     const optOutTimestamp = !secureMessagingEnabled ? new Date() : null;
     const optOutIpAddress = !secureMessagingEnabled ? ipAddress : null;
 
+    const ownerEmail = secureMessagingEnabled ? data.owner_email : null;
+    const ownerEmailEncrypted = ownerEmail ? encryptField(ownerEmail) : null;
+    const ownerEmailHash = ownerEmail ? hashForLookup(ownerEmail) : null;
+
     const bagResult = await client.query(
       `INSERT INTO bags (
-        short_id, owner_name, bag_name, owner_message, owner_email,
+        short_id, owner_name, bag_name, owner_message, owner_email, owner_email_hash,
         secure_messaging_enabled, opt_out_timestamp, opt_out_ip_address
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
       [
         shortId,
         data.owner_name || null,
         data.bag_name || null,
         data.owner_message || null,
-        secureMessagingEnabled ? data.owner_email : null,
+        ownerEmailEncrypted,
+        ownerEmailHash,
         secureMessagingEnabled,
         optOutTimestamp,
         optOutIpAddress,
@@ -89,7 +95,10 @@ export async function createBag(
       }
     }
 
-    return bag;
+    return {
+      ...bag,
+      owner_email: decryptField(bag.owner_email),
+    };
   });
 }
 
@@ -97,7 +106,13 @@ export async function getBagByShortId(shortId: string): Promise<Bag | null> {
   const result = await pool.query('SELECT * FROM bags WHERE short_id = $1', [
     shortId,
   ]);
-  return result.rows[0] || null;
+  const bag = result.rows[0];
+  if (!bag) return null;
+
+  return {
+    ...bag,
+    owner_email: decryptField(bag.owner_email),
+  };
 }
 
 export async function getFinderPageData(shortId: string) {

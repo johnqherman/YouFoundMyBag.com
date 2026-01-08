@@ -9,6 +9,7 @@ CREATE TABLE public.bags (
   bag_name VARCHAR(30),
   owner_message VARCHAR(150),
   owner_email VARCHAR(254),
+  owner_email_hash VARCHAR(64),
   secure_messaging_enabled BOOLEAN DEFAULT TRUE,
   opt_out_timestamp TIMESTAMP WITH TIME ZONE,
   opt_out_ip_address INET,
@@ -69,6 +70,7 @@ CREATE TABLE public.conversations (
   bag_id UUID REFERENCES public.bags (id) ON DELETE CASCADE,
   status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'resolved', 'archived')),
   finder_email VARCHAR(254),
+  finder_email_hash VARCHAR(64),
   finder_display_name VARCHAR(30),
   finder_notifications_sent INTEGER DEFAULT 0 NOT NULL,
   owner_notifications_sent INTEGER DEFAULT 0 NOT NULL,
@@ -99,7 +101,9 @@ CREATE TABLE public.owner_sessions (
 
 CREATE INDEX idx_bags_short_id ON public.bags (short_id);
 
-CREATE INDEX idx_bags_owner_email ON public.bags (owner_email);
+CREATE INDEX idx_bags_owner_email_hash ON public.bags (owner_email_hash)
+WHERE
+  owner_email_hash IS NOT NULL;
 
 CREATE INDEX idx_bags_status ON public.bags (status);
 
@@ -112,6 +116,10 @@ CREATE INDEX idx_contacts_bag_id ON public.contacts (bag_id);
 CREATE INDEX idx_messages_bag_id ON public.messages (bag_id);
 
 CREATE INDEX idx_conversations_bag_id ON public.conversations (bag_id);
+
+CREATE INDEX idx_conversations_finder_email_hash ON public.conversations (finder_email_hash)
+WHERE
+  finder_email_hash IS NOT NULL;
 
 CREATE INDEX idx_conversations_status ON public.conversations (status);
 

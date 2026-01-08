@@ -1,5 +1,11 @@
 import { pool } from '../../infrastructure/database/index.js';
-import { encrypt, decrypt } from '../../infrastructure/security/encryption.js';
+import {
+  encrypt,
+  decrypt,
+  encryptField,
+  decryptField,
+  hashForLookup,
+} from '../../infrastructure/security/encryption.js';
 import type {
   Conversation,
   ConversationMessage,
@@ -25,9 +31,12 @@ export async function createConversation(
   finderEmail?: string,
   finderDisplayName?: string
 ): Promise<Conversation> {
+  const finderEmailEncrypted = finderEmail ? encryptField(finderEmail) : null;
+  const finderEmailHash = finderEmail ? hashForLookup(finderEmail) : null;
+
   const conversationResult = await pool.query(
-    'INSERT INTO conversations (bag_id, finder_email, finder_display_name) VALUES ($1, $2, $3) RETURNING *',
-    [bagId, finderEmail || null, finderDisplayName || null]
+    'INSERT INTO conversations (bag_id, finder_email, finder_email_hash, finder_display_name) VALUES ($1, $2, $3, $4) RETURNING *',
+    [bagId, finderEmailEncrypted, finderEmailHash, finderDisplayName || null]
   );
 
   const conversation = conversationResult.rows[0];
@@ -42,7 +51,10 @@ export async function createConversation(
     [conversation.id]
   );
 
-  return conversation;
+  return {
+    ...conversation,
+    finder_email: decryptField(conversation.finder_email) ?? undefined,
+  };
 }
 
 export async function addMessage(
@@ -70,12 +82,17 @@ export async function getConversationsByBagId(
     'SELECT * FROM conversations WHERE bag_id = $1 ORDER BY last_message_at DESC',
     [bagId]
   );
-  return result.rows;
+  return result.rows.map((row) => ({
+    ...row,
+    finder_email: decryptField(row.finder_email) ?? undefined,
+  }));
 }
 
 export async function getConversationsByOwnerEmail(
   ownerEmail: string
 ): Promise<ConversationThread[]> {
+  const ownerEmailHash = hashForLookup(ownerEmail);
+
   const result = await pool.query(
     `
     SELECT
@@ -94,11 +111,11 @@ export async function getConversationsByOwnerEmail(
     FROM conversations c
     JOIN bags b ON c.bag_id = b.id
     LEFT JOIN conversation_messages cm ON c.id = cm.conversation_id
-    WHERE b.owner_email = $1
+    WHERE b.owner_email_hash = $1
     GROUP BY c.id, b.short_id, b.owner_name, b.bag_name, b.status
     ORDER BY c.last_message_at DESC
   `,
-    [ownerEmail]
+    [ownerEmailHash]
   );
 
   return result.rows.map((row) => ({
@@ -106,7 +123,7 @@ export async function getConversationsByOwnerEmail(
       id: row.id,
       bag_id: row.bag_id,
       status: row.status,
-      finder_email: row.finder_email,
+      finder_email: decryptField(row.finder_email) ?? undefined,
       finder_display_name: row.finder_display_name,
       finder_notifications_sent: row.finder_notifications_sent,
       owner_notifications_sent: row.owner_notifications_sent,
@@ -163,7 +180,7 @@ export async function getConversationById(
       id: row.id,
       bag_id: row.bag_id,
       status: row.status,
-      finder_email: row.finder_email,
+      finder_email: decryptField(row.finder_email) ?? undefined,
       finder_display_name: row.finder_display_name,
       finder_notifications_sent: row.finder_notifications_sent,
       owner_notifications_sent: row.owner_notifications_sent,

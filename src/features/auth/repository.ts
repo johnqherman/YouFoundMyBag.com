@@ -1,5 +1,6 @@
 import { pool } from '../../infrastructure/database/index.js';
 import type { OwnerSession } from '../../client/types/index.js';
+import { hashForLookup } from '../../infrastructure/security/encryption.js';
 
 export async function createOwnerSession(
   email: string,
@@ -37,9 +38,11 @@ export async function deleteExpiredSessions(): Promise<void> {
 }
 
 export async function getBagIdsByOwnerEmail(email: string): Promise<string[]> {
+  const emailHash = hashForLookup(email);
+
   const result = await pool.query(
-    'SELECT id FROM bags WHERE owner_email = $1',
-    [email]
+    'SELECT id FROM bags WHERE owner_email_hash = $1',
+    [emailHash]
   );
 
   return result.rows.map((row) => row.id);
@@ -51,9 +54,11 @@ export async function verifyOwnerEmailForBags(
 ): Promise<boolean> {
   if (bagIds.length === 0) return true;
 
+  const emailHash = hashForLookup(email);
+
   const result = await pool.query(
-    'SELECT COUNT(*) as count FROM bags WHERE owner_email = $1 AND id = ANY($2)',
-    [email, bagIds]
+    'SELECT COUNT(*) as count FROM bags WHERE owner_email_hash = $1 AND id = ANY($2)',
+    [emailHash, bagIds]
   );
 
   return parseInt(result.rows[0].count) === bagIds.length;
@@ -75,9 +80,11 @@ export async function verifyFinderAccessToConversation(
   finderEmail: string,
   conversationId: string
 ): Promise<boolean> {
+  const finderEmailHash = hashForLookup(finderEmail);
+
   const result = await pool.query(
-    'SELECT COUNT(*) as count FROM conversations WHERE id = $1 AND finder_email = $2',
-    [conversationId, finderEmail]
+    'SELECT COUNT(*) as count FROM conversations WHERE id = $1 AND finder_email_hash = $2',
+    [conversationId, finderEmailHash]
   );
 
   return parseInt(result.rows[0].count) > 0;
