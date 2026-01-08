@@ -50,41 +50,31 @@ export function decrypt(encryptedData: string): string {
     return encryptedData;
   }
 
-  if (!encryptedData.includes(':')) {
-    logger.warn('Attempted to decrypt data that is not in encrypted format');
-    return encryptedData;
+  const parts = encryptedData.split(':');
+
+  if (parts.length !== 3) {
+    throw new Error('Invalid encrypted data format');
   }
 
-  try {
-    const parts = encryptedData.split(':');
+  const ivHex = parts[0];
+  const authTagHex = parts[1];
+  const encrypted = parts[2];
 
-    if (parts.length !== 3) {
-      throw new Error('Invalid encrypted data format');
-    }
-
-    const ivHex = parts[0];
-    const authTagHex = parts[1];
-    const encrypted = parts[2];
-
-    if (!ivHex || !authTagHex || !encrypted) {
-      throw new Error('Invalid encrypted data parts');
-    }
-
-    const key = getEncryptionKey();
-    const iv = Buffer.from(ivHex, 'hex');
-    const authTag = Buffer.from(authTagHex, 'hex');
-
-    const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
-    decipher.setAuthTag(authTag);
-
-    let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-    decrypted += decipher.final('utf8');
-
-    return decrypted;
-  } catch (error) {
-    logger.error('Decryption failed:', error);
-    throw new Error('Failed to decrypt data');
+  if (!ivHex || !authTagHex || !encrypted) {
+    throw new Error('Invalid encrypted data parts');
   }
+
+  const key = getEncryptionKey();
+  const iv = Buffer.from(ivHex, 'hex');
+  const authTag = Buffer.from(authTagHex, 'hex');
+
+  const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
+  decipher.setAuthTag(authTag);
+
+  let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+  decrypted += decipher.final('utf8');
+
+  return decrypted;
 }
 
 export function isEncrypted(data: string): boolean {
@@ -106,10 +96,6 @@ export function encryptField(value: string | null | undefined): string | null {
     return value ?? null;
   }
 
-  if (!config.APP_ENCRYPTION_KEY) {
-    return value;
-  }
-
   return encrypt(value);
 }
 
@@ -118,29 +104,14 @@ export function decryptField(value: string | null | undefined): string | null {
     return value ?? null;
   }
 
-  if (!config.APP_ENCRYPTION_KEY) {
-    return value;
-  }
-
-  if (!isEncrypted(value)) {
-    return value;
-  }
-
-  try {
-    return decrypt(value);
-  } catch (error) {
-    logger.warn('Failed to decrypt field, returning as-is');
-    return value;
-  }
+  return decrypt(value);
 }
 
 export function hashForLookup(value: string): string {
-  if (!config.APP_ENCRYPTION_KEY) {
-    throw new Error('Cannot hash without encryption key configured');
-  }
+  const key = getEncryptionKey();
 
   return crypto
-    .createHmac('sha256', config.APP_ENCRYPTION_KEY)
+    .createHmac('sha256', key)
     .update(value.toLowerCase().trim())
     .digest('hex');
 }

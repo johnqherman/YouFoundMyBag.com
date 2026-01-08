@@ -1,6 +1,5 @@
 import { pool } from '../../infrastructure/database/index.js';
 import { encrypt, decrypt } from '../../infrastructure/security/encryption.js';
-import { config } from '../../infrastructure/config/index.js';
 import type {
   Conversation,
   ConversationMessage,
@@ -17,15 +16,7 @@ interface DatabaseMessage {
 }
 
 function decryptMessageContent(encryptedContent: string): string {
-  if (!config.APP_ENCRYPTION_KEY) {
-    return encryptedContent;
-  }
-
-  try {
-    return decrypt(encryptedContent);
-  } catch (error) {
-    return encryptedContent;
-  }
+  return decrypt(encryptedContent);
 }
 
 export async function createConversation(
@@ -41,13 +32,9 @@ export async function createConversation(
 
   const conversation = conversationResult.rows[0];
 
-  const encryptedMessage = config.APP_ENCRYPTION_KEY
-    ? encrypt(finderMessage)
-    : finderMessage;
-
   await pool.query(
     'INSERT INTO conversation_messages (conversation_id, sender_type, message_content) VALUES ($1, $2, $3)',
-    [conversation.id, 'finder', encryptedMessage]
+    [conversation.id, 'finder', encrypt(finderMessage)]
   );
 
   await pool.query(
@@ -63,13 +50,9 @@ export async function addMessage(
   senderType: 'finder' | 'owner',
   messageContent: string
 ): Promise<ConversationMessage> {
-  const encryptedMessage = config.APP_ENCRYPTION_KEY
-    ? encrypt(messageContent)
-    : messageContent;
-
   const messageResult = await pool.query(
     'INSERT INTO conversation_messages (conversation_id, sender_type, message_content) VALUES ($1, $2, $3) RETURNING *',
-    [conversationId, senderType, encryptedMessage]
+    [conversationId, senderType, encrypt(messageContent)]
   );
 
   await pool.query(
