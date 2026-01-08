@@ -1,4 +1,6 @@
 import { pool } from '../../infrastructure/database/index.js';
+import { encrypt, decrypt } from '../../infrastructure/security/encryption.js';
+import { config } from '../../infrastructure/config/index.js';
 import type {
   Conversation,
   ConversationMessage,
@@ -14,6 +16,24 @@ interface DatabaseMessage {
   sent_at: string;
 }
 
+/**
+ * Decrypt message content if encryption is enabled
+ * Handles both encrypted and unencrypted messages (for backward compatibility)
+ */
+function decryptMessageContent(encryptedContent: string): string {
+  if (!config.APP_ENCRYPTION_KEY) {
+    return encryptedContent;
+  }
+
+  try {
+    return decrypt(encryptedContent);
+  } catch (error) {
+    // If decryption fails, the message might be unencrypted (legacy data)
+    // Return as-is for backward compatibility
+    return encryptedContent;
+  }
+}
+
 export async function createConversation(
   bagId: string,
   finderMessage: string,
@@ -27,9 +47,14 @@ export async function createConversation(
 
   const conversation = conversationResult.rows[0];
 
+  // Encrypt message content if encryption is enabled
+  const encryptedMessage = config.APP_ENCRYPTION_KEY
+    ? encrypt(finderMessage)
+    : finderMessage;
+
   await pool.query(
     'INSERT INTO conversation_messages (conversation_id, sender_type, message_content) VALUES ($1, $2, $3)',
-    [conversation.id, 'finder', finderMessage]
+    [conversation.id, 'finder', encryptedMessage]
   );
 
   await pool.query(
@@ -45,9 +70,14 @@ export async function addMessage(
   senderType: 'finder' | 'owner',
   messageContent: string
 ): Promise<ConversationMessage> {
+  // Encrypt message content if encryption is enabled
+  const encryptedMessage = config.APP_ENCRYPTION_KEY
+    ? encrypt(messageContent)
+    : messageContent;
+
   const messageResult = await pool.query(
     'INSERT INTO conversation_messages (conversation_id, sender_type, message_content) VALUES ($1, $2, $3) RETURNING *',
-    [conversationId, senderType, messageContent]
+    [conversationId, senderType, encryptedMessage]
   );
 
   await pool.query(
@@ -108,7 +138,12 @@ export async function getConversationsByOwnerEmail(
       last_message_at: row.last_message_at,
       created_at: row.created_at,
     },
-    messages: row.messages.filter((msg: DatabaseMessage) => msg.id !== null),
+    messages: row.messages
+      .filter((msg: DatabaseMessage) => msg.id !== null)
+      .map((msg: DatabaseMessage) => ({
+        ...msg,
+        message_content: decryptMessageContent(msg.message_content),
+      })),
     bag: {
       short_id: row.short_id,
       owner_name: row.owner_name,
@@ -160,7 +195,12 @@ export async function getConversationById(
       last_message_at: row.last_message_at,
       created_at: row.created_at,
     },
-    messages: row.messages.filter((msg: DatabaseMessage) => msg.id !== null),
+    messages: row.messages
+      .filter((msg: DatabaseMessage) => msg.id !== null)
+      .map((msg: DatabaseMessage) => ({
+        ...msg,
+        message_content: decryptMessageContent(msg.message_content),
+      })),
     bag: {
       short_id: row.short_id,
       owner_name: row.owner_name,
