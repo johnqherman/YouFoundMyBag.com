@@ -16,10 +16,6 @@ interface DatabaseMessage {
   sent_at: string;
 }
 
-/**
- * Decrypt message content if encryption is enabled
- * Handles both encrypted and unencrypted messages (for backward compatibility)
- */
 function decryptMessageContent(encryptedContent: string): string {
   if (!config.APP_ENCRYPTION_KEY) {
     return encryptedContent;
@@ -28,8 +24,6 @@ function decryptMessageContent(encryptedContent: string): string {
   try {
     return decrypt(encryptedContent);
   } catch (error) {
-    // If decryption fails, the message might be unencrypted (legacy data)
-    // Return as-is for backward compatibility
     return encryptedContent;
   }
 }
@@ -47,7 +41,6 @@ export async function createConversation(
 
   const conversation = conversationResult.rows[0];
 
-  // Encrypt message content if encryption is enabled
   const encryptedMessage = config.APP_ENCRYPTION_KEY
     ? encrypt(finderMessage)
     : finderMessage;
@@ -70,7 +63,6 @@ export async function addMessage(
   senderType: 'finder' | 'owner',
   messageContent: string
 ): Promise<ConversationMessage> {
-  // Encrypt message content if encryption is enabled
   const encryptedMessage = config.APP_ENCRYPTION_KEY
     ? encrypt(messageContent)
     : messageContent;

@@ -100,3 +100,47 @@ export function isEncrypted(data: string): boolean {
   const hexPattern = /^[0-9a-f]+$/i;
   return parts.every((part) => hexPattern.test(part));
 }
+
+export function encryptField(value: string | null | undefined): string | null {
+  if (!value) {
+    return value ?? null;
+  }
+
+  if (!config.APP_ENCRYPTION_KEY) {
+    return value;
+  }
+
+  return encrypt(value);
+}
+
+export function decryptField(value: string | null | undefined): string | null {
+  if (!value) {
+    return value ?? null;
+  }
+
+  if (!config.APP_ENCRYPTION_KEY) {
+    return value;
+  }
+
+  if (!isEncrypted(value)) {
+    return value;
+  }
+
+  try {
+    return decrypt(value);
+  } catch (error) {
+    logger.warn('Failed to decrypt field, returning as-is');
+    return value;
+  }
+}
+
+export function hashForLookup(value: string): string {
+  if (!config.APP_ENCRYPTION_KEY) {
+    throw new Error('Cannot hash without encryption key configured');
+  }
+
+  return crypto
+    .createHmac('sha256', config.APP_ENCRYPTION_KEY)
+    .update(value.toLowerCase().trim())
+    .digest('hex');
+}

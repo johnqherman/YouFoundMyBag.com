@@ -25,8 +25,6 @@ const configSchema = z.object({
   SMTP_SECURE: z.coerce.boolean().default(false),
   SMTP_REQUIRE_TLS: z.coerce.boolean().default(true),
   SMTP_REJECT_UNAUTHORIZED: z.coerce.boolean().default(true),
-
-  // Encryption Configuration
   APP_ENCRYPTION_KEY: z.string().optional(),
 });
 

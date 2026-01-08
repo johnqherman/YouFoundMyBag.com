@@ -1,6 +1,10 @@
 import { pool, withTransaction } from '../../infrastructure/database/index';
 import type { CreateBagRequest } from '../../client/types/index';
 import { formatContactValue } from '../../infrastructure/utils/formatting';
+import {
+  encryptField,
+  decryptField,
+} from '../../infrastructure/security/encryption.js';
 
 export interface Bag {
   id: string;
@@ -75,7 +79,7 @@ export async function createBag(
             [
               bag.id,
               contact.type,
-              contact.value,
+              encryptField(contact.value),
               contact.is_primary || i === 0,
               i,
               contact.label || null,
@@ -114,12 +118,15 @@ export async function getFinderPageData(shortId: string) {
       value: string;
       is_primary: boolean;
       label: string | null;
-    }) => ({
-      type: contact.type,
-      value: formatContactValue(contact.type, contact.value),
-      label: contact.label || getContactLabel(contact.type),
-      is_primary: contact.is_primary || false,
-    })
+    }) => {
+      const decryptedValue = decryptField(contact.value) ?? '';
+      return {
+        type: contact.type,
+        value: formatContactValue(contact.type, decryptedValue),
+        label: contact.label || getContactLabel(contact.type),
+        is_primary: contact.is_primary || false,
+      };
+    }
   );
 
   return {
@@ -136,7 +143,10 @@ export async function getContactsByBagId(bagId: string): Promise<Contact[]> {
   const result = await pool.query('SELECT * FROM contacts WHERE bag_id = $1', [
     bagId,
   ]);
-  return result.rows;
+  return result.rows.map((contact) => ({
+    ...contact,
+    value: decryptField(contact.value) ?? '',
+  }));
 }
 
 export async function getBagId(shortId: string): Promise<string | null> {
