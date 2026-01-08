@@ -100,11 +100,12 @@ export interface ConversationMessage {
 export interface ConversationThread {
   conversation: Conversation;
   messages: ConversationMessage[];
+  unread_count?: number;
   bag: {
     short_id: string;
     owner_name?: string;
     bag_name?: string;
-    status: 'active' | 'recovered' | 'archived';
+    status: 'active' | 'disabled';
   };
 }
 
@@ -114,7 +115,7 @@ export interface OwnerDashboard {
     short_id: string;
     owner_name?: string;
     bag_name?: string;
-    status: 'active' | 'recovered' | 'archived';
+    status: 'active' | 'disabled';
     created_at: string;
     conversation_count: number;
     latest_conversation?: string;
@@ -159,7 +160,57 @@ export interface BagData {
   owner_message?: string;
   owner_email?: string;
   secure_messaging_enabled: boolean;
-  status: 'active' | 'recovered' | 'archived';
+  status: 'active' | 'disabled';
   created_at: string;
   updated_at: string;
+}
+
+export interface CachedBag {
+  id: string;
+  short_id: string;
+  owner_name?: string;
+  bag_name?: string;
+  owner_message?: string;
+  owner_email?: string;
+  secure_messaging_enabled: boolean;
+  status: 'active' | 'disabled';
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface CachedContact {
+  type: string;
+  value: string;
+  label?: string;
+  is_primary?: boolean;
+}
+
+export interface CachedFinderPageData {
+  short_id: string;
+  owner_name?: string;
+  bag_name?: string;
+  owner_message?: string;
+  secure_messaging_enabled: boolean;
+  contact_options_encrypted: CachedContact[];
+}
+
+export interface CachedConversationMessage {
+  id: string;
+  conversation_id: string;
+  sender_type: 'finder' | 'owner';
+  message_content: string;
+  read_at?: string;
+  sent_at: string;
+}
+
+export interface CachedConversationThread {
+  conversation: Conversation;
+  messages: CachedConversationMessage[];
+  unread_count?: number;
+  bag: {
+    short_id: string;
+    owner_name?: string;
+    bag_name?: string;
+    status: 'active' | 'disabled';
+  };
 }

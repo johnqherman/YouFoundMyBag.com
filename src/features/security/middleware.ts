@@ -1,7 +1,7 @@
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
-import { pool } from '../../infrastructure/database/index.js';
 import { logger } from '../../infrastructure/logger/index.js';
+import { cacheIncr, cacheExpire } from '../../infrastructure/cache/index.js';
 import crypto from 'crypto';
 import type { Request, Response, NextFunction } from 'express';
 import {
@@ -74,46 +74,41 @@ export function dbRateLimit(maxRequests: number, windowMinutes: number) {
       return next();
     }
 
-    try {
-      const clientIp =
-        req.ip ||
-        (req as Request & { connection?: { remoteAddress?: string } })
-          .connection?.remoteAddress ||
-        'unknown';
-      const ipHash = crypto
-        .createHash('sha256')
-        .update(clientIp)
-        .digest('hex')
-        .substring(0, 16);
-      const key = `${req.route?.path || req.path}:${ipHash}`;
+    const clientIp =
+      req.ip ||
+      (req as Request & { connection?: { remoteAddress?: string } }).connection
+        ?.remoteAddress ||
+      'unknown';
+    const ipHash = crypto
+      .createHash('sha256')
+      .update(clientIp)
+      .digest('hex')
+      .substring(0, 16);
+    const key = `${req.route?.path || req.path}:${ipHash}`;
 
-      const allowed = await checkRateLimit(key, maxRequests, windowMinutes);
+    const windowSeconds = windowMinutes * 60;
+    const rateLimitKey = `ratelimit:${key}`;
 
-      if (!allowed) {
-        return res.status(429).json({
-          error: 'Rate limit exceeded',
-          message: 'Too many requests. Please try again later.',
-          retry_after: windowMinutes * 60,
-        });
-      }
+    const count = await cacheIncr(rateLimitKey, 'ratelimit');
 
-      return next();
-    } catch (error) {
-      logger.error('Rate limit check failed:', error);
-      return next();
+    if (count === 1) {
+      await cacheExpire(rateLimitKey, windowSeconds);
     }
+
+    if (count > maxRequests) {
+      logger.debug('Rate limit exceeded', {
+        key,
+        count,
+        max: maxRequests,
+      });
+
+      return res.status(429).json({
+        error: 'Rate limit exceeded',
+        message: 'Too many requests. Please try again later.',
+        retry_after: windowMinutes * 60,
+      });
+    }
+
+    return next();
   };
-}
-
-async function checkRateLimit(
-  key: string,
-  maxRequests: number,
-  windowMinutes: number
-): Promise<boolean> {
-  const result = await pool.query(
-    'SELECT check_rate_limit($1, $2, $3) as allowed',
-    [key, maxRequests, windowMinutes]
-  );
-
-  return result.rows[0]?.allowed || false;
 }

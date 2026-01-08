@@ -135,7 +135,7 @@ export async function getOwnerDashboard(): Promise<{
     short_id: string;
     owner_name?: string;
     bag_name?: string;
-    status: 'active' | 'recovered' | 'archived';
+    status: 'active' | 'disabled';
     created_at: string;
     conversation_count: number;
     unread_count: number;

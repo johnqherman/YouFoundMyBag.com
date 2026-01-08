@@ -13,7 +13,7 @@ CREATE TABLE public.bags (
   secure_messaging_enabled BOOLEAN DEFAULT TRUE,
   opt_out_timestamp TIMESTAMP WITH TIME ZONE,
   opt_out_ip_address INET,
-  status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'recovered', 'archived')),
+  status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'disabled')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   CONSTRAINT bags_email_required_for_secure_messaging CHECK (

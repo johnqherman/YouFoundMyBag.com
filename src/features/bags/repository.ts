@@ -1,11 +1,19 @@
 import { pool, withTransaction } from '../../infrastructure/database/index';
-import type { CreateBagRequest } from '../../client/types/index';
+import type {
+  CreateBagRequest,
+  CachedBag,
+  CachedFinderPageData,
+  CachedContact,
+} from '../../client/types/index';
 import { formatContactValue } from '../../infrastructure/utils/formatting';
 import {
   encryptField,
   decryptField,
   hashForLookup,
 } from '../../infrastructure/security/encryption.js';
+import { cacheGet, cacheSet } from '../../infrastructure/cache/index.js';
+import { logger } from '../../infrastructure/logger/index.js';
+import { TIME_SECONDS as t } from '../../client/constants/timeConstants.js';
 
 export interface Bag {
   id: string;
@@ -17,7 +25,7 @@ export interface Bag {
   secure_messaging_enabled: boolean;
   opt_out_timestamp?: Date;
   opt_out_ip_address?: string;
-  status: 'active' | 'recovered' | 'archived';
+  status: 'active' | 'disabled';
   created_at: Date;
   updated_at: Date;
 }
@@ -103,19 +111,60 @@ export async function createBag(
 }
 
 export async function getBagByShortId(shortId: string): Promise<Bag | null> {
+  const cached = await cacheGet<CachedBag>(`bag:short:${shortId}`, 'bag');
+  if (cached) {
+    logger.debug('Bag cache HIT', { shortId });
+    return {
+      ...cached,
+      owner_email: cached.owner_email
+        ? (decryptField(cached.owner_email) ?? undefined)
+        : undefined,
+    };
+  }
+
   const result = await pool.query('SELECT * FROM bags WHERE short_id = $1', [
     shortId,
   ]);
   const bag = result.rows[0];
   if (!bag) return null;
 
+  await cacheSet(`bag:short:${shortId}`, bag, t.ONE_HOUR, 'bag');
+  logger.debug('Bag cache warmed from DB', { shortId });
+
   return {
     ...bag,
-    owner_email: decryptField(bag.owner_email),
+    owner_email: decryptField(bag.owner_email) ?? undefined,
   };
 }
 
 export async function getFinderPageData(shortId: string) {
+  const cached = await cacheGet<CachedFinderPageData>(
+    `bag:finder:${shortId}`,
+    'bag_finder'
+  );
+  if (cached) {
+    logger.debug('Bag finder page cache HIT', { shortId });
+    const contactOptions = cached.contact_options_encrypted.map(
+      (contact: CachedContact) => {
+        const decryptedValue = decryptField(contact.value) ?? '';
+        return {
+          type: contact.type,
+          value: formatContactValue(contact.type, decryptedValue),
+          label: contact.label,
+          is_primary: contact.is_primary,
+        };
+      }
+    );
+    return {
+      short_id: cached.short_id,
+      owner_name: cached.owner_name,
+      bag_name: cached.bag_name,
+      owner_message: cached.owner_message,
+      secure_messaging_enabled: cached.secure_messaging_enabled,
+      contact_options: contactOptions,
+    };
+  }
+
   const bag = await getBagByShortId(shortId);
   if (!bag) return null;
 
@@ -143,6 +192,18 @@ export async function getFinderPageData(shortId: string) {
       };
     }
   );
+
+  const cacheData = {
+    short_id: bag.short_id,
+    owner_name: bag.owner_name,
+    bag_name: bag.bag_name,
+    owner_message: bag.owner_message,
+    secure_messaging_enabled: bag.secure_messaging_enabled,
+    contact_options_encrypted: contactsResult.rows,
+  };
+
+  await cacheSet(`bag:finder:${shortId}`, cacheData, t.ONE_HOUR, 'bag_finder');
+  logger.debug('Bag finder page cache warmed from DB', { shortId });
 
   return {
     short_id: bag.short_id,

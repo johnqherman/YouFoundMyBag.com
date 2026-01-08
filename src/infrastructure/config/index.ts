@@ -16,15 +16,39 @@ const configSchema = z.object({
   DATABASE_SSL_CERT_PATH: z.string().optional(),
   DATABASE_SSL_KEY_PATH: z.string().optional(),
 
+  REDIS_HOST: z.string().default('localhost'),
+  REDIS_PORT: z.coerce.number().default(6379),
+  REDIS_PASSWORD: z.string().optional(),
+  REDIS_TLS_ENABLED: z
+    .string()
+    .optional()
+    .default('false')
+    .transform((val) => val === 'true'),
+  REDIS_MAX_RETRIES: z.coerce.number().default(3),
+  REDIS_CONNECT_TIMEOUT: z.coerce.number().default(10000),
+  REDIS_COMMAND_TIMEOUT: z.coerce.number().default(5000),
+
   CLOUDFLARE_TURNSTILE_SECRET_KEY: z.string().optional(),
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.coerce.number().default(587),
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
   SMTP_FROM: z.string().default('noreply@youfoundmybag.com'),
-  SMTP_SECURE: z.coerce.boolean().default(false),
-  SMTP_REQUIRE_TLS: z.coerce.boolean().default(true),
-  SMTP_REJECT_UNAUTHORIZED: z.coerce.boolean().default(true),
+  SMTP_SECURE: z
+    .string()
+    .optional()
+    .default('false')
+    .transform((val) => val === 'true'),
+  SMTP_REQUIRE_TLS: z
+    .string()
+    .optional()
+    .default('true')
+    .transform((val) => val === 'true'),
+  SMTP_REJECT_UNAUTHORIZED: z
+    .string()
+    .optional()
+    .default('true')
+    .transform((val) => val === 'true'),
   APP_ENCRYPTION_KEY: z.string().optional(),
 });
 

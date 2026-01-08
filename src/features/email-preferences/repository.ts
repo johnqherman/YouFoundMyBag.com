@@ -1,4 +1,11 @@
 import { pool } from '../../infrastructure/database/index.js';
+import {
+  cacheGet,
+  cacheSet,
+  cacheDel,
+} from '../../infrastructure/cache/index.js';
+import { logger } from '../../infrastructure/logger/index.js';
+import { TIME_SECONDS as t } from '../../client/constants/timeConstants.js';
 
 export interface EmailPreferences {
   id: string;
@@ -96,14 +103,46 @@ export async function updatePreferences(
     values
   );
 
-  return result.rows[0] || null;
+  const preferences = result.rows[0] || null;
+
+  if (preferences) {
+    await cacheDel(`email_prefs:${preferences.email}`, 'email_prefs');
+    logger.debug('Email preferences cache invalidated', {
+      email: preferences.email,
+    });
+  }
+
+  return preferences;
 }
 
 export async function shouldSendEmail(
   email: string,
   emailType: 'bag_created' | 'conversation_notification' | 'reply_notification'
 ): Promise<boolean> {
-  const preferences = await getPreferencesByEmail(email);
+  let preferences: EmailPreferences | null = null;
+
+  const cached = await cacheGet<EmailPreferences>(
+    `email_prefs:${email}`,
+    'email_prefs'
+  );
+  if (cached) {
+    logger.debug('Email preferences cache HIT', { email });
+    preferences = cached;
+  }
+
+  if (!preferences) {
+    preferences = await getPreferencesByEmail(email);
+
+    if (preferences) {
+      await cacheSet(
+        `email_prefs:${email}`,
+        preferences,
+        t.ONE_HOUR,
+        'email_prefs'
+      );
+      logger.debug('Email preferences cache warmed from DB', { email });
+    }
+  }
 
   if (!preferences) {
     return true;

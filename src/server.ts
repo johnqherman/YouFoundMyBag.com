@@ -4,6 +4,8 @@ import cors from 'cors';
 import { config } from './infrastructure/config/index.js';
 import { logger } from './infrastructure/logger/index.js';
 import { initializeDatabase } from './infrastructure/database/index.js';
+import { initializeCache, closeCache } from './infrastructure/cache/index.js';
+import { startBackgroundJobs } from './infrastructure/cache/sync-jobs.js';
 import {
   basicRateLimit,
   securityHeaders,
@@ -86,6 +88,8 @@ app.use(
 async function startServer() {
   try {
     await initializeDatabase();
+    await initializeCache();
+    startBackgroundJobs();
 
     app.listen(config.PORT, () => {
       logger.info(`Server running on port ${config.PORT}`);
@@ -93,6 +97,7 @@ async function startServer() {
       logger.info(
         `Database: ${config.DATABASE_URL ? 'configured' : 'using default'}`
       );
+      logger.info(`Redis cache: ${config.REDIS_HOST}:${config.REDIS_PORT}`);
     });
   } catch (error) {
     logger.error('Failed to start server:', error);
@@ -100,13 +105,15 @@ async function startServer() {
   }
 }
 
-process.on('SIGTERM', () => {
+process.on('SIGTERM', async () => {
   logger.info('SIGTERM received, shutting down gracefully');
+  await closeCache();
   process.exit(0);
 });
 
-process.on('SIGINT', () => {
+process.on('SIGINT', async () => {
   logger.info('SIGINT received, shutting down gracefully');
+  await closeCache();
   process.exit(0);
 });
 

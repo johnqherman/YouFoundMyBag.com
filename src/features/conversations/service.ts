@@ -134,7 +134,7 @@ export async function startConversation(
   }
 
   if (bag.status !== 'active') {
-    throw new Error('This bag has already been recovered');
+    throw new Error('This bag has been deactivated by its owner');
   }
 
   const conversation = await conversationRepository.createConversation(

@@ -1,6 +1,12 @@
 import { pool } from '../../infrastructure/database/index.js';
 import type { OwnerSession } from '../../client/types/index.js';
 import { hashForLookup } from '../../infrastructure/security/encryption.js';
+import {
+  cacheGet,
+  cacheSet,
+  cacheDel,
+} from '../../infrastructure/cache/index.js';
+import { logger } from '../../infrastructure/logger/index.js';
 
 export async function createOwnerSession(
   email: string,
@@ -15,22 +21,59 @@ export async function createOwnerSession(
     [token, email, bagIds, expiresAt, conversationId, sessionType]
   );
 
-  return result.rows[0];
+  const session = result.rows[0];
+
+  const ttl = Math.floor(
+    (new Date(session.expires_at).getTime() - Date.now()) / 1000
+  );
+  if (ttl > 0) {
+    await cacheSet(`session:${token}`, session, ttl, 'session');
+    logger.debug('Session cached on creation', {
+      token: token.substring(0, 8),
+    });
+  }
+
+  return session;
 }
 
 export async function getOwnerSession(
   token: string
 ): Promise<OwnerSession | null> {
+  const cached = await cacheGet<OwnerSession>(`session:${token}`, 'session');
+  if (cached) {
+    logger.debug('Session cache HIT', { token: token.substring(0, 8) });
+    return cached;
+  }
+
   const result = await pool.query(
     'SELECT * FROM owner_sessions WHERE token = $1 AND expires_at > NOW()',
     [token]
   );
 
-  return result.rows[0] || null;
+  const session = result.rows[0] || null;
+
+  if (session) {
+    const ttl = Math.floor(
+      (new Date(session.expires_at).getTime() - Date.now()) / 1000
+    );
+    if (ttl > 0) {
+      await cacheSet(`session:${token}`, session, ttl, 'session');
+      logger.debug('Session cache warmed from DB', {
+        token: token.substring(0, 8),
+      });
+    }
+  }
+
+  return session;
 }
 
 export async function deleteOwnerSession(token: string): Promise<void> {
   await pool.query('DELETE FROM owner_sessions WHERE token = $1', [token]);
+
+  await cacheDel(`session:${token}`, 'session');
+  logger.debug('Session cache invalidated', {
+    token: token.substring(0, 8),
+  });
 }
 
 export async function deleteExpiredSessions(): Promise<void> {

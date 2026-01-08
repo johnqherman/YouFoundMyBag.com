@@ -10,7 +10,21 @@ import type {
   Conversation,
   ConversationMessage,
   ConversationThread,
+  CachedConversationThread,
+  CachedConversationMessage,
 } from '../../client/types/index.js';
+import {
+  cacheHGetAll,
+  cacheHSet,
+  cacheHIncrBy,
+  cacheGet,
+  cacheSet,
+  cacheIncr,
+  cacheDecr,
+  cacheDel,
+} from '../../infrastructure/cache/index.js';
+import { logger } from '../../infrastructure/logger/index.js';
+import { TIME_SECONDS as t } from '../../client/constants/timeConstants.js';
 
 interface DatabaseMessage {
   id: string | null;
@@ -23,6 +37,36 @@ interface DatabaseMessage {
 
 function decryptMessageContent(encryptedContent: string): string {
   return decrypt(encryptedContent);
+}
+
+async function invalidateConversationCaches(
+  conversationId: string
+): Promise<void> {
+  const convResult = await pool.query(
+    `SELECT c.bag_id, b.owner_email_hash
+     FROM conversations c
+     JOIN bags b ON c.bag_id = b.id
+     WHERE c.id = $1`,
+    [conversationId]
+  );
+
+  if (convResult.rows.length === 0) {
+    logger.warn('Conversation not found for cache invalidation', {
+      conversationId,
+    });
+    return;
+  }
+
+  const { owner_email_hash: ownerEmailHash } = convResult.rows[0];
+
+  await cacheDel(
+    `conversation:thread:${conversationId}`,
+    'conversation_thread'
+  );
+  logger.debug('Invalidated conversation thread cache', { conversationId });
+
+  await cacheDel(`conversations:owner:${ownerEmailHash}`, 'dashboard');
+  logger.debug('Invalidated dashboard cache', { ownerEmailHash });
 }
 
 export async function createConversation(
@@ -72,6 +116,24 @@ export async function addMessage(
     [conversationId]
   );
 
+  if (senderType === 'finder') {
+    const convResult = await pool.query(
+      'SELECT bag_id FROM conversations WHERE id = $1',
+      [conversationId]
+    );
+
+    if (convResult.rows.length > 0) {
+      const bagId = convResult.rows[0].bag_id;
+
+      await cacheIncr(`unread:bag:${bagId}`, 'unread_count');
+      await cacheIncr(`unread:conversation:${conversationId}`, 'unread_count');
+
+      logger.debug('Unread counters incremented', { conversationId, bagId });
+    }
+  }
+
+  await invalidateConversationCaches(conversationId);
+
   return messageResult.rows[0];
 }
 
@@ -93,32 +155,63 @@ export async function getConversationsByOwnerEmail(
 ): Promise<ConversationThread[]> {
   const ownerEmailHash = hashForLookup(ownerEmail);
 
+  const cached = await cacheGet<CachedConversationThread[]>(
+    `conversations:owner:${ownerEmailHash}`,
+    'dashboard'
+  );
+  if (cached) {
+    logger.debug('Dashboard conversations cache HIT', { ownerEmailHash });
+    return cached.map((thread) => ({
+      ...thread,
+      conversation: {
+        ...thread.conversation,
+        finder_email: thread.conversation.finder_email
+          ? (decryptField(thread.conversation.finder_email) ?? undefined)
+          : undefined,
+      },
+      messages: thread.messages.map((msg: CachedConversationMessage) => ({
+        ...msg,
+        message_content: decryptMessageContent(msg.message_content),
+      })),
+      unread_count: thread.unread_count,
+    }));
+  }
+
   const result = await pool.query(
     `
     SELECT
       c.*,
       b.short_id, b.owner_name, b.bag_name, b.status as bag_status,
-      array_agg(
-        json_build_object(
+      (
+        SELECT json_build_object(
           'id', cm.id,
           'conversation_id', cm.conversation_id,
           'sender_type', cm.sender_type,
           'message_content', cm.message_content,
           'read_at', cm.read_at,
           'sent_at', cm.sent_at
-        ) ORDER BY cm.sent_at ASC
-      ) as messages
+        )
+        FROM conversation_messages cm
+        WHERE cm.conversation_id = c.id
+        ORDER BY cm.sent_at DESC
+        LIMIT 1
+      ) as latest_message,
+      (
+        SELECT COUNT(*)::integer
+        FROM conversation_messages cm
+        WHERE cm.conversation_id = c.id
+        AND cm.sender_type = 'finder'
+        AND cm.read_at IS NULL
+      ) as unread_count
     FROM conversations c
     JOIN bags b ON c.bag_id = b.id
-    LEFT JOIN conversation_messages cm ON c.id = cm.conversation_id
     WHERE b.owner_email_hash = $1
-    GROUP BY c.id, b.short_id, b.owner_name, b.bag_name, b.status
     ORDER BY c.last_message_at DESC
   `,
     [ownerEmailHash]
   );
 
-  return result.rows.map((row) => ({
+  const threads = result.rows.map((row) => ({
     conversation: {
       id: row.id,
       bag_id: row.bag_id,
@@ -130,12 +223,17 @@ export async function getConversationsByOwnerEmail(
       last_message_at: row.last_message_at,
       created_at: row.created_at,
     },
-    messages: row.messages
-      .filter((msg: DatabaseMessage) => msg.id !== null)
-      .map((msg: DatabaseMessage) => ({
-        ...msg,
-        message_content: decryptMessageContent(msg.message_content),
-      })),
+    messages: row.latest_message
+      ? [
+          {
+            ...row.latest_message,
+            message_content: decryptMessageContent(
+              row.latest_message.message_content
+            ),
+          },
+        ]
+      : [],
+    unread_count: row.unread_count,
     bag: {
       short_id: row.short_id,
       owner_name: row.owner_name,
@@ -143,11 +241,67 @@ export async function getConversationsByOwnerEmail(
       status: row.bag_status,
     },
   }));
+
+  const cacheData = result.rows.map((row) => ({
+    conversation: {
+      id: row.id,
+      bag_id: row.bag_id,
+      status: row.status,
+      finder_email: row.finder_email,
+      finder_display_name: row.finder_display_name,
+      finder_notifications_sent: row.finder_notifications_sent,
+      owner_notifications_sent: row.owner_notifications_sent,
+      last_message_at: row.last_message_at,
+      created_at: row.created_at,
+    },
+    messages: row.latest_message ? [row.latest_message] : [],
+    unread_count: row.unread_count,
+    bag: {
+      short_id: row.short_id,
+      owner_name: row.owner_name,
+      bag_name: row.bag_name,
+      status: row.bag_status,
+    },
+  }));
+
+  await cacheSet(
+    `conversations:owner:${ownerEmailHash}`,
+    cacheData,
+    t.FIVE_MINUTES,
+    'dashboard'
+  );
+  logger.debug('Dashboard conversations cache warmed from DB', {
+    ownerEmailHash,
+    count: threads.length,
+  });
+
+  return threads;
 }
 
 export async function getConversationById(
   conversationId: string
 ): Promise<ConversationThread | null> {
+  const cached = await cacheGet<CachedConversationThread>(
+    `conversation:thread:${conversationId}`,
+    'conversation_thread'
+  );
+  if (cached) {
+    logger.debug('Conversation thread cache HIT', { conversationId });
+    return {
+      ...cached,
+      conversation: {
+        ...cached.conversation,
+        finder_email: cached.conversation.finder_email
+          ? (decryptField(cached.conversation.finder_email) ?? undefined)
+          : undefined,
+      },
+      messages: cached.messages.map((msg: CachedConversationMessage) => ({
+        ...msg,
+        message_content: decryptMessageContent(msg.message_content),
+      })),
+    };
+  }
+
   const result = await pool.query(
     `
     SELECT
@@ -175,7 +329,7 @@ export async function getConversationById(
   if (result.rows.length === 0) return null;
 
   const row = result.rows[0];
-  return {
+  const thread = {
     conversation: {
       id: row.id,
       bag_id: row.bag_id,
@@ -200,6 +354,39 @@ export async function getConversationById(
       status: row.bag_status,
     },
   };
+
+  const cacheData = {
+    conversation: {
+      id: row.id,
+      bag_id: row.bag_id,
+      status: row.status,
+      finder_email: row.finder_email,
+      finder_display_name: row.finder_display_name,
+      finder_notifications_sent: row.finder_notifications_sent,
+      owner_notifications_sent: row.owner_notifications_sent,
+      last_message_at: row.last_message_at,
+      created_at: row.created_at,
+    },
+    messages: row.messages.filter((msg: DatabaseMessage) => msg.id !== null),
+    bag: {
+      short_id: row.short_id,
+      owner_name: row.owner_name,
+      bag_name: row.bag_name,
+      status: row.bag_status,
+    },
+  };
+
+  await cacheSet(
+    `conversation:thread:${conversationId}`,
+    cacheData,
+    t.TEN_MINUTES,
+    'conversation_thread'
+  );
+  logger.debug('Conversation thread cache warmed from DB', {
+    conversationId,
+  });
+
+  return thread;
 }
 
 export async function markMessagesAsRead(
@@ -208,10 +395,47 @@ export async function markMessagesAsRead(
 ): Promise<void> {
   const oppositeSender = senderType === 'finder' ? 'owner' : 'finder';
 
+  let unreadCount = 0;
+  if (oppositeSender === 'finder') {
+    const countResult = await pool.query(
+      'SELECT COUNT(*) as count FROM conversation_messages WHERE conversation_id = $1 AND sender_type = $2 AND read_at IS NULL',
+      [conversationId, oppositeSender]
+    );
+    unreadCount = parseInt(countResult.rows[0].count);
+  }
+
   await pool.query(
     'UPDATE conversation_messages SET read_at = NOW() WHERE conversation_id = $1 AND sender_type = $2 AND read_at IS NULL',
     [conversationId, oppositeSender]
   );
+
+  if (oppositeSender === 'finder' && unreadCount > 0) {
+    const convResult = await pool.query(
+      'SELECT bag_id FROM conversations WHERE id = $1',
+      [conversationId]
+    );
+
+    if (convResult.rows.length > 0) {
+      const bagId = convResult.rows[0].bag_id;
+
+      await cacheDecr(`unread:bag:${bagId}`, unreadCount, 'unread_count');
+
+      await cacheSet(
+        `unread:conversation:${conversationId}`,
+        0,
+        undefined,
+        'unread_count'
+      );
+
+      logger.debug('Unread counters decremented', {
+        conversationId,
+        bagId,
+        count: unreadCount,
+      });
+    }
+  }
+
+  await invalidateConversationCaches(conversationId);
 }
 
 export async function updateConversationStatus(
@@ -222,9 +446,17 @@ export async function updateConversationStatus(
     status,
     conversationId,
   ]);
+
+  await invalidateConversationCaches(conversationId);
 }
 
 export async function getUnreadMessageCount(bagId: string): Promise<number> {
+  const cached = await cacheGet<number>(`unread:bag:${bagId}`, 'unread_count');
+  if (cached !== null && cached !== undefined) {
+    logger.debug('Unread count cache HIT', { bagId, count: cached });
+    return cached;
+  }
+
   const result = await pool.query(
     `
     SELECT COUNT(*) as unread_count
@@ -237,13 +469,35 @@ export async function getUnreadMessageCount(bagId: string): Promise<number> {
     [bagId]
   );
 
-  return parseInt(result.rows[0].unread_count);
+  const count = parseInt(result.rows[0].unread_count);
+
+  await cacheSet(`unread:bag:${bagId}`, count, t.ONE_HOUR, 'unread_count');
+  logger.debug('Unread count cache warmed from DB', { bagId, count });
+
+  return count;
 }
 
 export async function getNotificationCounters(conversationId: string): Promise<{
   finder_notifications_sent: number;
   owner_notifications_sent: number;
 }> {
+  const cached = await cacheHGetAll<Record<string, string>>(
+    `notifications:conversation:${conversationId}`,
+    'notification_counters'
+  );
+
+  if (
+    cached &&
+    cached.finder_sent !== undefined &&
+    cached.owner_sent !== undefined
+  ) {
+    logger.debug('Notification counters cache HIT', { conversationId });
+    return {
+      finder_notifications_sent: parseInt(cached.finder_sent),
+      owner_notifications_sent: parseInt(cached.owner_sent),
+    };
+  }
+
   const result = await pool.query(
     'SELECT finder_notifications_sent, owner_notifications_sent FROM conversations WHERE id = $1',
     [conversationId]
@@ -253,13 +507,43 @@ export async function getNotificationCounters(conversationId: string): Promise<{
     throw new Error('Conversation not found');
   }
 
-  return result.rows[0];
+  const counters = result.rows[0];
+
+  await cacheHSet(
+    `notifications:conversation:${conversationId}`,
+    'finder_sent',
+    String(counters.finder_notifications_sent),
+    'notification_counters'
+  );
+  await cacheHSet(
+    `notifications:conversation:${conversationId}`,
+    'owner_sent',
+    String(counters.owner_notifications_sent),
+    'notification_counters'
+  );
+  logger.debug('Notification counters cache warmed from DB', {
+    conversationId,
+  });
+
+  return counters;
 }
 
 export async function incrementNotificationCounter(
   conversationId: string,
   recipientType: 'finder' | 'owner'
 ): Promise<void> {
+  const field = recipientType === 'finder' ? 'finder_sent' : 'owner_sent';
+  await cacheHIncrBy(
+    `notifications:conversation:${conversationId}`,
+    field,
+    1,
+    'notification_counters'
+  );
+  logger.debug('Notification counter incremented in Redis', {
+    conversationId,
+    recipientType,
+  });
+
   await pool.query(
     `UPDATE conversations
      SET finder_notifications_sent = CASE WHEN $2 = 'finder' THEN finder_notifications_sent + 1 ELSE finder_notifications_sent END,
@@ -273,6 +557,18 @@ export async function resetNotificationCounter(
   conversationId: string,
   senderType: 'finder' | 'owner'
 ): Promise<void> {
+  const field = senderType === 'finder' ? 'finder_sent' : 'owner_sent';
+  await cacheHSet(
+    `notifications:conversation:${conversationId}`,
+    field,
+    '0',
+    'notification_counters'
+  );
+  logger.debug('Notification counter reset in Redis', {
+    conversationId,
+    senderType,
+  });
+
   await pool.query(
     `UPDATE conversations
      SET finder_notifications_sent = CASE WHEN $2 = 'finder' THEN 0 ELSE finder_notifications_sent END,

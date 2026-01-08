@@ -34,7 +34,8 @@ let transporter: nodemailer.Transporter | null = null;
 function getTransporter() {
   if (!transporter && config.SMTP_HOST) {
     const needsAuth = config.SMTP_HOST !== 'localhost';
-    const isSecure = config.NODE_ENV === 'development' ? false : config.SMTP_SECURE
+    const isSecure =
+      config.NODE_ENV === 'development' ? false : config.SMTP_SECURE;
 
     if (!needsAuth || (config.SMTP_USER && config.SMTP_PASS)) {
       const transportConfig: SMTPTransportConfig = {

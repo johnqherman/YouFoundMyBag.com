@@ -161,11 +161,7 @@ router.get(
         const bag = bagMap.get(bagId);
         bag.conversations.push(thread);
         bag.conversation_count++;
-
-        const unreadMessages = thread.messages.filter(
-          (msg) => msg.sender_type === 'finder' && !msg.read_at
-        );
-        bag.unread_count += unreadMessages.length;
+        bag.unread_count += thread.unread_count || 0;
 
         if (
           !bag.latest_conversation ||
