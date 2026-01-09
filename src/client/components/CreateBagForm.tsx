@@ -252,12 +252,18 @@ export default function CreateBagForm({ onSuccess }: Props) {
         bag_name: formData.bag_name?.trim() || undefined,
         owner_message: formData.owner_message?.trim() || undefined,
         secure_messaging_enabled: formData.secure_messaging_enabled,
-        contacts: validContacts.map(({ type, value, label }, index) => ({
-          type,
-          value,
-          label,
-          is_primary: index === 0,
-        })),
+        contacts: validContacts.map(({ type, value, label }, index) => {
+          let cleanValue = value;
+          if (type === 'telegram' || type === 'instagram') {
+            cleanValue = value.replace(/^@+/, '');
+          }
+          return {
+            type,
+            value: cleanValue,
+            label: type === 'other' && label ? label : undefined,
+            is_primary: index === 0,
+          };
+        }),
       };
 
       if (formData.secure_messaging_enabled) {
@@ -289,6 +295,26 @@ export default function CreateBagForm({ onSuccess }: Props) {
         const result = emailSchema.safeParse(value);
         if (!result.success) {
           return 'Please enter a valid email address';
+        }
+        break;
+      }
+      case 'telegram': {
+        const cleanValue = value.replace(/^@+/, '');
+        if (cleanValue.length < 4 || cleanValue.length > 31) {
+          return 'Telegram username must be 4-31 characters';
+        }
+        if (!/^[A-Za-z0-9_]{4,31}$/.test(cleanValue)) {
+          return 'Telegram username can only contain letters, numbers, and underscores';
+        }
+        break;
+      }
+      case 'instagram': {
+        const cleanValue = value.replace(/^@+/, '');
+        if (cleanValue.length < 1 || cleanValue.length > 30) {
+          return 'Instagram username must be 1-30 characters';
+        }
+        if (!/^[A-Za-z0-9_.]{1,30}$/.test(cleanValue)) {
+          return 'Instagram username can only contain letters, numbers, periods, and underscores';
         }
         break;
       }

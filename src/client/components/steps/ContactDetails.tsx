@@ -59,7 +59,9 @@ export default function ContactDetails({
             type="email"
             placeholder="your@email.com"
             value={formData.owner_email}
-            onChange={(e) => onChange({ owner_email: e.target.value })}
+            onChange={(e) =>
+              onChange({ owner_email: e.target.value.replace(/\s/g, '') })
+            }
             required
             className="input-field"
             maxLength={254}

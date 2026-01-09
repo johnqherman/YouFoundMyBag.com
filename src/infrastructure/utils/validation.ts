@@ -60,7 +60,7 @@ export const createBagSchema = z
     bag_name: z.string().max(30).optional(),
     owner_message: z.string().max(150).optional(),
     owner_email: emailSchema.optional(),
-    contacts: z.array(contactSchema).min(0).max(5).default([]),
+    contacts: z.array(contactSchema).min(0).max(7).default([]),
     secure_messaging_enabled: z.boolean().optional(),
   })
   .refine(

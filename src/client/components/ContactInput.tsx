@@ -3,6 +3,7 @@ import 'intl-tel-input/styles';
 import IntlTelInput from 'intl-tel-input/reactWithUtils';
 import type { ContactWithId } from '../types/index';
 import { emailSchema } from '../../infrastructure/utils/validation';
+import { capitalizeWords } from '../../infrastructure/utils/formatting';
 import {
   SignalIcon,
   WhatsAppIcon,
@@ -101,10 +102,20 @@ export default function ContactInput({
   const handleNonPhoneValueChange = (newValue: string) => {
     if (!isMountedRef.current) return;
 
+    let processedValue = newValue;
+    if (
+      contact.type === 'email' ||
+      contact.type === 'telegram' ||
+      contact.type === 'instagram' ||
+      contact.type === 'other'
+    ) {
+      processedValue = newValue.replace(/\s/g, '');
+    }
+
     const errors: string[] = [];
-    if (newValue.trim()) {
+    if (processedValue.trim()) {
       if (contact.type === 'email') {
-        const result = emailSchema.safeParse(newValue);
+        const result = emailSchema.safeParse(processedValue);
         if (!result.success) {
           errors.push('Please enter a valid email address');
         }
@@ -115,17 +126,18 @@ export default function ContactInput({
       setErrors(errors);
       onUpdate({
         ...contact,
-        value: newValue,
+        value: processedValue,
       });
     }
   };
 
   const handleCustomLabelChange = (label: string) => {
-    setCustomLabel(label);
+    const capitalizedLabel = capitalizeWords(label);
+    setCustomLabel(capitalizedLabel);
     if (contact.type === 'other') {
       onUpdate({
         ...contact,
-        label,
+        label: capitalizedLabel,
       });
     }
   };

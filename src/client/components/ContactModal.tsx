@@ -230,7 +230,7 @@ export default function ContactModal({
               type="email"
               placeholder="your@email.com"
               value={senderInfo}
-              onChange={(e) => setSenderInfo(e.target.value)}
+              onChange={(e) => setSenderInfo(e.target.value.replace(/\s/g, ''))}
               className="input-field"
               maxLength={254}
               required
