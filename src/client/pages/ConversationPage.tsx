@@ -300,7 +300,7 @@ export default function ConversationPage() {
   return (
     <div className="min-h-screen bg-regal-navy-50 text-regal-navy-900">
       <div className="max-w-4xl mx-auto p-6">
-        <div className="mb-6">
+        <div className="sticky top-0 z-10 bg-regal-navy-50 pb-4 mb-6 -mx-6 px-6 pt-6 shadow-sm">
           <Link to="/dashboard" className="link mb-4 inline-block">
             ← Back to Dashboard
           </Link>
@@ -364,7 +364,13 @@ export default function ConversationPage() {
                       : 'text-regal-navy-500'
                   }`}
                 >
-                  {new Date(message.sent_at).toLocaleString()}
+                  {new Date(message.sent_at).toLocaleString('default', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                  })}
                 </span>
               </div>
               <p className="text-wrap-aggressive leading-relaxed">

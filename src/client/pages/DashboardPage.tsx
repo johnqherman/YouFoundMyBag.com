@@ -548,7 +548,16 @@ export default function DashboardPage() {
                                 </span>
                               </p>
                               <p className="text-xs text-regal-navy-500 mt-1.5">
-                                {new Date(lastMessage.sent_at).toLocaleString()}
+                                {new Date(lastMessage.sent_at).toLocaleString(
+                                  'default',
+                                  {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric',
+                                    hour: 'numeric',
+                                    minute: '2-digit',
+                                  }
+                                )}
                               </p>
                             </div>
                           )}
@@ -645,7 +654,16 @@ export default function DashboardPage() {
                                 {lastMessage.message_content}
                               </p>
                               <p className="text-xs text-regal-navy-500 mt-1.5">
-                                {new Date(lastMessage.sent_at).toLocaleString()}
+                                {new Date(lastMessage.sent_at).toLocaleString(
+                                  'default',
+                                  {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric',
+                                    hour: 'numeric',
+                                    minute: '2-digit',
+                                  }
+                                )}
                               </p>
                             </div>
                           )}
