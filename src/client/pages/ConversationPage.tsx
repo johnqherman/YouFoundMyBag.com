@@ -42,6 +42,7 @@ export default function ConversationPage() {
   const [replyMessage, setReplyMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [resolving, setResolving] = useState(false);
+  const [archiving, setArchiving] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const replyInputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -172,6 +173,49 @@ export default function ConversationPage() {
       );
     } finally {
       setResolving(false);
+    }
+  };
+
+  const handleArchiveConversation = async () => {
+    if (!conversationId || archiving) return;
+
+    const token = localStorage.getItem('owner_session_token');
+    if (!token) {
+      navigate('/auth/verify');
+      return;
+    }
+
+    if (
+      !confirm(
+        'Archive this conversation? It will be automatically deleted after 6 months.'
+      )
+    ) {
+      return;
+    }
+
+    setArchiving(true);
+    try {
+      const response = await fetch(
+        `/api/conversations/${conversationId}/archive`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to archive conversation');
+      }
+
+      navigate('/dashboard');
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Failed to archive conversation'
+      );
+    } finally {
+      setArchiving(false);
     }
   };
 
@@ -376,14 +420,27 @@ export default function ConversationPage() {
         )}
 
         {conversation.conversation.status === 'resolved' && (
-          <div className="alert-success text-center">
-            <div className="mb-2 flex justify-center">
-              <CheckIcon color="currentColor" />
+          <div className="card">
+            <div className="alert-success text-center mb-4">
+              <div className="mb-2 flex justify-center">
+                <CheckIcon color="currentColor" />
+              </div>
+              <p className="font-medium mb-1">
+                This conversation has been resolved.
+              </p>
+              <p className="text-sm">No further replies can be sent.</p>
             </div>
-            <p className="font-medium mb-1">
-              This conversation has been resolved.
+            <button
+              onClick={handleArchiveConversation}
+              disabled={archiving}
+              className="btn-secondary w-full disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {archiving ? 'Archiving...' : 'Archive Conversation'}
+            </button>
+            <p className="text-xs text-regal-navy-600 text-center mt-2">
+              Resolved conversations are automatically archived after 30 days.
+              Archived conversations are permanently deleted after 6 months.
             </p>
-            <p className="text-sm">No further replies can be sent.</p>
           </div>
         )}
 

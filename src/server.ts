@@ -6,6 +6,7 @@ import { logger } from './infrastructure/logger/index.js';
 import { initializeDatabase } from './infrastructure/database/index.js';
 import { initializeCache, closeCache } from './infrastructure/cache/index.js';
 import { startBackgroundJobs } from './infrastructure/cache/sync-jobs.js';
+import { scheduleConversationCleanup } from './infrastructure/scheduler/conversationCleanup.js';
 import {
   basicRateLimit,
   securityHeaders,
@@ -90,6 +91,7 @@ async function startServer() {
     await initializeDatabase();
     await initializeCache();
     startBackgroundJobs();
+    scheduleConversationCleanup();
 
     app.listen(config.PORT, () => {
       logger.info(`Server running on port ${config.PORT}`);

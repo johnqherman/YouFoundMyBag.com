@@ -138,6 +138,13 @@ export async function getBagByShortId(shortId: string): Promise<Bag | null> {
 }
 
 export async function getFinderPageData(shortId: string) {
+  const bag = await getBagByShortId(shortId);
+  if (!bag) return null;
+
+  if (bag.status === 'disabled') {
+    return { status: 'disabled' as const };
+  }
+
   const cached = await cacheGet<CachedFinderPageData>(
     `bag:finder:${shortId}`,
     'bag_finder'
@@ -156,6 +163,7 @@ export async function getFinderPageData(shortId: string) {
       }
     );
     return {
+      status: 'active' as const,
       short_id: cached.short_id,
       owner_name: cached.owner_name,
       bag_name: cached.bag_name,
@@ -164,9 +172,6 @@ export async function getFinderPageData(shortId: string) {
       contact_options: contactOptions,
     };
   }
-
-  const bag = await getBagByShortId(shortId);
-  if (!bag) return null;
 
   const contactsResult = await pool.query(
     `SELECT type, value, is_primary, label
@@ -206,6 +211,7 @@ export async function getFinderPageData(shortId: string) {
   logger.debug('Bag finder page cache warmed from DB', { shortId });
 
   return {
+    status: 'active' as const,
     short_id: bag.short_id,
     owner_name: bag.owner_name,
     bag_name: bag.bag_name,
@@ -230,6 +236,20 @@ export async function getBagId(shortId: string): Promise<string | null> {
     shortId,
   ]);
   return result.rows[0]?.id || null;
+}
+
+export async function getBagsByOwnerEmail(ownerEmail: string): Promise<Bag[]> {
+  const ownerEmailHash = hashForLookup(ownerEmail);
+
+  const result = await pool.query(
+    'SELECT * FROM bags WHERE owner_email_hash = $1 ORDER BY created_at DESC',
+    [ownerEmailHash]
+  );
+
+  return result.rows.map((row) => ({
+    ...row,
+    owner_email: decryptField(row.owner_email) ?? undefined,
+  }));
 }
 
 function getContactLabel(type: string): string {

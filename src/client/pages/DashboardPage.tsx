@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type {
   ConversationThread,
@@ -7,7 +7,11 @@ import type {
   MessageContextInfo,
 } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { MessageIcon } from '../components/icons/AppIcons';
+import {
+  MessageIcon,
+  MailIcon,
+  ArchiveIcon,
+} from '../components/icons/AppIcons';
 
 function formatBagDisplayName(
   ownerName?: string,
@@ -109,6 +113,13 @@ export default function DashboardPage() {
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'active' | 'archived'>('active');
+  const [archivedConversations, setArchivedConversations] = useState<
+    ConversationThread[]
+  >([]);
+  const [loadingArchived, setLoadingArchived] = useState(false);
+  const [restoringId, setRestoringId] = useState<string | null>(null);
+  const [archivingId, setArchivingId] = useState<string | null>(null);
 
   useEffect(() => {
     loadDashboard();
@@ -143,6 +154,124 @@ export default function DashboardPage() {
       setLoading(false);
     }
   };
+
+  const loadArchivedConversations = useCallback(async () => {
+    if (archivedConversations.length > 0) return;
+
+    setLoadingArchived(true);
+    try {
+      const token = localStorage.getItem('owner_session_token');
+      if (!token) return;
+
+      const response = await fetch('/api/conversations/archived', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to load archived conversations');
+      }
+
+      const result = await response.json();
+      setArchivedConversations(result.data);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Failed to load archived conversations'
+      );
+    } finally {
+      setLoadingArchived(false);
+    }
+  }, [archivedConversations.length]);
+
+  const handleArchiveConversation = async (
+    conversationId: string,
+    e: React.MouseEvent
+  ) => {
+    e.stopPropagation();
+
+    if (archivingId) return;
+
+    const token = localStorage.getItem('owner_session_token');
+    if (!token) return;
+
+    if (
+      !confirm(
+        'Archive this conversation? It will be automatically deleted after 6 months.'
+      )
+    ) {
+      return;
+    }
+
+    setArchivingId(conversationId);
+    try {
+      const response = await fetch(
+        `/api/conversations/${conversationId}/archive`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to archive conversation');
+      }
+
+      await loadDashboard();
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Failed to archive conversation'
+      );
+    } finally {
+      setArchivingId(null);
+    }
+  };
+
+  const handleRestoreConversation = async (conversationId: string) => {
+    if (restoringId) return;
+
+    const token = localStorage.getItem('owner_session_token');
+    if (!token) return;
+
+    setRestoringId(conversationId);
+    try {
+      const response = await fetch(
+        `/api/conversations/${conversationId}/restore`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to restore conversation');
+      }
+
+      setArchivedConversations((prev) =>
+        prev.filter((thread) => thread.conversation.id !== conversationId)
+      );
+
+      await loadDashboard();
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Failed to restore conversation'
+      );
+    } finally {
+      setRestoringId(null);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'archived') {
+      loadArchivedConversations();
+    }
+  }, [activeTab, loadArchivedConversations]);
 
   if (loading) {
     return (
@@ -227,7 +356,12 @@ export default function DashboardPage() {
                       </p>
 
                       <div className="flex justify-between text-xs text-regal-navy-600">
-                        <span>{bag.conversation_count} conversations</span>
+                        <span>
+                          {bag.conversation_count}{' '}
+                          {bag.conversation_count === 1
+                            ? 'conversation'
+                            : 'conversations'}
+                        </span>
                         {bag.unread_count > 0 && (
                           <span className="badge badge-error">
                             {bag.unread_count} unread
@@ -243,132 +377,283 @@ export default function DashboardPage() {
 
           <div className="lg:col-span-2">
             <div className="card">
-              <h2 className="text-xl font-semibold mb-4">Recent Messages</h2>
-
-              {dashboardData.conversations.length === 0 ? (
-                <div className="text-center text-regal-navy-500 py-12">
-                  <div className="text-5xl mb-4">📭</div>
-                  <p className="text-lg mb-2 font-medium text-regal-navy-700">
-                    No messages yet
-                  </p>
-                  <p className="text-sm">
-                    When someone finds your bag and sends a message, it will
-                    appear here.
-                  </p>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">
+                  {activeTab === 'active' ? 'Recent Messages' : 'Archived'}
+                </h2>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setActiveTab('active')}
+                    className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                      activeTab === 'active'
+                        ? 'bg-regal-navy-600 text-white'
+                        : 'bg-regal-navy-100 text-regal-navy-700 hover:bg-regal-navy-200'
+                    }`}
+                  >
+                    Active
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('archived')}
+                    className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                      activeTab === 'archived'
+                        ? 'bg-regal-navy-600 text-white'
+                        : 'bg-regal-navy-100 text-regal-navy-700 hover:bg-regal-navy-200'
+                    }`}
+                  >
+                    Archived
+                  </button>
                 </div>
-              ) : (
-                <div className="space-y-4">
-                  {dashboardData.conversations.map((thread) => {
-                    const lastMessage =
-                      thread.messages[thread.messages.length - 1];
-                    const unreadCount = thread.messages.filter(
-                      (msg) => msg.sender_type === 'finder' && !msg.read_at
-                    ).length;
+              </div>
 
-                    let contextInfo: MessageContextInfo | null = null;
-                    let contextLabel = '';
-                    let ContextIcon = MessageIcon;
+              {activeTab === 'active' &&
+                dashboardData.conversations.length === 0 && (
+                  <div className="text-center text-regal-navy-500 py-12">
+                    <div className="mb-4 flex justify-center text-regal-navy-400">
+                      <div style={{ fontSize: '4rem' }}>
+                        <MailIcon color="currentColor" />
+                      </div>
+                    </div>
+                    <p className="text-lg mb-2 font-medium text-regal-navy-700">
+                      No messages yet
+                    </p>
+                    <p className="text-sm">
+                      When someone finds your bag and sends a message, it will
+                      appear here.
+                    </p>
+                  </div>
+                )}
 
-                    if (lastMessage) {
-                      contextInfo = analyzeMessageContext(
-                        thread.messages,
-                        lastMessage.sender_type
-                      );
-                      contextLabel = getMessageContextLabel(
-                        contextInfo.context,
-                        lastMessage.sender_type,
-                        'owner'
-                      );
-                      ContextIcon = getMessageContextIcon(
-                        contextInfo.context,
-                        lastMessage.sender_type
-                      );
-                    }
+              {activeTab === 'active' &&
+                dashboardData.conversations.length > 0 && (
+                  <div className="space-y-4">
+                    {dashboardData.conversations.map((thread) => {
+                      const lastMessage =
+                        thread.messages[thread.messages.length - 1];
+                      const unreadCount = thread.messages.filter(
+                        (msg) => msg.sender_type === 'finder' && !msg.read_at
+                      ).length;
 
-                    return (
-                      <div
-                        key={thread.conversation.id}
-                        className="bg-white rounded-lg p-5 border border-regal-navy-200 hover:border-regal-navy-400 cursor-pointer transition-all duration-150 hover:shadow-soft-md"
-                        onClick={() =>
-                          navigate(
-                            `/dashboard/conversation/${thread.conversation.id}`
-                          )
-                        }
-                      >
-                        <div className="flex justify-between items-start mb-3">
-                          <div>
-                            <h3 className="font-medium text-regal-navy-900">
-                              {formatBagDisplayName(
-                                thread.bag.owner_name,
-                                thread.bag.bag_name,
-                                thread.bag.short_id
-                              )}
-                            </h3>
-                            <div className="flex items-center gap-2 text-sm text-regal-navy-600 mt-1">
-                              <span>
-                                Conversation started{' '}
-                                {new Date(
-                                  thread.conversation.created_at
-                                ).toLocaleDateString()}
-                              </span>
-                              <span
-                                className={`badge ${
-                                  thread.conversation.status === 'resolved'
-                                    ? 'badge-neutral'
-                                    : contextInfo?.context === 'initial'
-                                      ? 'bg-regal-navy-100 text-regal-navy-700'
-                                      : contextInfo?.context === 'follow-up'
-                                        ? 'badge-warning'
-                                        : 'badge-success'
-                                }`}
-                              >
-                                <span className="inline-flex">
-                                  {thread.conversation.status === 'resolved' ? (
-                                    '✓'
-                                  ) : (
-                                    <ContextIcon color="currentColor" />
-                                  )}
+                      let contextInfo: MessageContextInfo | null = null;
+                      let contextLabel = '';
+                      let ContextIcon = MessageIcon;
+
+                      if (lastMessage) {
+                        contextInfo = analyzeMessageContext(
+                          thread.messages,
+                          lastMessage.sender_type
+                        );
+                        contextLabel = getMessageContextLabel(
+                          contextInfo.context,
+                          lastMessage.sender_type,
+                          'owner'
+                        );
+                        ContextIcon = getMessageContextIcon(
+                          contextInfo.context,
+                          lastMessage.sender_type
+                        );
+                      }
+
+                      return (
+                        <div
+                          key={thread.conversation.id}
+                          className="bg-white rounded-lg p-5 border border-regal-navy-200 hover:border-regal-navy-400 cursor-pointer transition-all duration-150 hover:shadow-soft-md"
+                          onClick={() =>
+                            navigate(
+                              `/dashboard/conversation/${thread.conversation.id}`
+                            )
+                          }
+                        >
+                          <div className="flex justify-between items-start mb-3">
+                            <div className="flex-1">
+                              <h3 className="font-medium text-regal-navy-900">
+                                {formatBagDisplayName(
+                                  thread.bag.owner_name,
+                                  thread.bag.bag_name,
+                                  thread.bag.short_id
+                                )}
+                              </h3>
+                              <div className="flex items-center gap-2 text-sm text-regal-navy-600 mt-1">
+                                <span>
+                                  Conversation started{' '}
+                                  {new Date(
+                                    thread.conversation.created_at
+                                  ).toLocaleDateString()}
                                 </span>
-                                <span className="ml-1">
-                                  {thread.conversation.status === 'resolved'
-                                    ? 'Resolved'
-                                    : contextInfo?.context === 'initial'
-                                      ? 'New'
-                                      : contextInfo?.context === 'follow-up'
-                                        ? 'Follow-up'
-                                        : 'Active'}
+                                <span
+                                  className={`badge ${
+                                    thread.conversation.status === 'resolved'
+                                      ? 'badge-neutral'
+                                      : contextInfo?.context === 'initial'
+                                        ? 'bg-regal-navy-100 text-regal-navy-700'
+                                        : contextInfo?.context === 'follow-up'
+                                          ? 'badge-warning'
+                                          : 'badge-success'
+                                  }`}
+                                >
+                                  <span className="inline-flex">
+                                    {thread.conversation.status ===
+                                    'resolved' ? (
+                                      '✓'
+                                    ) : (
+                                      <ContextIcon color="currentColor" />
+                                    )}
+                                  </span>
+                                  <span className="ml-1">
+                                    {thread.conversation.status === 'resolved'
+                                      ? 'Resolved'
+                                      : contextInfo?.context === 'initial'
+                                        ? 'New'
+                                        : contextInfo?.context === 'follow-up'
+                                          ? 'Follow-up'
+                                          : 'Active'}
+                                  </span>
                                 </span>
-                              </span>
+                                {thread.conversation.status === 'resolved' && (
+                                  <button
+                                    onClick={(e) =>
+                                      handleArchiveConversation(
+                                        thread.conversation.id,
+                                        e
+                                      )
+                                    }
+                                    disabled={
+                                      archivingId === thread.conversation.id
+                                    }
+                                    className="btn-secondary text-xs px-2 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    title="Archive conversation"
+                                  >
+                                    {archivingId === thread.conversation.id
+                                      ? 'Archiving...'
+                                      : 'Archive'}
+                                  </button>
+                                )}
+                              </div>
                             </div>
+                            {unreadCount > 0 && (
+                              <span className="badge badge-error">
+                                {unreadCount} new
+                              </span>
+                            )}
                           </div>
-                          {unreadCount > 0 && (
-                            <span className="badge badge-error">
-                              {unreadCount} new
-                            </span>
+
+                          {lastMessage && (
+                            <div className="bg-regal-navy-50 rounded-lg p-3 mt-3">
+                              <p className="text-sm text-regal-navy-800">
+                                <span className="font-medium inline-flex items-center gap-1">
+                                  <ContextIcon color="currentColor" />
+                                  <span>{contextLabel}:</span>
+                                </span>{' '}
+                                <span className="text-wrap-aggressive line-clamp-1 overflow-hidden text-ellipsis">
+                                  {lastMessage.message_content}
+                                </span>
+                              </p>
+                              <p className="text-xs text-regal-navy-500 mt-1.5">
+                                {new Date(lastMessage.sent_at).toLocaleString()}
+                              </p>
+                            </div>
                           )}
                         </div>
+                      );
+                    })}
+                  </div>
+                )}
 
-                        {lastMessage && (
-                          <div className="bg-regal-navy-50 rounded-lg p-3 mt-3">
-                            <p className="text-sm text-regal-navy-800">
-                              <span className="font-medium inline-flex items-center gap-1">
-                                <ContextIcon color="currentColor" />
-                                <span>{contextLabel}:</span>
-                              </span>{' '}
-                              <span className="text-wrap-aggressive line-clamp-1 overflow-hidden text-ellipsis">
-                                {lastMessage.message_content}
-                              </span>
-                            </p>
-                            <p className="text-xs text-regal-navy-500 mt-1.5">
-                              {new Date(lastMessage.sent_at).toLocaleString()}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
+              {activeTab === 'archived' && loadingArchived && (
+                <div className="text-center py-12">
+                  <LoadingSpinner />
+                  <p className="mt-4 text-regal-navy-600">
+                    Loading archived conversations...
+                  </p>
                 </div>
               )}
+
+              {activeTab === 'archived' &&
+                !loadingArchived &&
+                archivedConversations.length === 0 && (
+                  <div className="text-center text-regal-navy-500 py-12">
+                    <div className="mb-4 flex justify-center text-regal-navy-400">
+                      <div style={{ fontSize: '4rem' }}>
+                        <ArchiveIcon color="currentColor" />
+                      </div>
+                    </div>
+                    <p className="text-lg mb-2 font-medium text-regal-navy-700">
+                      No archived conversations
+                    </p>
+                    <p className="text-sm">
+                      Resolved conversations are automatically archived after 30
+                      days.
+                    </p>
+                  </div>
+                )}
+
+              {activeTab === 'archived' &&
+                !loadingArchived &&
+                archivedConversations.length > 0 && (
+                  <div className="space-y-4">
+                    {archivedConversations.map((thread) => {
+                      const lastMessage =
+                        thread.messages[thread.messages.length - 1];
+
+                      return (
+                        <div
+                          key={thread.conversation.id}
+                          className="bg-regal-navy-50 rounded-lg p-5 border border-regal-navy-200"
+                        >
+                          <div className="flex justify-between items-start mb-3">
+                            <div className="flex-1">
+                              <h3 className="font-medium text-regal-navy-900">
+                                {formatBagDisplayName(
+                                  thread.bag.owner_name,
+                                  thread.bag.bag_name,
+                                  thread.bag.short_id
+                                )}
+                              </h3>
+                              <p className="text-sm text-regal-navy-600 mt-1">
+                                Archived{' '}
+                                {thread.conversation.archived_at &&
+                                  new Date(
+                                    thread.conversation.archived_at
+                                  ).toLocaleDateString()}
+                              </p>
+                              {thread.conversation.permanently_deleted_at && (
+                                <p className="text-xs text-cinnabar-600 mt-1">
+                                  Will be permanently deleted on{' '}
+                                  {new Date(
+                                    thread.conversation.permanently_deleted_at
+                                  ).toLocaleDateString()}
+                                </p>
+                              )}
+                            </div>
+                            <button
+                              onClick={() =>
+                                handleRestoreConversation(
+                                  thread.conversation.id
+                                )
+                              }
+                              disabled={restoringId === thread.conversation.id}
+                              className="btn-secondary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {restoringId === thread.conversation.id
+                                ? 'Restoring...'
+                                : 'Restore'}
+                            </button>
+                          </div>
+
+                          {lastMessage && (
+                            <div className="bg-white rounded-lg p-3 mt-3">
+                              <p className="text-sm text-regal-navy-800 line-clamp-2">
+                                {lastMessage.message_content}
+                              </p>
+                              <p className="text-xs text-regal-navy-500 mt-1.5">
+                                {new Date(lastMessage.sent_at).toLocaleString()}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
             </div>
           </div>
         </div>

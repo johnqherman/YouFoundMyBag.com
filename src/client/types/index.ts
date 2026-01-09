@@ -21,26 +21,31 @@ export interface CreateBagResponse {
 
 export interface FinderPageData {
   success: boolean;
-  data: {
-    short_id: string;
-    owner_name?: string;
-    bag_name?: string;
-    owner_message?: string;
-    secure_messaging_enabled: boolean;
-    contact_options: Array<{
-      type:
-        | 'sms'
-        | 'whatsapp'
-        | 'email'
-        | 'instagram'
-        | 'telegram'
-        | 'signal'
-        | 'other';
-      label: string;
-      value: string;
-      is_primary: boolean;
-    }>;
-  };
+  data:
+    | {
+        status: 'disabled';
+      }
+    | {
+        status: 'active';
+        short_id: string;
+        owner_name?: string;
+        bag_name?: string;
+        owner_message?: string;
+        secure_messaging_enabled: boolean;
+        contact_options: Array<{
+          type:
+            | 'sms'
+            | 'whatsapp'
+            | 'email'
+            | 'instagram'
+            | 'telegram'
+            | 'signal'
+            | 'other';
+          label: string;
+          value: string;
+          is_primary: boolean;
+        }>;
+      };
 }
 
 export interface Contact {
@@ -86,6 +91,8 @@ export interface Conversation {
   owner_notifications_sent: number;
   last_message_at: string;
   created_at: string;
+  archived_at?: string;
+  permanently_deleted_at?: string;
 }
 
 export interface ConversationMessage {

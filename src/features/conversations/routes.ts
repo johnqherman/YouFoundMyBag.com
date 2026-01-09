@@ -169,6 +169,52 @@ router.post(
 );
 
 router.get(
+  '/conversations/archived',
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader?.startsWith('Bearer ')) {
+        res.status(401).json({
+          success: false,
+          error: 'unauthorized',
+          message: 'Authentication required',
+        });
+        return;
+      }
+
+      const token = authHeader.substring(7);
+      const session = await verifyOwnerSession(token);
+      if (!session) {
+        res.status(401).json({
+          success: false,
+          error: 'unauthorized',
+          message: 'Invalid or expired session',
+        });
+        return;
+      }
+
+      const archivedConversations =
+        await conversationService.getArchivedConversations(session.email);
+
+      res.json({
+        success: true,
+        data: archivedConversations,
+      });
+    } catch (error) {
+      logger.error('Error getting archived conversations:', error);
+      res.status(500).json({
+        success: false,
+        error: 'archived_error',
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Failed to get archived conversations',
+      });
+    }
+  }
+);
+
+router.get(
   '/conversations/:conversationId',
   async (req: Request, res: Response): Promise<void> => {
     try {
@@ -315,6 +361,128 @@ router.post(
           error instanceof Error
             ? error.message
             : 'Failed to resolve conversation',
+      });
+    }
+  }
+);
+
+router.post(
+  '/conversations/:conversationId/archive',
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { conversationId } = req.params;
+
+      if (!conversationId) {
+        res.status(400).json({
+          success: false,
+          error: 'validation_error',
+          message: 'Conversation ID is required',
+        });
+        return;
+      }
+
+      const authHeader = req.headers.authorization;
+      if (!authHeader?.startsWith('Bearer ')) {
+        res.status(401).json({
+          success: false,
+          error: 'unauthorized',
+          message: 'Authentication required',
+        });
+        return;
+      }
+
+      const token = authHeader.substring(7);
+      const session = await verifyOwnerSession(token);
+      if (!session) {
+        res.status(401).json({
+          success: false,
+          error: 'unauthorized',
+          message: 'Invalid or expired session',
+        });
+        return;
+      }
+
+      await conversationService.archiveConversation(
+        conversationId,
+        session.email
+      );
+
+      res.json({
+        success: true,
+        message: 'Conversation archived successfully',
+      });
+    } catch (error) {
+      logger.error('Error archiving conversation:', error);
+      const status =
+        error instanceof Error && error.message === 'Access denied' ? 403 : 500;
+      res.status(status).json({
+        success: false,
+        error: 'archive_error',
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Failed to archive conversation',
+      });
+    }
+  }
+);
+
+router.post(
+  '/conversations/:conversationId/restore',
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { conversationId } = req.params;
+
+      if (!conversationId) {
+        res.status(400).json({
+          success: false,
+          error: 'validation_error',
+          message: 'Conversation ID is required',
+        });
+        return;
+      }
+
+      const authHeader = req.headers.authorization;
+      if (!authHeader?.startsWith('Bearer ')) {
+        res.status(401).json({
+          success: false,
+          error: 'unauthorized',
+          message: 'Authentication required',
+        });
+        return;
+      }
+
+      const token = authHeader.substring(7);
+      const session = await verifyOwnerSession(token);
+      if (!session) {
+        res.status(401).json({
+          success: false,
+          error: 'unauthorized',
+          message: 'Invalid or expired session',
+        });
+        return;
+      }
+
+      await conversationService.restoreConversation(
+        conversationId,
+        session.email
+      );
+
+      res.json({
+        success: true,
+        message: 'Conversation restored successfully',
+      });
+    } catch (error) {
+      logger.error('Error restoring conversation:', error);
+      const status =
+        error instanceof Error && error.message === 'Access denied' ? 403 : 500;
+      res.status(status).json({
+        success: false,
+        error: 'restore_error',
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Failed to restore conversation',
       });
     }
   }

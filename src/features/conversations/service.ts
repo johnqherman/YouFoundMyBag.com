@@ -382,3 +382,55 @@ export function getClientIpHash(
     .digest('hex')
     .substring(0, 16);
 }
+
+export async function archiveConversation(
+  conversationId: string,
+  ownerEmail: string
+): Promise<void> {
+  const thread =
+    await conversationRepository.getConversationById(conversationId);
+  if (!thread) {
+    throw new Error('Conversation not found');
+  }
+
+  const bag = await getBagByShortId(thread.bag.short_id);
+  if (!bag || bag.owner_email !== ownerEmail) {
+    throw new Error('Access denied');
+  }
+
+  if (thread.conversation.status !== 'resolved') {
+    throw new Error('Only resolved conversations can be archived');
+  }
+
+  await conversationRepository.archiveConversation(conversationId);
+}
+
+export async function restoreConversation(
+  conversationId: string,
+  ownerEmail: string
+): Promise<void> {
+  const thread =
+    await conversationRepository.getConversationById(conversationId);
+  if (!thread) {
+    throw new Error('Conversation not found');
+  }
+
+  const bag = await getBagByShortId(thread.bag.short_id);
+  if (!bag || bag.owner_email !== ownerEmail) {
+    throw new Error('Access denied');
+  }
+
+  if (thread.conversation.status !== 'archived') {
+    throw new Error('Only archived conversations can be restored');
+  }
+
+  await conversationRepository.restoreConversation(conversationId);
+}
+
+export async function getArchivedConversations(
+  ownerEmail: string
+): Promise<ConversationThread[]> {
+  return conversationRepository.getArchivedConversationsByOwnerEmail(
+    ownerEmail
+  );
+}

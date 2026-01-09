@@ -15,6 +15,7 @@ import AddIcon from '@atlaskit/icon/core/add';
 import ShieldIcon from '@atlaskit/icon/core/shield';
 import BriefcaseIcon from '@atlaskit/icon/core/briefcase';
 import CheckMarkIcon from '@atlaskit/icon/core/check-mark';
+import ArchiveBoxIcon from '@atlaskit/icon/core/archive-box';
 
 export type IconSize = 'small' | 'medium' | 'large';
 export type IconColor = 'currentColor';
@@ -262,6 +263,21 @@ export const BagIcon = ({
 }: IconProps) => (
   <IconWrapper className={className}>
     <BriefcaseIcon spacing="spacious" color={color} label={label || 'Bag'} />
+  </IconWrapper>
+);
+
+export const ArchiveIcon = ({
+  size: _size = 'medium',
+  color = 'currentColor',
+  label = '',
+  className = '',
+}: IconProps) => (
+  <IconWrapper className={className}>
+    <ArchiveBoxIcon
+      spacing="spacious"
+      color={color}
+      label={label || 'Archive'}
+    />
   </IconWrapper>
 );
 

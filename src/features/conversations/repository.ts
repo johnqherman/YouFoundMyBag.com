@@ -206,6 +206,7 @@ export async function getConversationsByOwnerEmail(
     FROM conversations c
     JOIN bags b ON c.bag_id = b.id
     WHERE b.owner_email_hash = $1
+    AND c.status != 'archived'
     ORDER BY c.last_message_at DESC
   `,
     [ownerEmailHash]
@@ -576,4 +577,151 @@ export async function resetNotificationCounter(
      WHERE id = $1`,
     [conversationId, senderType]
   );
+}
+
+export async function archiveConversation(
+  conversationId: string
+): Promise<void> {
+  await pool.query(
+    `UPDATE conversations
+     SET status = 'archived', archived_at = NOW(), permanently_deleted_at = NOW() + INTERVAL '6 months'
+     WHERE id = $1`,
+    [conversationId]
+  );
+
+  await invalidateConversationCaches(conversationId);
+  logger.info('Conversation archived', { conversationId });
+}
+
+export async function restoreConversation(
+  conversationId: string
+): Promise<void> {
+  await pool.query(
+    `UPDATE conversations
+     SET status = 'resolved', archived_at = NULL, permanently_deleted_at = NULL
+     WHERE id = $1`,
+    [conversationId]
+  );
+
+  await invalidateConversationCaches(conversationId);
+  logger.info('Conversation restored from archive', { conversationId });
+}
+
+export async function autoArchiveResolvedConversations(): Promise<number> {
+  const result = await pool.query(
+    `UPDATE conversations
+     SET status = 'archived', archived_at = NOW(), permanently_deleted_at = NOW() + INTERVAL '6 months'
+     WHERE status = 'resolved'
+     AND archived_at IS NULL
+     AND last_message_at < NOW() - INTERVAL '30 days'
+     RETURNING id`
+  );
+
+  const archivedIds = result.rows.map((row) => row.id);
+
+  for (const conversationId of archivedIds) {
+    await invalidateConversationCaches(conversationId);
+  }
+
+  logger.info('Auto-archived resolved conversations', {
+    count: result.rowCount,
+  });
+
+  return result.rowCount || 0;
+}
+
+export async function permanentlyDeleteConversations(): Promise<number> {
+  const result = await pool.query(
+    `DELETE FROM conversations
+     WHERE status = 'archived'
+     AND permanently_deleted_at IS NOT NULL
+     AND permanently_deleted_at < NOW()
+     RETURNING id`
+  );
+
+  const deletedIds = result.rows.map((row) => row.id);
+
+  for (const conversationId of deletedIds) {
+    await invalidateConversationCaches(conversationId);
+  }
+
+  logger.info('Permanently deleted archived conversations', {
+    count: result.rowCount,
+  });
+
+  return result.rowCount || 0;
+}
+
+export async function getArchivedConversationsByOwnerEmail(
+  ownerEmail: string
+): Promise<ConversationThread[]> {
+  const ownerEmailHash = hashForLookup(ownerEmail);
+
+  const result = await pool.query(
+    `
+    SELECT
+      c.*,
+      b.short_id, b.owner_name, b.bag_name, b.status as bag_status,
+      (
+        SELECT json_build_object(
+          'id', cm.id,
+          'conversation_id', cm.conversation_id,
+          'sender_type', cm.sender_type,
+          'message_content', cm.message_content,
+          'read_at', cm.read_at,
+          'sent_at', cm.sent_at
+        )
+        FROM conversation_messages cm
+        WHERE cm.conversation_id = c.id
+        ORDER BY cm.sent_at DESC
+        LIMIT 1
+      ) as latest_message,
+      (
+        SELECT COUNT(*)::integer
+        FROM conversation_messages cm
+        WHERE cm.conversation_id = c.id
+        AND cm.sender_type = 'finder'
+        AND cm.read_at IS NULL
+      ) as unread_count
+    FROM conversations c
+    JOIN bags b ON c.bag_id = b.id
+    WHERE b.owner_email_hash = $1
+    AND c.status = 'archived'
+    ORDER BY c.archived_at DESC
+  `,
+    [ownerEmailHash]
+  );
+
+  return result.rows.map((row) => ({
+    conversation: {
+      id: row.id,
+      bag_id: row.bag_id,
+      status: row.status,
+      finder_email: decryptField(row.finder_email) ?? undefined,
+      finder_display_name: row.finder_display_name,
+      finder_notifications_sent: row.finder_notifications_sent,
+      owner_notifications_sent: row.owner_notifications_sent,
+      last_message_at: row.last_message_at,
+      created_at: row.created_at,
+      archived_at: row.archived_at,
+      permanently_deleted_at: row.permanently_deleted_at,
+    },
+    messages: row.latest_message
+      ? [
+          {
+            ...row.latest_message,
+            message_content: decryptMessageContent(
+              row.latest_message.message_content
+            ),
+          },
+        ]
+      : [],
+    unread_count: row.unread_count,
+    bag: {
+      short_id: row.short_id,
+      owner_name: row.owner_name,
+      bag_name: row.bag_name,
+      status: row.bag_status,
+    },
+  }));
 }

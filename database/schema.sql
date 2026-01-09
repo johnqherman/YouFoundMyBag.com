@@ -75,7 +75,9 @@ CREATE TABLE public.conversations (
   finder_notifications_sent INTEGER DEFAULT 0 NOT NULL,
   owner_notifications_sent INTEGER DEFAULT 0 NOT NULL,
   last_message_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  archived_at TIMESTAMP WITH TIME ZONE,
+  permanently_deleted_at TIMESTAMP WITH TIME ZONE
 );
 
 CREATE TABLE public.conversation_messages (
@@ -124,6 +126,19 @@ WHERE
 CREATE INDEX idx_conversations_status ON public.conversations (status);
 
 CREATE INDEX idx_conversations_last_message ON public.conversations (last_message_at DESC);
+
+CREATE INDEX idx_conversations_archived_at ON public.conversations (archived_at)
+WHERE
+  archived_at IS NOT NULL;
+
+CREATE INDEX idx_conversations_permanently_deleted_at ON public.conversations (permanently_deleted_at)
+WHERE
+  permanently_deleted_at IS NOT NULL;
+
+CREATE INDEX idx_conversations_status_last_message ON public.conversations (status, last_message_at)
+WHERE
+  status = 'resolved'
+  AND archived_at IS NULL;
 
 CREATE INDEX idx_conversation_messages_conversation_id ON public.conversation_messages (conversation_id);
 

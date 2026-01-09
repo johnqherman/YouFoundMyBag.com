@@ -3,6 +3,8 @@ import type { Request, Response } from 'express';
 import { logger } from '../../infrastructure/logger/index.js';
 import * as authService from './service.js';
 import * as conversationService from '../conversations/service.js';
+import * as bagRepository from '../bags/repository.js';
+import type { ConversationThread } from '../../client/types/index.js';
 import {
   magicLinkSchema,
   verifyMagicLinkSchema,
@@ -133,41 +135,58 @@ router.get(
         return;
       }
 
-      const conversations = await conversationService.getOwnerConversations(
-        session.email
-      );
+      const [allBags, conversations] = await Promise.all([
+        bagRepository.getBagsByOwnerEmail(session.email),
+        conversationService.getOwnerConversations(session.email),
+      ]);
 
-      const bagMap = new Map();
-
-      conversations.forEach((thread) => {
-        const bagId = thread.conversation.bag_id;
-        const shortId = thread.bag.short_id;
-
-        if (!bagMap.has(bagId)) {
-          bagMap.set(bagId, {
-            id: bagId,
-            short_id: shortId,
-            owner_name: thread.bag.owner_name,
-            bag_name: thread.bag.bag_name,
-            status: thread.bag.status,
-            created_at: thread.conversation.created_at,
+      const bagMap = new Map<
+        string,
+        {
+          id: string;
+          short_id: string;
+          owner_name?: string;
+          bag_name?: string;
+          status: 'active' | 'disabled';
+          created_at: string;
+          conversations: ConversationThread[];
+          conversation_count: number;
+          unread_count: number;
+          latest_conversation: string | null;
+        }
+      >(
+        allBags.map((bag) => [
+          bag.id,
+          {
+            id: bag.id,
+            short_id: bag.short_id,
+            owner_name: bag.owner_name,
+            bag_name: bag.bag_name,
+            status: bag.status,
+            created_at: bag.created_at.toISOString(),
             conversations: [],
             conversation_count: 0,
             unread_count: 0,
             latest_conversation: null,
-          });
-        }
+          },
+        ])
+      );
 
+      conversations.forEach((thread) => {
+        const bagId = thread.conversation.bag_id;
         const bag = bagMap.get(bagId);
-        bag.conversations.push(thread);
-        bag.conversation_count++;
-        bag.unread_count += thread.unread_count || 0;
 
-        if (
-          !bag.latest_conversation ||
-          thread.conversation.last_message_at > bag.latest_conversation
-        ) {
-          bag.latest_conversation = thread.conversation.last_message_at;
+        if (bag) {
+          bag.conversations.push(thread);
+          bag.conversation_count++;
+          bag.unread_count += thread.unread_count || 0;
+
+          if (
+            !bag.latest_conversation ||
+            thread.conversation.last_message_at > bag.latest_conversation
+          ) {
+            bag.latest_conversation = thread.conversation.last_message_at;
+          }
         }
       });
 

@@ -1,7 +1,7 @@
+import cron from 'node-cron';
 import { pool } from '../database/index.js';
 import { getRedisClient, cacheHSet, cacheSet } from './index.js';
 import { logger } from '../logger/index.js';
-import { TIME_MS as t } from '../../client/constants/timeConstants.js';
 
 export async function syncNotificationCountersToDb(): Promise<{
   synced: number;
@@ -257,7 +257,7 @@ export async function reconcileCounters(): Promise<{
 export function startBackgroundJobs(): void {
   logger.info('Starting cache background jobs');
 
-  setInterval(async () => {
+  cron.schedule('*/5 * * * *', async () => {
     try {
       await syncNotificationCountersToDb();
     } catch (error) {
@@ -265,9 +265,9 @@ export function startBackgroundJobs(): void {
         error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
-  }, t.FIVE_MINUTES);
+  });
 
-  setInterval(async () => {
+  cron.schedule('0 * * * *', async () => {
     try {
       await reconcileCounters();
     } catch (error) {
@@ -275,7 +275,7 @@ export function startBackgroundJobs(): void {
         error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
-  }, t.ONE_HOUR);
+  });
 
   setTimeout(async () => {
     try {
@@ -285,7 +285,9 @@ export function startBackgroundJobs(): void {
         error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
-  }, t.ONE_MINUTE);
+  }, 60000);
 
-  logger.info('Cache background jobs started');
+  logger.info(
+    'Cache background jobs started (sync: */5 min, reconcile: hourly)'
+  );
 }

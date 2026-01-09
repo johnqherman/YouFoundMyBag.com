@@ -84,6 +84,37 @@ export default function FinderPage() {
 
   const { data } = bagData;
 
+  if (data.status === 'disabled') {
+    return (
+      <div className="min-h-screen bg-regal-navy-50">
+        <div className="max-w-readable mx-auto p-6">
+          <div className="card text-center">
+            <div
+              className="mb-6 flex justify-center text-regal-navy-400"
+              style={{ fontSize: '4rem' }}
+            >
+              <BagIcon color="currentColor" />
+            </div>
+            <h1 className="text-2xl font-semibold text-regal-navy-900 mb-4">
+              This bag has been deactivated
+            </h1>
+            <p className="text-regal-navy-700 mb-4">
+              The owner of this bag tag has disabled it.
+            </p>
+          </div>
+
+          <div className="text-center mt-8">
+            <a href="/" className="link text-sm">
+              Create your own lost item QR code →
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const activeBagData = data;
+
   return (
     <div className="min-h-screen bg-regal-navy-50">
       <div className="max-w-readable mx-auto p-6">
@@ -96,39 +127,43 @@ export default function FinderPage() {
               <BagIcon color="currentColor" />
             </div>
             <h1 className="text-3xl font-semibold mb-3 text-regal-navy-900">
-              You found {formatOwnerReference(data.owner_name)}{' '}
-              {formatBagDisplayName(data.owner_name, data.bag_name)}!
+              You found {formatOwnerReference(activeBagData.owner_name)}{' '}
+              {formatBagDisplayName(
+                activeBagData.owner_name,
+                activeBagData.bag_name
+              )}
+              !
             </h1>
             <p className="text-lg text-regal-navy-700">
               Thank you for taking the time to help.
             </p>
           </div>
 
-          {data.owner_message && (
+          {activeBagData.owner_message && (
             <div className="alert-info mb-8">
               <p className="font-medium text-regal-navy-900 mb-2">
-                Message from {data.owner_name || 'owner'}:
+                Message from {activeBagData.owner_name || 'owner'}:
               </p>
               <p className="text-regal-navy-800 italic text-wrap-aggressive">
-                &quot;{data.owner_message}&quot;
+                &quot;{activeBagData.owner_message}&quot;
               </p>
             </div>
           )}
 
           <div className="space-y-5">
-            {data.secure_messaging_enabled ? (
+            {activeBagData.secure_messaging_enabled ? (
               <p className="text-lg font-medium text-center text-regal-navy-900 mb-2">
                 Choose how you&apos;d like to contact me:
               </p>
             ) : (
               <>
                 <p className="text-lg font-medium text-center text-regal-navy-900 mb-2">
-                  Contact {data.owner_name || 'me'} directly:
+                  Contact {activeBagData.owner_name || 'me'} directly:
                 </p>
               </>
             )}
 
-            {data.secure_messaging_enabled && (
+            {activeBagData.secure_messaging_enabled && (
               <div className="bg-regal-navy-50 border border-regal-navy-200 rounded-lg p-5">
                 <h3 className="font-medium text-regal-navy-900 mb-2 flex items-center gap-2">
                   <PrivacyIcon color="currentColor" /> Private Messaging
@@ -145,13 +180,13 @@ export default function FinderPage() {
               </div>
             )}
 
-            {data.contact_options.length > 0 && (
+            {activeBagData.contact_options.length > 0 && (
               <div className="bg-regal-navy-50 border border-regal-navy-200 rounded-lg p-5">
                 <h3 className="font-medium text-regal-navy-900 mb-3 flex items-center gap-2">
                   <PhoneContactIcon color="currentColor" /> Direct Contact
                 </h3>
                 <div className="space-y-2">
-                  {data.contact_options
+                  {activeBagData.contact_options
                     .sort(
                       (a, b) => (b.is_primary ? 1 : 0) - (a.is_primary ? 1 : 0)
                     )
@@ -224,14 +259,16 @@ export default function FinderPage() {
         </div>
       </div>
 
-      {showContactModal && shortId && data.secure_messaging_enabled && (
-        <ContactModal
-          shortId={shortId}
-          onClose={() => setShowContactModal(false)}
-          ownerName={data.owner_name}
-          bagName={data.bag_name}
-        />
-      )}
+      {showContactModal &&
+        shortId &&
+        activeBagData.secure_messaging_enabled && (
+          <ContactModal
+            shortId={shortId}
+            onClose={() => setShowContactModal(false)}
+            ownerName={activeBagData.owner_name}
+            bagName={activeBagData.bag_name}
+          />
+        )}
     </div>
   );
 }
