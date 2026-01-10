@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { api } from '../utils/api';
 import type { FinderPageData } from '../types';
 import ContactModal from '../components/ContactModal';
@@ -65,6 +66,9 @@ export default function FinderPage() {
   if (error || !bagData) {
     return (
       <div className="min-h-screen bg-regal-navy-50">
+        <Helmet>
+          <title>Bag Not Found | YouFoundMyBag.com</title>
+        </Helmet>
         <div className="max-w-readable mx-auto p-6">
           <div className="card text-center">
             <h1 className="text-2xl font-semibold text-cinnabar-600 mb-4">
@@ -87,6 +91,9 @@ export default function FinderPage() {
   if (data.status === 'disabled') {
     return (
       <div className="min-h-screen bg-regal-navy-50">
+        <Helmet>
+          <title>Bag Deactivated | YouFoundMyBag.com</title>
+        </Helmet>
         <div className="max-w-readable mx-auto p-6">
           <div className="card text-center">
             <div
@@ -117,6 +124,9 @@ export default function FinderPage() {
 
   return (
     <div className="min-h-screen bg-regal-navy-50">
+      <Helmet>
+        <title>You Found My Bag!</title>
+      </Helmet>
       <div className="max-w-readable mx-auto p-6">
         <div className="card">
           <div className="text-center mb-8">

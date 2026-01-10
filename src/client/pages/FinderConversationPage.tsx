@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import LoadingSpinner from '../components/LoadingSpinner';
 import CharacterLimitTextArea from '../components/CharacterLimitTextArea';
 import type { ConversationThread, ConversationMessage } from '../types/index';
@@ -203,6 +204,12 @@ export default function FinderConversationPage() {
   if (loading || authenticating) {
     return (
       <div className="min-h-screen bg-neutral-950 text-neutral-100 flex items-center justify-center">
+        <Helmet>
+          <title>
+            {authenticating ? 'Authenticating...' : 'Loading Conversation...'} |
+            YouFoundMyBag.com
+          </title>
+        </Helmet>
         <div className="text-center">
           <LoadingSpinner />
           <p className="mt-4 text-neutral-400">
@@ -216,6 +223,9 @@ export default function FinderConversationPage() {
   if (error) {
     return (
       <div className="min-h-screen bg-neutral-950 text-neutral-100">
+        <Helmet>
+          <title>Access Error | YouFoundMyBag.com</title>
+        </Helmet>
         <div className="max-w-readable mx-auto p-6">
           <div className="text-center">
             <div
@@ -241,6 +251,9 @@ export default function FinderConversationPage() {
   if (!conversation) {
     return (
       <div className="min-h-screen bg-white text-neutral-900">
+        <Helmet>
+          <title>Conversation Not Found | YouFoundMyBag.com</title>
+        </Helmet>
         <div className="max-w-readable mx-auto p-6">
           <div className="text-center">
             <div className="text-6xl mb-4">❓</div>
@@ -257,8 +270,20 @@ export default function FinderConversationPage() {
     );
   }
 
+  const conversationTitle = conversation.bag.bag_name
+    ? `Conversation about${' '}
+            ${formatBagDisplayName(
+              conversation.bag.owner_name,
+              conversation.bag.bag_name,
+              conversation.bag.short_id
+            )} | YouFoundMyBag.com`
+    : 'Conversation | YouFoundMyBag.com';
+
   return (
     <div className="min-h-screen bg-white text-neutral-900">
+      <Helmet>
+        <title>{conversationTitle}</title>
+      </Helmet>
       <div className="max-w-4xl mx-auto p-6">
         <div className="sticky top-0 z-10 bg-white pb-4 mb-6 -mx-6 px-6 pt-6 shadow-sm">
           <h1 className="text-3xl font-bold mb-2 text-neutral-900">

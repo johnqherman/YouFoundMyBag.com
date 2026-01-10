@@ -1,8 +1,12 @@
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 
 export default function NotFoundPage() {
   return (
     <div className="min-h-screen bg-regal-navy-50 text-regal-navy-900">
+      <Helmet>
+        <title>Page Not Found | YouFoundMyBag.com</title>
+      </Helmet>
       <div className="max-w-md mx-auto p-6 lg:max-w-2xl flex items-center justify-center min-h-screen">
         <div className="card text-center">
           <div className="text-6xl mb-4">🔍</div>

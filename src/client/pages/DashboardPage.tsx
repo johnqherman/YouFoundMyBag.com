@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import type {
   ConversationThread,
   ConversationMessage,
@@ -284,6 +285,9 @@ export default function DashboardPage() {
   if (error || !dashboardData) {
     return (
       <div className="min-h-screen bg-regal-navy-50 text-regal-navy-900">
+        <Helmet>
+          <title>Dashboard Error | YouFoundMyBag.com</title>
+        </Helmet>
         <div className="max-w-4xl mx-auto p-6">
           <div className="text-center">
             <h1 className="text-2xl font-semibold text-cinnabar-600 mb-4">
@@ -303,6 +307,9 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-regal-navy-50 text-regal-navy-900">
+      <Helmet>
+        <title>Your Dashboard | YouFoundMyBag.com</title>
+      </Helmet>
       <div className="max-w-6xl mx-auto p-6">
         <header className="mb-8">
           <h1 className="text-3xl font-semibold mb-2">

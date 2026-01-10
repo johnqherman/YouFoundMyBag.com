@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import type { CreateBagResponse } from '../types/index.js';
 import { TIME_MS as t } from '../constants/timeConstants';
 import {
@@ -38,6 +39,9 @@ export default function BagCreated({ bagData, onCreateAnother }: Props) {
 
   return (
     <div className="min-h-screen bg-regal-navy-50 text-regal-navy-900 pb-20">
+      <Helmet>
+        <title>Your QR code is ready! | YouFoundMyBag.com</title>
+      </Helmet>
       <div className="max-w-md mx-auto p-6 lg:max-w-2xl">
         <div className="card text-center">
           <h1 className="text-2xl font-semibold mb-6 text-medium-jungle-700 flex items-center justify-center gap-2">

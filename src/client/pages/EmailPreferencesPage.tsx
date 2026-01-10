@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { SuccessIcon } from '../components/icons/AppIcons';
 import LoadingSpinner from '../components/LoadingSpinner';
 
@@ -117,6 +118,9 @@ export default function EmailPreferencesPage() {
   if (error && !preferences) {
     return (
       <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4">
+        <Helmet>
+          <title>Error | YouFoundMyBag.com</title>
+        </Helmet>
         <div className="max-w-md w-full bg-white rounded-lg shadow-md p-6">
           <h1 className="text-2xl font-bold text-regal-navy-900 mb-4">
             Error Loading Preferences
@@ -129,6 +133,9 @@ export default function EmailPreferencesPage() {
 
   return (
     <div className="min-h-screen bg-neutral-50 py-12 px-4">
+      <Helmet>
+        <title>Email Preferences | YouFoundMyBag.com</title>
+      </Helmet>
       <div className="max-w-2xl mx-auto">
         <div className="bg-white rounded-lg shadow-md p-6 md:p-8">
           <h1 className="text-3xl font-bold text-regal-navy-900 mb-2">

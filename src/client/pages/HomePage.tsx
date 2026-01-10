@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import CreateBagForm from '../components/CreateBagForm';
 import BagCreated from '../components/BagCreated';
 import type { CreateBagResponse } from '../types';
@@ -17,6 +18,9 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-regal-navy-50 text-regal-navy-900 pb-20">
+      <Helmet>
+        <title>Create New Bag | YouFoundMyBag.com</title>
+      </Helmet>
       <div className="max-w-md mx-auto p-6 lg:max-w-2xl">
         <header className="text-center mb-12 mt-4">
           <h1 className="text-4xl font-semibold mb-3 text-regal-navy-900">

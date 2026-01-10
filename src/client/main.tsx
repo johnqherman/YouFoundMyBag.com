@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import './index.css';
 import HomePage from './pages/HomePage';
 import FinderPage from './pages/FinderPage';
@@ -13,29 +14,31 @@ import EmailPreferencesPage from './pages/EmailPreferencesPage';
 
 function App() {
   return (
-    <Router future={{ v7_relativeSplatPath: true }}>
-      <div className="min-h-screen">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/b/:shortId" element={<FinderPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route
-            path="/dashboard/conversation/:conversationId"
-            element={<ConversationPage />}
-          />
-          <Route
-            path="/finder/conversation/:conversationId"
-            element={<FinderConversationPage />}
-          />
-          <Route path="/auth/verify" element={<AuthVerifyPage />} />
-          <Route
-            path="/email-preferences/:token"
-            element={<EmailPreferencesPage />}
-          />
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-      </div>
-    </Router>
+    <HelmetProvider>
+      <Router future={{ v7_relativeSplatPath: true }}>
+        <div className="min-h-screen">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/b/:shortId" element={<FinderPage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route
+              path="/dashboard/conversation/:conversationId"
+              element={<ConversationPage />}
+            />
+            <Route
+              path="/finder/conversation/:conversationId"
+              element={<FinderConversationPage />}
+            />
+            <Route path="/auth/verify" element={<AuthVerifyPage />} />
+            <Route
+              path="/email-preferences/:token"
+              element={<EmailPreferencesPage />}
+            />
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </div>
+      </Router>
+    </HelmetProvider>
   );
 }
 

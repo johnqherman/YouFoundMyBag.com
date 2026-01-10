@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import LoadingSpinner from '../components/LoadingSpinner';
 import CharacterLimitTextArea from '../components/CharacterLimitTextArea';
 import type { ConversationThread, ConversationMessage } from '../types/index';
@@ -249,6 +250,9 @@ export default function ConversationPage() {
   if (error) {
     return (
       <div className="min-h-screen bg-regal-navy-50 text-regal-navy-900">
+        <Helmet>
+          <title>Error | YouFoundMyBag.com</title>
+        </Helmet>
         <div className="max-w-readable mx-auto p-6">
           <div className="text-center">
             <div
@@ -273,6 +277,9 @@ export default function ConversationPage() {
   if (!conversation) {
     return (
       <div className="min-h-screen bg-regal-navy-50 text-regal-navy-900">
+        <Helmet>
+          <title>Conversation Not Found | YouFoundMyBag.com</title>
+        </Helmet>
         <div className="max-w-readable mx-auto p-6">
           <div className="text-center">
             <div
@@ -297,8 +304,20 @@ export default function ConversationPage() {
     );
   }
 
+  const conversationTitle = conversation.bag.bag_name
+    ? `Conversation about${' '}
+            ${formatBagDisplayName(
+              conversation.bag.owner_name,
+              conversation.bag.bag_name,
+              conversation.bag.short_id
+            )} | YouFoundMyBag.com`
+    : 'Conversation | YouFoundMyBag.com';
+
   return (
     <div className="min-h-screen bg-regal-navy-50 text-regal-navy-900">
+      <Helmet>
+        <title>{conversationTitle}</title>
+      </Helmet>
       <div className="max-w-4xl mx-auto p-6">
         <div className="sticky top-0 z-10 bg-regal-navy-50 pb-4 mb-6 -mx-6 px-6 pt-6 shadow-sm">
           <Link to="/dashboard" className="link mb-4 inline-block">

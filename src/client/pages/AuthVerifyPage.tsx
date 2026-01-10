@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { TIME_MS as t } from '../constants/timeConstants';
 import { SuccessIcon, ErrorIcon } from '../components/icons/AppIcons';
@@ -62,6 +63,9 @@ export default function AuthVerifyPage() {
   if (status === 'verifying') {
     return (
       <div className="min-h-screen bg-neutral-950 text-neutral-100 flex items-center justify-center">
+        <Helmet>
+          <title>Verifying Access... | YouFoundMyBag.com</title>
+        </Helmet>
         <div className="text-center">
           <LoadingSpinner />
           <p className="mt-4 text-neutral-400">Verifying your access...</p>
@@ -73,6 +77,9 @@ export default function AuthVerifyPage() {
   if (status === 'success') {
     return (
       <div className="min-h-screen bg-neutral-950 text-neutral-100 flex items-center justify-center">
+        <Helmet>
+          <title>Access Granted! | YouFoundMyBag.com</title>
+        </Helmet>
         <div className="text-center">
           <div
             className="mb-4 flex justify-center text-green-400"
@@ -93,6 +100,9 @@ export default function AuthVerifyPage() {
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100">
+      <Helmet>
+        <title>Verification Failed | YouFoundMyBag.com</title>
+      </Helmet>
       <div className="max-w-md mx-auto p-6 lg:max-w-2xl">
         <div className="text-center">
           <div
