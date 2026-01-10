@@ -8,6 +8,7 @@ import type {
   MessageContextInfo,
 } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
+import ConfirmModal from '../components/ConfirmModal';
 import {
   MessageIcon,
   MailIcon,
@@ -121,6 +122,10 @@ export default function DashboardPage() {
   const [loadingArchived, setLoadingArchived] = useState(false);
   const [restoringId, setRestoringId] = useState<string | null>(null);
   const [archivingId, setArchivingId] = useState<string | null>(null);
+  const [confirmArchive, setConfirmArchive] = useState<{
+    conversationId: string;
+    event: React.MouseEvent;
+  } | null>(null);
 
   useEffect(() => {
     loadDashboard();
@@ -187,26 +192,24 @@ export default function DashboardPage() {
     }
   }, [archivedConversations.length]);
 
-  const handleArchiveConversation = async (
-    conversationId: string,
-    e: React.MouseEvent
-  ) => {
+  const handleArchiveClick = (conversationId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-
     if (archivingId) return;
+    setConfirmArchive({ conversationId, event: e });
+  };
 
+  const handleArchiveConversation = async () => {
+    if (!confirmArchive || archivingId) return;
+
+    const { conversationId } = confirmArchive;
     const token = localStorage.getItem('owner_session_token');
-    if (!token) return;
-
-    if (
-      !confirm(
-        'Archive this conversation? It will be automatically deleted after 6 months.'
-      )
-    ) {
+    if (!token) {
+      setConfirmArchive(null);
       return;
     }
 
     setArchivingId(conversationId);
+    setConfirmArchive(null);
     try {
       const response = await fetch(
         `/api/conversations/${conversationId}/archive`,
@@ -518,7 +521,7 @@ export default function DashboardPage() {
                                 {thread.conversation.status === 'resolved' && (
                                   <button
                                     onClick={(e) =>
-                                      handleArchiveConversation(
+                                      handleArchiveClick(
                                         thread.conversation.id,
                                         e
                                       )
@@ -699,6 +702,17 @@ export default function DashboardPage() {
           </button>
         </footer>
       </div>
+
+      <ConfirmModal
+        isOpen={confirmArchive !== null}
+        title="Archive Conversation"
+        message="Archive this conversation? It will be automatically deleted after 6 months."
+        confirmText="Archive"
+        cancelText="Cancel"
+        variant="warning"
+        onConfirm={handleArchiveConversation}
+        onCancel={() => setConfirmArchive(null)}
+      />
     </div>
   );
 }

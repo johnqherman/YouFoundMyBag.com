@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import LoadingSpinner from '../components/LoadingSpinner';
 import CharacterLimitTextArea from '../components/CharacterLimitTextArea';
+import ConfirmModal from '../components/ConfirmModal';
 import type { ConversationThread, ConversationMessage } from '../types/index';
 import { api } from '../utils/api';
 import {
@@ -44,6 +45,7 @@ export default function ConversationPage() {
   const [sending, setSending] = useState(false);
   const [resolving, setResolving] = useState(false);
   const [archiving, setArchiving] = useState(false);
+  const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const replyInputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -177,6 +179,11 @@ export default function ConversationPage() {
     }
   };
 
+  const handleArchiveClick = () => {
+    if (archiving) return;
+    setShowArchiveConfirm(true);
+  };
+
   const handleArchiveConversation = async () => {
     if (!conversationId || archiving) return;
 
@@ -186,14 +193,7 @@ export default function ConversationPage() {
       return;
     }
 
-    if (
-      !confirm(
-        'Archive this conversation? It will be automatically deleted after 6 months.'
-      )
-    ) {
-      return;
-    }
-
+    setShowArchiveConfirm(false);
     setArchiving(true);
     try {
       const response = await fetch(
@@ -456,7 +456,7 @@ export default function ConversationPage() {
               <p className="text-sm">No further replies can be sent.</p>
             </div>
             <button
-              onClick={handleArchiveConversation}
+              onClick={handleArchiveClick}
               disabled={archiving}
               className="btn-secondary w-full disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -475,6 +475,17 @@ export default function ConversationPage() {
           </div>
         )}
       </div>
+
+      <ConfirmModal
+        isOpen={showArchiveConfirm}
+        title="Archive Conversation"
+        message="Archive this conversation? It will be automatically deleted after 6 months."
+        confirmText="Archive"
+        cancelText="Cancel"
+        variant="warning"
+        onConfirm={handleArchiveConversation}
+        onCancel={() => setShowArchiveConfirm(false)}
+      />
     </div>
   );
 }
