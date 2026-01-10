@@ -621,7 +621,12 @@ export default function DashboardPage() {
                       return (
                         <div
                           key={thread.conversation.id}
-                          className="bg-regal-navy-50 rounded-lg p-5 border border-regal-navy-200"
+                          className="bg-regal-navy-50 rounded-lg p-5 border border-regal-navy-200 hover:border-regal-navy-400 cursor-pointer transition-all duration-150 hover:shadow-soft-md"
+                          onClick={() =>
+                            navigate(
+                              `/dashboard/conversation/${thread.conversation.id}`
+                            )
+                          }
                         >
                           <div className="flex justify-between items-start mb-3">
                             <div className="flex-1">
@@ -651,11 +656,12 @@ export default function DashboardPage() {
                               )}
                             </div>
                             <button
-                              onClick={() =>
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 handleRestoreConversation(
                                   thread.conversation.id
-                                )
-                              }
+                                );
+                              }}
                               disabled={restoringId === thread.conversation.id}
                               className="btn-secondary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                             >
@@ -667,9 +673,12 @@ export default function DashboardPage() {
 
                           {lastMessage && (
                             <div className="bg-white rounded-lg p-3 mt-3">
-                              <p className="text-sm text-regal-navy-800 line-clamp-2">
+                              <Twemoji
+                                tag="p"
+                                className="text-sm text-regal-navy-800 line-clamp-2"
+                              >
                                 {lastMessage.message_content}
-                              </p>
+                              </Twemoji>
                               <p className="text-xs text-regal-navy-500 mt-1.5">
                                 {new Date(lastMessage.sent_at).toLocaleString(
                                   'default',
