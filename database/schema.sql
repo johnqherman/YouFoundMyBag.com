@@ -58,13 +58,6 @@ CREATE TABLE public.messages (
   sent_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-CREATE TABLE public.rate_limits (
-  key VARCHAR(100) PRIMARY KEY,
-  count INTEGER DEFAULT 1,
-  window_start TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  last_attempt TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
 CREATE TABLE public.conversations (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
   bag_id UUID REFERENCES public.bags (id) ON DELETE CASCADE,
@@ -72,8 +65,6 @@ CREATE TABLE public.conversations (
   finder_email VARCHAR(254),
   finder_email_hash VARCHAR(64),
   finder_display_name VARCHAR(30),
-  finder_notifications_sent INTEGER DEFAULT 0 NOT NULL,
-  owner_notifications_sent INTEGER DEFAULT 0 NOT NULL,
   last_message_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   archived_at TIMESTAMP WITH TIME ZONE,
@@ -152,8 +143,6 @@ CREATE INDEX idx_owner_sessions_conversation ON public.owner_sessions (conversat
 
 CREATE INDEX idx_owner_sessions_type ON public.owner_sessions (session_type);
 
-CREATE INDEX idx_rate_limits_window ON public.rate_limits (window_start);
-
 CREATE TABLE public.email_preferences (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
   email VARCHAR(254) UNIQUE NOT NULL,
@@ -195,43 +184,3 @@ GRANT ALL ON public.email_preferences TO PUBLIC;
 GRANT USAGE,
 SELECT
   ON ALL SEQUENCES IN SCHEMA public TO PUBLIC;
-
-CREATE OR REPLACE FUNCTION check_rate_limit (
-  limit_key TEXT,
-  max_requests INTEGER,
-  window_minutes INTEGER
-) RETURNS BOOLEAN AS $$
-DECLARE
-    current_window_start TIMESTAMP WITH TIME ZONE;
-    request_count INTEGER;
-BEGIN
-    current_window_start := date_trunc('minute', NOW() - INTERVAL '1 minute' * (EXTRACT(MINUTE FROM NOW())::INTEGER % window_minutes));
-
-    DELETE FROM public.rate_limits
-    WHERE window_start < current_window_start - INTERVAL '1 minute' * window_minutes;
-
-    SELECT count INTO request_count
-    FROM public.rate_limits
-    WHERE key = limit_key AND window_start = current_window_start;
-
-    IF request_count IS NULL THEN
-        INSERT INTO public.rate_limits (key, count, window_start, last_attempt)
-        VALUES (limit_key, 1, current_window_start, NOW())
-        ON CONFLICT (key) DO UPDATE SET
-            count = 1,
-            window_start = current_window_start,
-            last_attempt = NOW();
-        RETURN TRUE;
-    ELSIF request_count < max_requests THEN
-        UPDATE public.rate_limits
-        SET count = count + 1, last_attempt = NOW()
-        WHERE key = limit_key AND window_start = current_window_start;
-        RETURN TRUE;
-    ELSE
-        UPDATE public.rate_limits
-        SET last_attempt = NOW()
-        WHERE key = limit_key AND window_start = current_window_start;
-        RETURN FALSE;
-    END IF;
-END;
-$$ LANGUAGE plpgsql;

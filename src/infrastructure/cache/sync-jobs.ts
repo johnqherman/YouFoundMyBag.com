@@ -1,71 +1,7 @@
 import cron from 'node-cron';
 import { pool } from '../database/index.js';
-import { getRedisClient, cacheHSet, cacheSet } from './index.js';
+import { getRedisClient, cacheSet } from './index.js';
 import { logger } from '../logger/index.js';
-
-export async function syncNotificationCountersToDb(): Promise<{
-  synced: number;
-  errors: number;
-}> {
-  const redis = getRedisClient();
-  if (!redis) {
-    logger.warn(
-      'Redis client not available, skipping notification counter sync'
-    );
-    return { synced: 0, errors: 0 };
-  }
-
-  let synced = 0;
-  let errors = 0;
-
-  try {
-    logger.info('Starting notification counter sync from Redis to DB');
-
-    const keys = await redis.keys('notifications:conversation:*');
-
-    logger.info(`Found ${keys.length} notification counter keys to sync`);
-
-    for (const key of keys) {
-      try {
-        const conversationId = key.replace('notifications:conversation:', '');
-
-        const finderSent = await redis.hget(key, 'finder_sent');
-        const ownerSent = await redis.hget(key, 'owner_sent');
-
-        if (finderSent !== null && ownerSent !== null) {
-          await pool.query(
-            `UPDATE conversations
-             SET finder_notifications_sent = $1,
-                 owner_notifications_sent = $2
-             WHERE id = $3`,
-            [parseInt(finderSent), parseInt(ownerSent), conversationId]
-          );
-
-          synced++;
-          logger.debug('Synced notification counters', {
-            conversationId,
-            finder_sent: finderSent,
-            owner_sent: ownerSent,
-          });
-        }
-      } catch (error) {
-        errors++;
-        logger.error('Failed to sync notification counter', {
-          key,
-          error: error instanceof Error ? error.message : 'Unknown error',
-        });
-      }
-    }
-
-    logger.info('Notification counter sync completed', { synced, errors });
-  } catch (error) {
-    logger.error('Notification counter sync failed', {
-      error: error instanceof Error ? error.message : 'Unknown error',
-    });
-  }
-
-  return { synced, errors };
-}
 
 export async function reconcileCounters(): Promise<{
   checked: number;
@@ -83,10 +19,10 @@ export async function reconcileCounters(): Promise<{
   let fixed = 0;
 
   try {
-    logger.info('Starting counter reconciliation');
+    logger.info('Starting unread counter reconciliation');
 
     const conversationsResult = await pool.query(
-      "SELECT id, bag_id, finder_notifications_sent, owner_notifications_sent FROM conversations WHERE status = 'active'"
+      "SELECT id, bag_id FROM conversations WHERE status = 'active'"
     );
 
     logger.info(
@@ -96,65 +32,6 @@ export async function reconcileCounters(): Promise<{
     for (const conv of conversationsResult.rows) {
       try {
         checked++;
-
-        const redisFinderSent = await redis.hget(
-          `notifications:conversation:${conv.id}`,
-          'finder_sent'
-        );
-        const redisOwnerSent = await redis.hget(
-          `notifications:conversation:${conv.id}`,
-          'owner_sent'
-        );
-
-        let notificationDrift = false;
-
-        if (
-          redisFinderSent !== null &&
-          parseInt(redisFinderSent) !== conv.finder_notifications_sent
-        ) {
-          notificationDrift = true;
-          logger.warn('Notification counter drift detected', {
-            conversationId: conv.id,
-            type: 'finder',
-            redis: redisFinderSent,
-            db: conv.finder_notifications_sent,
-          });
-        }
-
-        if (
-          redisOwnerSent !== null &&
-          parseInt(redisOwnerSent) !== conv.owner_notifications_sent
-        ) {
-          notificationDrift = true;
-          logger.warn('Notification counter drift detected', {
-            conversationId: conv.id,
-            type: 'owner',
-            redis: redisOwnerSent,
-            db: conv.owner_notifications_sent,
-          });
-        }
-
-        if (notificationDrift) {
-          drifts++;
-
-          await cacheHSet(
-            `notifications:conversation:${conv.id}`,
-            'finder_sent',
-            String(conv.finder_notifications_sent),
-            'notification_counters'
-          );
-          await cacheHSet(
-            `notifications:conversation:${conv.id}`,
-            'owner_sent',
-            String(conv.owner_notifications_sent),
-            'notification_counters'
-          );
-
-          fixed++;
-          logger.info('Fixed notification counter drift', {
-            conversationId: conv.id,
-          });
-        }
 
         const unreadResult = await pool.query(
           `SELECT COUNT(*) as count FROM conversation_messages
@@ -257,16 +134,6 @@ export async function reconcileCounters(): Promise<{
 export function startBackgroundJobs(): void {
   logger.info('Starting cache background jobs');
 
-  cron.schedule('*/5 * * * *', async () => {
-    try {
-      await syncNotificationCountersToDb();
-    } catch (error) {
-      logger.error('Background sync job failed', {
-        error: error instanceof Error ? error.message : 'Unknown error',
-      });
-    }
-  });
-
   cron.schedule('0 * * * *', async () => {
     try {
       await reconcileCounters();
@@ -287,7 +154,5 @@ export function startBackgroundJobs(): void {
     }
   }, 60000);
 
-  logger.info(
-    'Cache background jobs started (sync: */5 min, reconcile: hourly)'
-  );
+  logger.info('Cache background jobs started (unread reconcile: hourly)');
 }
