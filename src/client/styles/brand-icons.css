@@ -1,6 +1,17 @@
 .brand-icon {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 18px;
+  line-height: 1;
+}
+
+.brand-icon svg,
+.brand-icon span {
+  max-height: 18px;
+  display: flex;
+  align-items: center;
 }
 
 .brand-icon-interactive {

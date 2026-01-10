@@ -59,7 +59,7 @@ export const SuccessIcon = ({
 }: IconProps) => (
   <IconWrapper className={className}>
     <CheckCircleIcon
-      spacing="spacious"
+      spacing="compact"
       color={color}
       label={label || 'Success'}
     />
@@ -73,11 +73,7 @@ export const ErrorIcon = ({
   className = '',
 }: IconProps) => (
   <IconWrapper className={className}>
-    <CrossCircleIcon
-      spacing="spacious"
-      color={color}
-      label={label || 'Error'}
-    />
+    <CrossCircleIcon spacing="compact" color={color} label={label || 'Error'} />
   </IconWrapper>
 );
 
@@ -88,7 +84,7 @@ export const AlertIcon = ({
   className = '',
 }: IconProps) => (
   <IconWrapper className={className}>
-    <WarningIcon spacing="spacious" color={color} label={label || 'Warning'} />
+    <WarningIcon spacing="compact" color={color} label={label || 'Warning'} />
   </IconWrapper>
 );
 
@@ -100,7 +96,7 @@ export const InfoIcon = ({
 }: IconProps) => (
   <IconWrapper className={className}>
     <InformationCircleIcon
-      spacing="spacious"
+      spacing="compact"
       color={color}
       label={label || 'Information'}
     />
@@ -115,7 +111,7 @@ export const QuestionIcon = ({
 }: IconProps) => (
   <IconWrapper className={className}>
     <QuestionCircleIcon
-      spacing="spacious"
+      spacing="compact"
       color={color}
       label={label || 'Question'}
     />
@@ -129,7 +125,7 @@ export const CheckIcon = ({
   className = '',
 }: IconProps) => (
   <IconWrapper className={className}>
-    <CheckMarkIcon spacing="spacious" color={color} label={label || 'Check'} />
+    <CheckMarkIcon spacing="compact" color={color} label={label || 'Check'} />
   </IconWrapper>
 );
 
@@ -141,7 +137,7 @@ export const PrivacyIcon = ({
 }: IconProps) => (
   <IconWrapper className={className}>
     <LockLockedIcon
-      spacing="spacious"
+      spacing="compact"
       color={color}
       label={label || 'Privacy'}
     />
@@ -155,7 +151,7 @@ export const SecureIcon = ({
   className = '',
 }: IconProps) => (
   <IconWrapper className={className}>
-    <ShieldIcon spacing="spacious" color={color} label={label || 'Secure'} />
+    <ShieldIcon spacing="compact" color={color} label={label || 'Secure'} />
   </IconWrapper>
 );
 
@@ -166,7 +162,7 @@ export const PhoneContactIcon = ({
   className = '',
 }: IconProps) => (
   <IconWrapper className={className}>
-    <PhoneIcon spacing="spacious" color={color} label={label || 'Phone'} />
+    <PhoneIcon spacing="compact" color={color} label={label || 'Phone'} />
   </IconWrapper>
 );
 
@@ -178,7 +174,7 @@ export const MobileIcon = ({
 }: IconProps) => (
   <IconWrapper className={className}>
     <DeviceMobileIcon
-      spacing="spacious"
+      spacing="compact"
       color={color}
       label={label || 'Mobile'}
     />
@@ -192,7 +188,7 @@ export const MailIcon = ({
   className = '',
 }: IconProps) => (
   <IconWrapper className={className}>
-    <EmailIcon spacing="spacious" color={color} label={label || 'Email'} />
+    <EmailIcon spacing="compact" color={color} label={label || 'Email'} />
   </IconWrapper>
 );
 
@@ -203,7 +199,7 @@ export const MessageIcon = ({
   className = '',
 }: IconProps) => (
   <IconWrapper className={className}>
-    <CommentIcon spacing="spacious" color={color} label={label || 'Message'} />
+    <CommentIcon spacing="compact" color={color} label={label || 'Message'} />
   </IconWrapper>
 );
 
@@ -214,7 +210,7 @@ export const MessengerIcon = ({
   className = '',
 }: IconProps) => (
   <IconWrapper className={className}>
-    <SendIcon spacing="spacious" color={color} label={label || 'Messenger'} />
+    <SendIcon spacing="compact" color={color} label={label || 'Messenger'} />
   </IconWrapper>
 );
 
@@ -225,7 +221,7 @@ export const PrintIcon = ({
   className = '',
 }: IconProps) => (
   <IconWrapper className={className}>
-    <PrinterIcon spacing="spacious" color={color} label={label || 'Print'} />
+    <PrinterIcon spacing="compact" color={color} label={label || 'Print'} />
   </IconWrapper>
 );
 
@@ -236,11 +232,7 @@ export const DownloadActionIcon = ({
   className = '',
 }: IconProps) => (
   <IconWrapper className={className}>
-    <DownloadIcon
-      spacing="spacious"
-      color={color}
-      label={label || 'Download'}
-    />
+    <DownloadIcon spacing="compact" color={color} label={label || 'Download'} />
   </IconWrapper>
 );
 
@@ -251,7 +243,7 @@ export const PlusIcon = ({
   className = '',
 }: IconProps) => (
   <IconWrapper className={className}>
-    <AddIcon spacing="spacious" color={color} label={label || 'Add'} />
+    <AddIcon spacing="compact" color={color} label={label || 'Add'} />
   </IconWrapper>
 );
 
@@ -262,7 +254,7 @@ export const BagIcon = ({
   className = '',
 }: IconProps) => (
   <IconWrapper className={className}>
-    <BriefcaseIcon spacing="spacious" color={color} label={label || 'Bag'} />
+    <BriefcaseIcon spacing="compact" color={color} label={label || 'Bag'} />
   </IconWrapper>
 );
 
@@ -274,7 +266,7 @@ export const ArchiveIcon = ({
 }: IconProps) => (
   <IconWrapper className={className}>
     <ArchiveBoxIcon
-      spacing="spacious"
+      spacing="compact"
       color={color}
       label={label || 'Archive'}
     />
