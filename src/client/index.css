@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+img.emoji {
+  height: 1em !important;
+  width: 1em !important;
+  margin: 0 0.05em 0 0.1em !important;
+  vertical-align: -0.1em !important;
+  display: inline-block !important;
+  max-width: 1em !important;
+  max-height: 1em !important;
+}
+
 @layer base {
   html {
     font-family:

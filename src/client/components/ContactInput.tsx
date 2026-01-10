@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import 'intl-tel-input/styles';
 import IntlTelInput from 'intl-tel-input/reactWithUtils';
-import type { ContactWithId } from '../types/index';
+import type { ContactWithId, IntlTelInputRef } from '../types/index';
 import { emailSchema } from '../../infrastructure/utils/validation';
 import { capitalizeWords } from '../../infrastructure/utils/formatting';
 import {
@@ -33,8 +33,7 @@ export default function ContactInput({
   const [errors, setErrors] = useState<string[]>([]);
   const [customLabel, setCustomLabel] = useState(contact.label || '');
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const intlTelInputInstanceRef = useRef<any>(null);
+  const intlTelInputInstanceRef = useRef<IntlTelInputRef | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const isMountedRef = useRef(true);
   const isUpdatingFromPropRef = useRef(false);

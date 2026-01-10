@@ -5,6 +5,7 @@ import { api } from '../utils/api';
 import type { FinderPageData } from '../types';
 import ContactModal from '../components/ContactModal';
 import LoadingSpinner from '../components/LoadingSpinner';
+import Twemoji from '../components/Twemoji';
 import {
   BagIcon,
   PrivacyIcon,
@@ -137,11 +138,14 @@ export default function FinderPage() {
               <BagIcon color="currentColor" />
             </div>
             <h1 className="text-3xl font-semibold mb-3 text-regal-navy-900">
-              You found {formatOwnerReference(activeBagData.owner_name)}{' '}
-              {formatBagDisplayName(
-                activeBagData.owner_name,
-                activeBagData.bag_name
-              )}
+              You found{' '}
+              <Twemoji>
+                {formatOwnerReference(activeBagData.owner_name)}{' '}
+                {formatBagDisplayName(
+                  activeBagData.owner_name,
+                  activeBagData.bag_name
+                )}
+              </Twemoji>
               !
             </h1>
             <p className="text-lg text-regal-navy-700">
@@ -152,11 +156,15 @@ export default function FinderPage() {
           {activeBagData.owner_message && (
             <div className="alert-info mb-8">
               <p className="font-medium text-regal-navy-900 mb-2">
-                Message from {activeBagData.owner_name || 'owner'}:
+                Message from{' '}
+                <Twemoji>{activeBagData.owner_name || 'owner'}</Twemoji>:
               </p>
-              <p className="text-regal-navy-800 italic text-wrap-aggressive">
+              <Twemoji
+                tag="p"
+                className="text-regal-navy-800 italic text-wrap-aggressive"
+              >
                 &quot;{activeBagData.owner_message}&quot;
-              </p>
+              </Twemoji>
             </div>
           )}
 
@@ -168,7 +176,8 @@ export default function FinderPage() {
             ) : (
               <>
                 <p className="text-lg font-medium text-center text-regal-navy-900 mb-2">
-                  Contact {activeBagData.owner_name || 'me'} directly:
+                  Contact <Twemoji>{activeBagData.owner_name || 'me'}</Twemoji>{' '}
+                  directly:
                 </p>
               </>
             )}

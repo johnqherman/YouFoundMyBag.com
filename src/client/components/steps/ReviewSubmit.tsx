@@ -6,6 +6,7 @@ import {
   formatContactTypeName,
 } from '../../../infrastructure/utils/formatting';
 import { getContactMethodIcon } from '../icons/AppIcons';
+import Twemoji from '../Twemoji';
 import {
   SignalIcon,
   WhatsAppIcon,
@@ -227,22 +228,22 @@ export default function ReviewSubmit({
         <div className="space-y-2.5 text-sm">
           <div className="flex justify-between gap-4">
             <span className="text-regal-navy-600">Your name:</span>
-            <span className="text-regal-navy-900 font-medium text-right">
+            <Twemoji className="text-regal-navy-900 font-medium text-right">
               {formData.owner_name || 'Not provided'}
-            </span>
+            </Twemoji>
           </div>
           <div className="flex justify-between gap-4">
             <span className="text-regal-navy-600">Bag type:</span>
-            <span className="text-regal-navy-900 font-medium text-right">
+            <Twemoji className="text-regal-navy-900 font-medium text-right">
               {formData.bag_name || 'Not provided'}
-            </span>
+            </Twemoji>
           </div>
           {formData.owner_message && (
             <div className="flex justify-between gap-4 items-start">
               <span className="text-regal-navy-600 shrink-0">Message:</span>
-              <span className="text-regal-navy-900 font-medium text-right">
+              <Twemoji className="text-regal-navy-900 font-medium text-right">
                 &quot;{formData.owner_message}&quot;
-              </span>
+              </Twemoji>
             </div>
           )}
         </div>

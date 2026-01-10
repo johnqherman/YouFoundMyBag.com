@@ -221,3 +221,11 @@ export interface CachedConversationThread {
     status: 'active' | 'disabled';
   };
 }
+
+export interface TwemojiProps {
+  children: React.ReactNode;
+  className?: string;
+  tag?: keyof JSX.IntrinsicElements;
+}
+
+export type { IntlTelInputRef } from 'intl-tel-input/reactWithUtils';

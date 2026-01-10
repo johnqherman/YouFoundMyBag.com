@@ -9,6 +9,7 @@ import type {
 } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ConfirmModal from '../components/ConfirmModal';
+import Twemoji from '../components/Twemoji';
 import {
   MessageIcon,
   MailIcon,
@@ -344,11 +345,13 @@ export default function DashboardPage() {
                     >
                       <div className="flex justify-between items-start mb-2">
                         <h3 className="font-medium text-regal-navy-900">
-                          {formatBagDisplayName(
-                            bag.owner_name,
-                            bag.bag_name,
-                            bag.short_id
-                          )}
+                          <Twemoji>
+                            {formatBagDisplayName(
+                              bag.owner_name,
+                              bag.bag_name,
+                              bag.short_id
+                            )}
+                          </Twemoji>
                         </h3>
                         <span
                           className={`badge ${
@@ -476,11 +479,13 @@ export default function DashboardPage() {
                           <div className="flex justify-between items-start mb-3">
                             <div className="flex-1">
                               <h3 className="font-medium text-regal-navy-900">
-                                {formatBagDisplayName(
-                                  thread.bag.owner_name,
-                                  thread.bag.bag_name,
-                                  thread.bag.short_id
-                                )}
+                                <Twemoji>
+                                  {formatBagDisplayName(
+                                    thread.bag.owner_name,
+                                    thread.bag.bag_name,
+                                    thread.bag.short_id
+                                  )}
+                                </Twemoji>
                               </h3>
                               <div className="flex items-center gap-2 text-sm text-regal-navy-600 mt-1">
                                 <span>
@@ -553,9 +558,9 @@ export default function DashboardPage() {
                                   <ContextIcon color="currentColor" />
                                   <span>{contextLabel}:</span>
                                 </span>{' '}
-                                <span className="text-wrap-aggressive line-clamp-1 overflow-hidden text-ellipsis">
+                                <Twemoji className="text-wrap-aggressive line-clamp-1 overflow-hidden text-ellipsis">
                                   {lastMessage.message_content}
-                                </span>
+                                </Twemoji>
                               </p>
                               <p className="text-xs text-regal-navy-500 mt-1.5">
                                 {new Date(lastMessage.sent_at).toLocaleString(
@@ -621,11 +626,13 @@ export default function DashboardPage() {
                           <div className="flex justify-between items-start mb-3">
                             <div className="flex-1">
                               <h3 className="font-medium text-regal-navy-900">
-                                {formatBagDisplayName(
-                                  thread.bag.owner_name,
-                                  thread.bag.bag_name,
-                                  thread.bag.short_id
-                                )}
+                                <Twemoji>
+                                  {formatBagDisplayName(
+                                    thread.bag.owner_name,
+                                    thread.bag.bag_name,
+                                    thread.bag.short_id
+                                  )}
+                                </Twemoji>
                               </h3>
                               <p className="text-sm text-regal-navy-600 mt-1">
                                 Archived{' '}

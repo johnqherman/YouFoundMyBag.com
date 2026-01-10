@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import LoadingSpinner from '../components/LoadingSpinner';
 import CharacterLimitTextArea from '../components/CharacterLimitTextArea';
 import ConfirmModal from '../components/ConfirmModal';
+import Twemoji from '../components/Twemoji';
 import type { ConversationThread, ConversationMessage } from '../types/index';
 import { api } from '../utils/api';
 import {
@@ -325,11 +326,13 @@ export default function ConversationPage() {
           </Link>
           <h1 className="text-3xl font-semibold mb-2">
             Conversation about{' '}
-            {formatBagDisplayName(
-              conversation.bag.owner_name,
-              conversation.bag.bag_name,
-              conversation.bag.short_id
-            )}
+            <Twemoji>
+              {formatBagDisplayName(
+                conversation.bag.owner_name,
+                conversation.bag.bag_name,
+                conversation.bag.short_id
+              )}
+            </Twemoji>
           </h1>
           <p className="text-regal-navy-600">
             Status:{' '}
@@ -348,7 +351,10 @@ export default function ConversationPage() {
             </span>
             {conversation.conversation.finder_display_name && (
               <span className="ml-4">
-                • Finder: {conversation.conversation.finder_display_name}
+                • Finder:{' '}
+                <Twemoji>
+                  {conversation.conversation.finder_display_name}
+                </Twemoji>
               </span>
             )}
           </p>
@@ -365,7 +371,7 @@ export default function ConversationPage() {
               }`}
             >
               <div className="flex justify-between items-start mb-2">
-                <span className="font-medium text-sm">
+                <Twemoji className="font-medium text-sm">
                   {formatConversationParticipant(
                     message.sender_type,
                     {
@@ -375,7 +381,7 @@ export default function ConversationPage() {
                     },
                     message.sender_type === 'owner'
                   )}
-                </span>
+                </Twemoji>
                 <span
                   className={`text-xs ${
                     message.sender_type === 'owner'
@@ -392,9 +398,9 @@ export default function ConversationPage() {
                   })}
                 </span>
               </div>
-              <p className="text-wrap-aggressive leading-relaxed">
+              <Twemoji tag="p" className="text-wrap-aggressive leading-relaxed">
                 {message.message_content}
-              </p>
+              </Twemoji>
             </div>
           ))}
           <div ref={messagesEndRef} />

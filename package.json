@@ -24,6 +24,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@types/dompurify": "^3.0.5",
     "@types/jsdom": "^27.0.0",
+    "@types/twemoji": "^13.1.1",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
     "deep-email-validator": "^0.1.21",
@@ -45,6 +46,7 @@
     "react-dom": "^18.2.0",
     "react-helmet-async": "^2.0.5",
     "react-router-dom": "^6.20.1",
+    "twemoji": "^14.0.2",
     "winston": "^3.19.0",
     "zod": "^3.22.4"
   },

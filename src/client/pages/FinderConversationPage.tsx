@@ -3,6 +3,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import LoadingSpinner from '../components/LoadingSpinner';
 import CharacterLimitTextArea from '../components/CharacterLimitTextArea';
+import Twemoji from '../components/Twemoji';
 import type { ConversationThread, ConversationMessage } from '../types/index';
 import {
   formatConversationParticipant,
@@ -288,11 +289,13 @@ export default function FinderConversationPage() {
         <div className="sticky top-0 z-10 bg-white pb-4 mb-6 -mx-6 px-6 pt-6 shadow-sm">
           <h1 className="text-3xl font-bold mb-2 text-neutral-900">
             Conversation about{' '}
-            {formatBagDisplayName(
-              conversation.bag.owner_name,
-              conversation.bag.bag_name,
-              conversation.bag.short_id
-            )}
+            <Twemoji>
+              {formatBagDisplayName(
+                conversation.bag.owner_name,
+                conversation.bag.bag_name,
+                conversation.bag.short_id
+              )}
+            </Twemoji>
           </h1>
           <p className="text-neutral-800 mb-2">
             Status:{' '}
@@ -311,7 +314,7 @@ export default function FinderConversationPage() {
             </span>
             {conversation.bag.owner_name && (
               <span className="ml-4">
-                • Owner: {conversation.bag.owner_name}
+                • Owner: <Twemoji>{conversation.bag.owner_name}</Twemoji>
               </span>
             )}
           </p>
@@ -331,7 +334,7 @@ export default function FinderConversationPage() {
               }`}
             >
               <div className="flex justify-between items-start mb-2">
-                <span
+                <Twemoji
                   className={`font-medium ${
                     message.sender_type === 'finder'
                       ? 'text-white'
@@ -347,7 +350,7 @@ export default function FinderConversationPage() {
                     },
                     message.sender_type === 'finder'
                   )}
-                </span>
+                </Twemoji>
                 <span
                   className={`text-sm font-medium ${
                     message.sender_type === 'finder'
@@ -364,7 +367,8 @@ export default function FinderConversationPage() {
                   })}
                 </span>
               </div>
-              <p
+              <Twemoji
+                tag="p"
                 className={`text-wrap-aggressive ${
                   message.sender_type === 'finder'
                     ? 'text-white'
@@ -372,7 +376,7 @@ export default function FinderConversationPage() {
                 }`}
               >
                 {message.message_content}
-              </p>
+              </Twemoji>
             </div>
           ))}
           <div ref={messagesEndRef} />

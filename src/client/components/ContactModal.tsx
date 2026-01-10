@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { api } from '../utils/api';
 import CharacterLimitTextArea from './CharacterLimitTextArea';
 import PrivacyWarning from './PrivacyWarning';
+import Twemoji from './Twemoji';
 import { emailSchema } from '../../infrastructure/utils/validation';
 import { lowercaseBagName } from '../../infrastructure/utils/formatting';
 import { SuccessIcon } from './icons/AppIcons';
@@ -138,7 +139,8 @@ export default function ContactModal({
               Message Sent!
             </h2>
             <p className="text-regal-navy-700 mb-6 leading-relaxed">
-              Your message has been sent to {ownerName || 'the owner'}!
+              Your message has been sent to{' '}
+              <Twemoji>{ownerName || 'the owner'}</Twemoji>!
               <br />
               <br />
               <strong className="text-regal-navy-900">
