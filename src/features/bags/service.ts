@@ -33,6 +33,7 @@ export async function createBagWithQR(
     width: 300,
     margin: 2,
     color: { dark: '#000000', light: '#ffffff' },
+    errorCorrectionLevel: 'H',
   });
 
   if (bag.owner_email && bag.secure_messaging_enabled) {
@@ -67,6 +68,7 @@ export async function generateQRCode(bagUrl: string): Promise<string> {
     width: 300,
     margin: 2,
     color: { dark: '#000000', light: '#ffffff' },
+    errorCorrectionLevel: 'H',
   });
 }
 

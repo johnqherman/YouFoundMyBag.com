@@ -24,6 +24,7 @@ interface BagManagementModalProps {
     bag_name?: string;
     status: 'active' | 'disabled';
     owner_email?: string;
+    conversation_count?: number;
   };
   onBagUpdated: () => void;
 }
@@ -475,6 +476,7 @@ export default function BagManagementModal({
   };
 
   const renderSectionContent = () => {
+    const hasActiveConversations = (bag.conversation_count ?? 0) > 0;
     switch (activeSection) {
       case 'qr':
         return (
@@ -484,8 +486,8 @@ export default function BagManagementModal({
                 QR Code & Short Link
               </h2>
               <p className="text-lg text-slate-600 leading-relaxed">
-                Your unique QR code and short link for this bag. Share this with
-                potential finders.
+                Print and attach this QR code to your bag so finders can reach
+                you if it gets lost.
               </p>
             </div>
 
@@ -819,21 +821,35 @@ export default function BagManagementModal({
             </div>
 
             <div className="space-y-6">
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-6">
-                <h3 className="text-base font-semibold text-amber-900 mb-3">
-                  Before you proceed:
-                </h3>
-                <ul className="space-y-2 text-base text-amber-800 list-disc list-inside">
-                  <li>All active conversations will be marked as resolved</li>
-                  <li>Conversations will be archived automatically</li>
-                  <li>You can restore them later if needed</li>
-                  <li>This action affects all conversations for this bag</li>
-                </ul>
-              </div>
+              {!hasActiveConversations && (
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center">
+                  <p className="text-base text-slate-600">
+                    No active conversations to resolve.
+                  </p>
+                </div>
+              )}
+
+              {hasActiveConversations && (
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-6">
+                  <h3 className="text-base font-semibold text-amber-900 mb-3">
+                    Before you proceed:
+                  </h3>
+                  <ul className="space-y-2 text-base text-amber-800 list-disc list-inside">
+                    <li>All active conversations will be marked as resolved</li>
+                    <li>Conversations will be archived automatically</li>
+                    <li>
+                      Archived conversations are permanently deleted after 6
+                      months
+                    </li>
+                    <li>This action affects all conversations for this bag</li>
+                  </ul>
+                </div>
+              )}
 
               <button
                 onClick={() => setConfirmResolveAll(true)}
-                className="w-full px-6 py-4 bg-saffron-400 hover:bg-saffron-500 border border-saffron-600 text-saffron-950 font-semibold rounded-xl transition-all"
+                disabled={!hasActiveConversations}
+                className="w-full px-6 py-4 bg-saffron-400 hover:bg-saffron-500 border border-saffron-600 text-saffron-950 font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-saffron-400"
               >
                 Resolve All Conversations
               </button>
@@ -1050,7 +1066,7 @@ export default function BagManagementModal({
       <ConfirmModal
         isOpen={confirmResolveAll}
         title="Resolve All Conversations?"
-        message="This will mark all active conversations as resolved and archive them. You can restore them later if needed."
+        message="This will mark all active conversations as resolved and archive them. Archived conversations are automatically deleted after 6 months."
         confirmText="Resolve All"
         cancelText="Cancel"
         onConfirm={handleResolveAll}

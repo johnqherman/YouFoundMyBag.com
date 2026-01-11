@@ -138,6 +138,7 @@ export default function DashboardPage() {
     bag_name?: string;
     status: 'active' | 'disabled';
     owner_email?: string;
+    conversation_count?: number;
   } | null>(null);
   const [showReissueModal, setShowReissueModal] = useState(false);
 
@@ -403,6 +404,7 @@ export default function DashboardPage() {
                                 bag_name: bag.bag_name,
                                 status: bag.status,
                                 owner_email: dashboardData?.owner_email,
+                                conversation_count: bag.conversation_count,
                               });
                             }}
                             className="text-regal-navy-600 hover:text-regal-navy-900 transition-colors p-1"
@@ -544,7 +546,7 @@ export default function DashboardPage() {
                                 <span
                                   className={`badge ${
                                     thread.conversation.status === 'resolved'
-                                      ? 'badge-neutral'
+                                      ? 'bg-regal-navy-100 text-regal-navy-700'
                                       : contextInfo?.context === 'initial'
                                         ? 'bg-regal-navy-100 text-regal-navy-700'
                                         : contextInfo?.context === 'follow-up'
@@ -570,31 +572,28 @@ export default function DashboardPage() {
                                           : 'Active'}
                                   </span>
                                 </span>
-                                {thread.conversation.status === 'resolved' && (
-                                  <button
-                                    onClick={(e) =>
-                                      handleArchiveClick(
-                                        thread.conversation.id,
-                                        e
-                                      )
-                                    }
-                                    disabled={
-                                      archivingId === thread.conversation.id
-                                    }
-                                    className="btn-secondary text-xs px-2 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    title="Archive conversation"
-                                  >
-                                    {archivingId === thread.conversation.id
-                                      ? 'Archiving...'
-                                      : 'Archive'}
-                                  </button>
-                                )}
                               </div>
                             </div>
                             {unreadCount > 0 && (
                               <span className="badge badge-error">
                                 {unreadCount} new
                               </span>
+                            )}
+                            {thread.conversation.status === 'resolved' && (
+                              <button
+                                onClick={(e) =>
+                                  handleArchiveClick(thread.conversation.id, e)
+                                }
+                                disabled={
+                                  archivingId === thread.conversation.id
+                                }
+                                className="btn-secondary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Archive conversation"
+                              >
+                                {archivingId === thread.conversation.id
+                                  ? 'Archiving...'
+                                  : 'Archive'}
+                              </button>
                             )}
                           </div>
 

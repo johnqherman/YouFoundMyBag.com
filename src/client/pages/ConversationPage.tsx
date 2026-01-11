@@ -16,6 +16,7 @@ import {
   ErrorIcon,
   QuestionIcon,
   CheckIcon,
+  ArchiveIcon,
 } from '../components/icons/AppIcons';
 
 function formatBagDisplayName(
@@ -361,7 +362,7 @@ export default function ConversationPage() {
                 conversation.conversation.status === 'active'
                   ? 'badge-success'
                   : conversation.conversation.status === 'resolved'
-                    ? 'badge-neutral'
+                    ? 'bg-regal-navy-100 text-regal-navy-700'
                     : 'badge-neutral'
               }`}
             >
@@ -454,7 +455,7 @@ export default function ConversationPage() {
               <button
                 type="button"
                 onClick={handleResolveConversation}
-                className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-regal-navy-100 hover:bg-regal-navy-200 text-regal-navy-800 border border-regal-navy-300 px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={sending || resolving}
               >
                 {resolving ? 'Resolving...' : 'Mark as Resolved'}
@@ -484,8 +485,9 @@ export default function ConversationPage() {
             <button
               onClick={handleArchiveClick}
               disabled={archiving}
-              className="btn-secondary w-full disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-saffron-100 hover:bg-saffron-200 text-saffron-800 border border-saffron-300 w-full py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
+              <ArchiveIcon color="currentColor" />
               {archiving ? 'Archiving...' : 'Archive Conversation'}
             </button>
             <p className="text-xs text-regal-navy-600 text-center mt-2">

@@ -707,7 +707,7 @@ export async function resolveAndArchiveAllByBagId(
 ): Promise<{ count: number }> {
   const result = await pool.query(
     `UPDATE conversations
-     SET status = 'archived', archived_at = NOW()
+     SET status = 'archived', archived_at = NOW(), permanently_deleted_at = NOW() + INTERVAL '6 months'
      WHERE bag_id = $1
      AND status IN ('active', 'resolved')
      AND archived_at IS NULL
