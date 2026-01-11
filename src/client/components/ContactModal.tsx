@@ -129,11 +129,8 @@ export default function ContactModal({
       <div className="fixed inset-0 bg-regal-navy-900 bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div className="bg-white rounded-lg p-8 w-full max-w-md shadow-soft-lg">
           <div className="text-center">
-            <div
-              className="mb-4 flex justify-center text-medium-jungle-700"
-              style={{ fontSize: '4rem' }}
-            >
-              <SuccessIcon color="currentColor" />
+            <div className="mb-4 flex justify-center text-medium-jungle-700">
+              <SuccessIcon color="currentColor" size="large" />
             </div>
             <h2 className="text-2xl font-semibold text-medium-jungle-700 mb-4">
               Message Sent!

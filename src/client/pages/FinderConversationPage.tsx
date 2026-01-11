@@ -229,11 +229,8 @@ export default function FinderConversationPage() {
         </Helmet>
         <div className="max-w-readable mx-auto p-6">
           <div className="text-center">
-            <div
-              className="mb-4 flex justify-center text-red-400"
-              style={{ fontSize: '4rem' }}
-            >
-              <ErrorIcon color="currentColor" />
+            <div className="mb-4 flex justify-center text-red-400">
+              <ErrorIcon color="currentColor" size="large" />
             </div>
             <h1 className="text-2xl font-bold text-red-400 mb-4">
               Access Error

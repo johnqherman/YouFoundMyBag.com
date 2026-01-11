@@ -17,7 +17,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-regal-navy-50 text-regal-navy-900 pb-20">
+    <div className="h-screen bg-regal-navy-50 text-regal-navy-900 overflow-y-auto pb-20">
       <Helmet>
         <title>Create New Bag | YouFoundMyBag.com</title>
       </Helmet>

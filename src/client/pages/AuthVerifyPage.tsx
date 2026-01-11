@@ -83,11 +83,8 @@ export default function AuthVerifyPage() {
           <title>Access Granted! | YouFoundMyBag.com</title>
         </Helmet>
         <div className="text-center">
-          <div
-            className="mb-4 flex justify-center text-green-400"
-            style={{ fontSize: '4rem' }}
-          >
-            <SuccessIcon color="currentColor" />
+          <div className="mb-4 flex justify-center text-green-400">
+            <SuccessIcon color="currentColor" size="large" />
           </div>
           <h1 className="text-2xl font-bold text-green-400 mb-4">
             Access Granted!
@@ -107,11 +104,8 @@ export default function AuthVerifyPage() {
       </Helmet>
       <div className="max-w-md mx-auto p-6 lg:max-w-2xl">
         <div className="text-center">
-          <div
-            className="mb-4 flex justify-center text-red-400"
-            style={{ fontSize: '4rem' }}
-          >
-            <ErrorIcon color="currentColor" />
+          <div className="mb-4 flex justify-center text-red-400">
+            <ErrorIcon color="currentColor" size="large" />
           </div>
           <h1 className="text-2xl font-bold text-red-400 mb-4">
             Verification Failed

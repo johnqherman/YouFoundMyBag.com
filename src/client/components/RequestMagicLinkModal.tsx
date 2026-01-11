@@ -93,11 +93,8 @@ export default function RequestMagicLinkModal({
           onClick={(e) => e.stopPropagation()}
         >
           <div className="text-center">
-            <div
-              className="mb-4 flex justify-center text-medium-jungle-700"
-              style={{ fontSize: '4rem' }}
-            >
-              <SuccessIcon color="currentColor" />
+            <div className="mb-4 flex justify-center text-medium-jungle-700">
+              <SuccessIcon color="currentColor" size="large" />
             </div>
             <h2 className="text-2xl font-semibold text-medium-jungle-700 mb-4">
               Check Your Email!

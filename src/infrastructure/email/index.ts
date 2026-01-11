@@ -237,12 +237,12 @@ export async function sendMagicLinkEmail({
 
   const subject = conversationId
     ? `Someone found your ${bagType}! Click to respond`
-    : 'Access your YouFoundMyBag dashboard';
+    : 'Access your dashboard';
 
   const { textFooter, htmlFooter } = await getEmailFooter(email);
 
   const textBody = `
-${conversationId ? `🎒 Great news! Someone found your ${bagType} and wants to return it.` : 'Access your YouFoundMyBag dashboard'}
+${conversationId ? `🎒 Great news! Someone found your ${bagType} and wants to return it.` : 'Access your dashboard'}
 
 Click this secure link to ${conversationId ? 'respond to the finder' : 'access your dashboard'}:
 ${magicLinkUrl}

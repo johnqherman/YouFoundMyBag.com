@@ -327,9 +327,7 @@ export default function DashboardPage() {
       </Helmet>
       <div className="max-w-6xl mx-auto p-6">
         <header className="mb-8">
-          <h1 className="text-3xl font-semibold mb-2">
-            Your YouFoundMyBag Dashboard
-          </h1>
+          <h1 className="text-3xl font-semibold mb-2">Your Dashboard</h1>
           <p className="text-regal-navy-600">
             Manage your bags and respond to messages from people who find them.
           </p>
@@ -452,9 +450,7 @@ export default function DashboardPage() {
                 dashboardData.conversations.length === 0 && (
                   <div className="text-center text-regal-navy-500 py-12">
                     <div className="mb-4 flex justify-center text-regal-navy-400">
-                      <div style={{ fontSize: '4rem' }}>
-                        <MailIcon color="currentColor" />
-                      </div>
+                      <MailIcon color="currentColor" size="large" />
                     </div>
                     <p className="text-lg mb-2 font-medium text-regal-navy-700">
                       No messages yet
@@ -626,9 +622,7 @@ export default function DashboardPage() {
                 archivedConversations.length === 0 && (
                   <div className="text-center text-regal-navy-500 py-12">
                     <div className="mb-4 flex justify-center text-regal-navy-400">
-                      <div style={{ fontSize: '4rem' }}>
-                        <ArchiveIcon color="currentColor" />
-                      </div>
+                      <ArchiveIcon color="currentColor" size="large" />
                     </div>
                     <p className="text-lg mb-2 font-medium text-regal-navy-700">
                       No archived conversations

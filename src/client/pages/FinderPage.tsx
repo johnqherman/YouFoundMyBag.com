@@ -97,11 +97,8 @@ export default function FinderPage() {
         </Helmet>
         <div className="max-w-readable mx-auto p-6">
           <div className="card text-center">
-            <div
-              className="mb-6 flex justify-center text-regal-navy-400"
-              style={{ fontSize: '4rem' }}
-            >
-              <BagIcon color="currentColor" />
+            <div className="mb-6 flex justify-center text-regal-navy-400">
+              <BagIcon color="currentColor" size="large" />
             </div>
             <h1 className="text-2xl font-semibold text-regal-navy-900 mb-4">
               This bag has been deactivated
@@ -131,11 +128,8 @@ export default function FinderPage() {
       <div className="max-w-readable mx-auto p-6">
         <div className="card">
           <div className="text-center mb-8">
-            <div
-              className="mb-4 flex justify-center text-regal-navy-700"
-              style={{ fontSize: '4rem' }}
-            >
-              <BagIcon color="currentColor" />
+            <div className="mb-4 flex justify-center text-regal-navy-700">
+              <BagIcon color="currentColor" size="large" />
             </div>
             <h1 className="text-3xl font-semibold mb-3 text-regal-navy-900">
               You found{' '}

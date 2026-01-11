@@ -45,25 +45,40 @@ interface IconProps {
   className?: string;
 }
 
+const getScaleClass = (size: IconSize): string => {
+  switch (size) {
+    case 'small':
+      return '';
+    case 'medium':
+      return 'scale-[2]';
+    case 'large':
+      return 'scale-[3]';
+  }
+};
+
 const IconWrapper = ({
   children,
   className = '',
+  size = 'small',
 }: {
   children: React.ReactNode;
   className?: string;
+  size?: IconSize;
 }) => (
-  <span className={`inline-flex items-center justify-center ${className}`}>
+  <span
+    className={`inline-flex items-center justify-center ${size !== 'small' ? 'p-2' : ''} ${getScaleClass(size)} ${className}`}
+  >
     {children}
   </span>
 );
 
 export const SuccessIcon = ({
-  size: _size = 'medium',
+  size = 'small',
   color = 'currentColor',
   label = '',
   className = '',
 }: IconProps) => (
-  <IconWrapper className={className}>
+  <IconWrapper className={className} size={size}>
     <CheckCircleIcon
       spacing="compact"
       color={color}
@@ -73,34 +88,34 @@ export const SuccessIcon = ({
 );
 
 export const ErrorIcon = ({
-  size: _size = 'medium',
+  size = 'small',
   color = 'currentColor',
   label = '',
   className = '',
 }: IconProps) => (
-  <IconWrapper className={className}>
+  <IconWrapper className={className} size={size}>
     <CrossCircleIcon spacing="compact" color={color} label={label || 'Error'} />
   </IconWrapper>
 );
 
 export const AlertIcon = ({
-  size: _size = 'medium',
+  size = 'small',
   color = 'currentColor',
   label = '',
   className = '',
 }: IconProps) => (
-  <IconWrapper className={className}>
+  <IconWrapper className={className} size={size}>
     <WarningIcon spacing="compact" color={color} label={label || 'Warning'} />
   </IconWrapper>
 );
 
 export const InfoIcon = ({
-  size: _size = 'medium',
+  size = 'small',
   color = 'currentColor',
   label = '',
   className = '',
 }: IconProps) => (
-  <IconWrapper className={className}>
+  <IconWrapper className={className} size={size}>
     <InformationCircleIcon
       spacing="compact"
       color={color}
@@ -110,12 +125,12 @@ export const InfoIcon = ({
 );
 
 export const QuestionIcon = ({
-  size: _size = 'medium',
+  size = 'small',
   color = 'currentColor',
   label = '',
   className = '',
 }: IconProps) => (
-  <IconWrapper className={className}>
+  <IconWrapper className={className} size={size}>
     <QuestionCircleIcon
       spacing="compact"
       color={color}
@@ -125,23 +140,23 @@ export const QuestionIcon = ({
 );
 
 export const CheckIcon = ({
-  size: _size = 'medium',
+  size = 'small',
   color = 'currentColor',
   label = '',
   className = '',
 }: IconProps) => (
-  <IconWrapper className={className}>
+  <IconWrapper className={className} size={size}>
     <CheckMarkIcon spacing="compact" color={color} label={label || 'Check'} />
   </IconWrapper>
 );
 
 export const PrivacyIcon = ({
-  size: _size = 'medium',
+  size = 'small',
   color = 'currentColor',
   label = '',
   className = '',
 }: IconProps) => (
-  <IconWrapper className={className}>
+  <IconWrapper className={className} size={size}>
     <LockLockedIcon
       spacing="compact"
       color={color}
@@ -151,34 +166,34 @@ export const PrivacyIcon = ({
 );
 
 export const SecureIcon = ({
-  size: _size = 'medium',
+  size = 'small',
   color = 'currentColor',
   label = '',
   className = '',
 }: IconProps) => (
-  <IconWrapper className={className}>
+  <IconWrapper className={className} size={size}>
     <ShieldIcon spacing="compact" color={color} label={label || 'Secure'} />
   </IconWrapper>
 );
 
 export const PhoneContactIcon = ({
-  size: _size = 'medium',
+  size = 'small',
   color = 'currentColor',
   label = '',
   className = '',
 }: IconProps) => (
-  <IconWrapper className={className}>
+  <IconWrapper className={className} size={size}>
     <PhoneIcon spacing="compact" color={color} label={label || 'Phone'} />
   </IconWrapper>
 );
 
 export const MobileIcon = ({
-  size: _size = 'medium',
+  size = 'small',
   color = 'currentColor',
   label = '',
   className = '',
 }: IconProps) => (
-  <IconWrapper className={className}>
+  <IconWrapper className={className} size={size}>
     <DeviceMobileIcon
       spacing="compact"
       color={color}
@@ -188,89 +203,89 @@ export const MobileIcon = ({
 );
 
 export const MailIcon = ({
-  size: _size = 'medium',
+  size = 'small',
   color = 'currentColor',
   label = '',
   className = '',
 }: IconProps) => (
-  <IconWrapper className={className}>
+  <IconWrapper className={className} size={size}>
     <EmailIcon spacing="compact" color={color} label={label || 'Email'} />
   </IconWrapper>
 );
 
 export const MessageIcon = ({
-  size: _size = 'medium',
+  size = 'small',
   color = 'currentColor',
   label = '',
   className = '',
 }: IconProps) => (
-  <IconWrapper className={className}>
+  <IconWrapper className={className} size={size}>
     <CommentIcon spacing="compact" color={color} label={label || 'Message'} />
   </IconWrapper>
 );
 
 export const MessengerIcon = ({
-  size: _size = 'medium',
+  size = 'small',
   color = 'currentColor',
   label = '',
   className = '',
 }: IconProps) => (
-  <IconWrapper className={className}>
+  <IconWrapper className={className} size={size}>
     <SendIcon spacing="compact" color={color} label={label || 'Messenger'} />
   </IconWrapper>
 );
 
 export const PrintIcon = ({
-  size: _size = 'medium',
+  size = 'small',
   color = 'currentColor',
   label = '',
   className = '',
 }: IconProps) => (
-  <IconWrapper className={className}>
+  <IconWrapper className={className} size={size}>
     <PrinterIcon spacing="compact" color={color} label={label || 'Print'} />
   </IconWrapper>
 );
 
 export const DownloadActionIcon = ({
-  size: _size = 'medium',
+  size = 'small',
   color = 'currentColor',
   label = '',
   className = '',
 }: IconProps) => (
-  <IconWrapper className={className}>
+  <IconWrapper className={className} size={size}>
     <DownloadIcon spacing="compact" color={color} label={label || 'Download'} />
   </IconWrapper>
 );
 
 export const PlusIcon = ({
-  size: _size = 'medium',
+  size = 'small',
   color = 'currentColor',
   label = '',
   className = '',
 }: IconProps) => (
-  <IconWrapper className={className}>
+  <IconWrapper className={className} size={size}>
     <AddIcon spacing="compact" color={color} label={label || 'Add'} />
   </IconWrapper>
 );
 
 export const BagIcon = ({
-  size: _size = 'medium',
+  size = 'small',
   color = 'currentColor',
   label = '',
   className = '',
 }: IconProps) => (
-  <IconWrapper className={className}>
+  <IconWrapper className={className} size={size}>
     <BriefcaseIcon spacing="compact" color={color} label={label || 'Bag'} />
   </IconWrapper>
 );
 
 export const ArchiveIcon = ({
-  size: _size = 'medium',
+  size = 'small',
   color = 'currentColor',
   label = '',
   className = '',
 }: IconProps) => (
-  <IconWrapper className={className}>
+  <IconWrapper className={className} size={size}>
     <ArchiveBoxIcon
       spacing="compact"
       color={color}
@@ -280,67 +295,67 @@ export const ArchiveIcon = ({
 );
 
 export const BagSettingsIcon = ({
-  size: _size = 'medium',
+  size = 'small',
   color = 'currentColor',
   label = '',
   className = '',
 }: IconProps) => (
-  <IconWrapper className={className}>
+  <IconWrapper className={className} size={size}>
     <SettingsIcon spacing="compact" color={color} label={label || 'Settings'} />
   </IconWrapper>
 );
 
 export const EditPencilIcon = ({
-  size: _size = 'medium',
+  size = 'small',
   color = 'currentColor',
   label = '',
   className = '',
 }: IconProps) => (
-  <IconWrapper className={className}>
+  <IconWrapper className={className} size={size}>
     <EditIcon spacing="compact" color={color} label={label || 'Edit'} />
   </IconWrapper>
 );
 
 export const RefreshRotateIcon = ({
-  size: _size = 'medium',
+  size = 'small',
   color = 'currentColor',
   label = '',
   className = '',
 }: IconProps) => (
-  <IconWrapper className={className}>
+  <IconWrapper className={className} size={size}>
     <RefreshIcon spacing="compact" color={color} label={label || 'Refresh'} />
   </IconWrapper>
 );
 
 export const StatusIcon = ({
-  size: _size = 'medium',
+  size = 'small',
   color = 'currentColor',
   label = '',
   className = '',
 }: IconProps) => (
-  <IconWrapper className={className}>
+  <IconWrapper className={className} size={size}>
     <LightbulbIcon spacing="compact" color={color} label={label || 'Status'} />
   </IconWrapper>
 );
 
 export const QRCodeIcon = ({
-  size: _size = 'medium',
+  size = 'small',
   color = 'currentColor',
   label = '',
   className = '',
 }: IconProps) => (
-  <IconWrapper className={className}>
+  <IconWrapper className={className} size={size}>
     <GridIcon spacing="compact" color={color} label={label || 'QR Code'} />
   </IconWrapper>
 );
 
 export const DeleteIcon = ({
-  size: _size = 'medium',
+  size = 'small',
   color = 'currentColor',
   label = '',
   className = '',
 }: IconProps) => (
-  <IconWrapper className={className}>
+  <IconWrapper className={className} size={size}>
     <DeleteIconAtlas
       spacing="compact"
       color={color}

@@ -639,9 +639,6 @@ export default function BagManagementModal({
               </h2>
               <p className="text-lg text-slate-600 leading-relaxed">
                 Generate a new QR code and short link.
-                <br />
-                Old codes stop working for new finders, but existing
-                conversations remain accessible.
               </p>
             </div>
 
@@ -679,7 +676,9 @@ export default function BagManagementModal({
                   What happens when you rotate?
                 </h3>
                 <ul className="space-y-2 text-base text-slate-700 list-disc list-inside">
-                  <li>A new QR code and short link will be generated</li>
+                  <li>
+                    A new QR code and short link will be generated for your bag
+                  </li>
                   <li>Old QR codes will no longer work for new finders</li>
                   <li>Existing conversations remain fully accessible</li>
                   <li>You can rotate once per week</li>
@@ -909,7 +908,6 @@ export default function BagManagementModal({
           className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] grid grid-cols-[280px_1fr] overflow-hidden animate-slideUp"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Sidebar Navigation */}
           <nav className="bg-gradient-to-b from-slate-800 to-slate-900 border-r border-white/10 py-8 flex flex-col overflow-y-auto">
             <div className="px-6 pb-8 border-b border-white/10 mb-6">
               <h1 className="text-2xl font-bold text-white mb-2 tracking-tight">
@@ -926,7 +924,6 @@ export default function BagManagementModal({
             </div>
 
             <div className="flex-1 overflow-y-auto">
-              {/* Primary Section */}
               <div className="mb-8">
                 <h3 className="px-6 text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">
                   Quick Access
@@ -949,7 +946,6 @@ export default function BagManagementModal({
                   ))}
               </div>
 
-              {/* Settings Section */}
               <div className="mb-8">
                 <h3 className="px-6 text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">
                   Settings
@@ -972,7 +968,6 @@ export default function BagManagementModal({
                   ))}
               </div>
 
-              {/* Advanced Section */}
               <div className="mb-8">
                 <h3 className="px-6 text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">
                   Advanced
@@ -1001,7 +996,6 @@ export default function BagManagementModal({
             </div>
           </nav>
 
-          {/* Main Content Area */}
           <main className="bg-white overflow-y-auto relative p-12">
             <button
               onClick={handleClose}
@@ -1023,7 +1017,6 @@ export default function BagManagementModal({
               </svg>
             </button>
 
-            {/* Success/Error Messages */}
             {success && (
               <div className="mb-8 flex items-center gap-3 px-5 py-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 animate-slideDown">
                 <SuccessIcon color="currentColor" />
@@ -1043,7 +1036,6 @@ export default function BagManagementModal({
         </div>
       </div>
 
-      {/* Confirm Modals */}
       <ConfirmModal
         isOpen={confirmRotate}
         title="Rotate Short Link?"
