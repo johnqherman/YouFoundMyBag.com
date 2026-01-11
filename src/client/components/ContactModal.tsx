@@ -191,7 +191,7 @@ export default function ContactModal({
               value={message}
               onChange={setMessage}
               maxLength={300}
-              placeholder={`Hi! I found your ${lowercaseBagName(bagName)}. Let me know how to return it.`}
+              placeholder={`Hi! I have your ${lowercaseBagName(bagName)}. Let me know how to return it.`}
               rows={4}
               required
               variant="light"

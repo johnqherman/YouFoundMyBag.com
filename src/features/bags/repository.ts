@@ -161,7 +161,7 @@ export async function getFinderPageData(shortId: string) {
         return {
           type: contact.type,
           value: formatContactValue(contact.type, decryptedValue),
-          label: contact.label,
+          label: contact.label || getContactLabel(contact.type),
           is_primary: contact.is_primary,
         };
       }

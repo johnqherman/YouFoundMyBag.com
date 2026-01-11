@@ -460,7 +460,7 @@ export default function DashboardPage() {
                       No messages yet
                     </p>
                     <p className="text-sm">
-                      When someone finds your bag and sends a message, it will
+                      When someone scans your tag and sends a message, it will
                       appear here.
                     </p>
                   </div>

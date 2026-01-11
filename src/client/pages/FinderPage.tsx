@@ -113,7 +113,7 @@ export default function FinderPage() {
 
           <div className="text-center mt-8">
             <a href="/" className="link text-sm">
-              Create your own lost item QR code →
+              Create your own bag QR code →
             </a>
           </div>
         </div>
@@ -273,7 +273,7 @@ export default function FinderPage() {
 
         <div className="text-center mt-8">
           <a href="/" className="link text-sm">
-            Create your own lost item QR code →
+            Create your own bag QR code →
           </a>
         </div>
       </div>

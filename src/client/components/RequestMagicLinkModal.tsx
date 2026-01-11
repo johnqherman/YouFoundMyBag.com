@@ -140,8 +140,8 @@ export default function RequestMagicLinkModal({
         </div>
 
         <p className="text-regal-navy-700 mb-6 leading-relaxed">
-          Enter your email address and we&apos;ll send you a new magic link to access
-          your {conversationId ? 'conversation' : 'dashboard'}.
+          Enter your email address and we&apos;ll send you a new magic link to
+          access your {conversationId ? 'conversation' : 'dashboard'}.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -164,8 +164,8 @@ export default function RequestMagicLinkModal({
               autoFocus
             />
             <p className="text-xs text-regal-navy-600 mt-1.5">
-              We&apos;ll send a new 7-day magic link to this address if it&apos;s in our
-              system.
+              We&apos;ll send a new 7-day magic link to this address if
+              it&apos;s in our system.
             </p>
           </div>
 

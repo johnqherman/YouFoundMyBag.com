@@ -1,7 +1,7 @@
 {
   "name": "youfoundmybag",
   "version": "1.0.0",
-  "description": "Privacy-first lost item recovery system",
+  "description": "Privacy-first return tag system",
   "private": true,
   "type": "module",
   "main": "dist/runtime/server.js",
