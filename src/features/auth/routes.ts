@@ -8,6 +8,7 @@ import type { ConversationThread } from '../../client/types/index.js';
 import {
   magicLinkSchema,
   verifyMagicLinkSchema,
+  emailSchema,
 } from '../../infrastructure/utils/validation.js';
 
 const router = Router();
@@ -252,6 +253,57 @@ router.post(
         success: false,
         error: 'logout_error',
         message: 'Failed to logout',
+      });
+    }
+  }
+);
+
+router.post(
+  '/auth/request-magic-link',
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const bodyResult = emailSchema.safeParse(req.body.email);
+      if (!bodyResult.success) {
+        res.status(400).json({
+          success: false,
+          error: 'validation_error',
+          message: 'Please provide a valid email address',
+        });
+        return;
+      }
+
+      const email = bodyResult.data;
+      const conversationId = req.body.conversation_id;
+
+      const result = await authService.requestMagicLinkReissue(
+        email,
+        conversationId
+      );
+
+      res.json({
+        success: true,
+        message:
+          "If your email exists in our system, you'll receive magic links shortly.",
+        data: result,
+      });
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message.includes('Too many requests')
+      ) {
+        res.status(429).json({
+          success: false,
+          error: 'rate_limit_exceeded',
+          message: error.message,
+        });
+        return;
+      }
+
+      logger.error('Error requesting magic link reissue:', error);
+      res.status(500).json({
+        success: false,
+        error: 'request_error',
+        message: 'Failed to process request. Please try again later.',
       });
     }
   }

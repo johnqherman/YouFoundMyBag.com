@@ -725,3 +725,21 @@ export async function resolveAndArchiveAllByBagId(
 
   return { count: result.rowCount || 0 };
 }
+
+export async function verifyFinderEmailForConversation(
+  email: string,
+  conversationId: string
+): Promise<boolean> {
+  const emailHash = hashForLookup(email);
+  const result = await pool.query(
+    `SELECT COUNT(*) as count
+     FROM conversations
+     WHERE id = $1
+     AND finder_email_hash = $2
+     AND status IN ('active', 'resolved')
+     AND permanently_deleted_at IS NULL`,
+    [conversationId, emailHash]
+  );
+
+  return parseInt(result.rows[0].count) > 0;
+}

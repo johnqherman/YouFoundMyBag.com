@@ -10,6 +10,7 @@ import {
   getContextualReplyPlaceholder,
 } from '../../infrastructure/utils/personalization';
 import { ErrorIcon, PrivacyIcon } from '../components/icons/AppIcons';
+import RequestMagicLinkModal from '../components/RequestMagicLinkModal';
 
 function formatBagDisplayName(
   ownerName?: string,
@@ -39,6 +40,7 @@ export default function FinderConversationPage() {
   const [replyMessage, setReplyMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [authenticating, setAuthenticating] = useState(false);
+  const [showReissueModal, setShowReissueModal] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const replyInputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -99,7 +101,7 @@ export default function FinderConversationPage() {
 
       if (!response.ok) {
         const result = await response.json();
-        throw new Error(result.error || 'Authentication failed');
+        throw new Error(result.message || 'Authentication failed');
       }
 
       const result = await response.json();
@@ -239,12 +241,32 @@ export default function FinderConversationPage() {
               Access Error
             </h1>
             <p className="text-neutral-400 mb-6">{error}</p>
-            <p className="text-sm text-neutral-500">
-              If you need to access this conversation, please check your email
-              for the original magic link.
-            </p>
+            {!error?.includes('deleted') &&
+              !error?.includes('no longer exists') && (
+                <>
+                  <button
+                    onClick={() => setShowReissueModal(true)}
+                    className="text-blue-400 hover:text-blue-300 underline mb-4 transition-colors"
+                  >
+                    Lost your secure chat link?
+                  </button>
+                  <br />
+                  <p className="text-sm text-neutral-500">
+                    If you need to access this conversation, please check your
+                    email for the original magic link.
+                  </p>
+                </>
+              )}
           </div>
         </div>
+
+        {showReissueModal && (
+          <RequestMagicLinkModal
+            isOpen={showReissueModal}
+            onClose={() => setShowReissueModal(false)}
+            conversationId={conversationId}
+          />
+        )}
       </div>
     );
   }

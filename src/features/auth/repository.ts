@@ -126,7 +126,11 @@ export async function verifyFinderAccessToConversation(
   const finderEmailHash = hashForLookup(finderEmail);
 
   const result = await pool.query(
-    'SELECT COUNT(*) as count FROM conversations WHERE id = $1 AND finder_email_hash = $2',
+    `SELECT COUNT(*) as count
+     FROM conversations
+     WHERE id = $1
+     AND finder_email_hash = $2
+     AND permanently_deleted_at IS NULL`,
     [conversationId, finderEmailHash]
   );
 

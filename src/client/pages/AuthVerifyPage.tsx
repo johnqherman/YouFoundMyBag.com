@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { TIME_MS as t } from '../constants/timeConstants';
 import { SuccessIcon, ErrorIcon } from '../components/icons/AppIcons';
+import RequestMagicLinkModal from '../components/RequestMagicLinkModal';
 
 export default function AuthVerifyPage() {
   const [searchParams] = useSearchParams();
@@ -12,6 +13,7 @@ export default function AuthVerifyPage() {
     'verifying'
   );
   const [error, setError] = useState<string | null>(null);
+  const [showReissueModal, setShowReissueModal] = useState(false);
 
   useEffect(() => {
     const verifyMagicLink = async () => {
@@ -32,11 +34,11 @@ export default function AuthVerifyPage() {
           body: JSON.stringify({ magic_token: token }),
         });
 
-        if (!response.ok) {
-          throw new Error('Verification failed');
-        }
-
         const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.message || 'Verification failed');
+        }
 
         localStorage.setItem('owner_session_token', result.data.session_token);
 
@@ -117,11 +119,28 @@ export default function AuthVerifyPage() {
           <p className="text-neutral-400 mb-6">
             {error || 'The verification link is invalid or has expired.'}
           </p>
-          <a href="/" className="text-blue-400 hover:text-blue-300 underline">
+          <button
+            onClick={() => setShowReissueModal(true)}
+            className="text-blue-400 hover:text-blue-300 underline mb-4 transition-colors"
+          >
+            Lost your secure chat link?
+          </button>
+          <br />
+          <a
+            href="/"
+            className="text-neutral-500 hover:text-neutral-400 underline transition-colors"
+          >
             Return to homepage
           </a>
         </div>
       </div>
+
+      {showReissueModal && (
+        <RequestMagicLinkModal
+          isOpen={showReissueModal}
+          onClose={() => setShowReissueModal(false)}
+        />
+      )}
     </div>
   );
 }

@@ -1100,3 +1100,161 @@ ${htmlFooter}
     throw error;
   }
 }
+
+export async function sendMagicLinkReissueEmail(
+  email: string,
+  magicLinkToken: string,
+  bagIds: string[]
+): Promise<void> {
+  const magicLink = `${config.FRONTEND_URL}/auth/verify?token=${magicLinkToken}`;
+
+  const { textFooter, htmlFooter } = await getEmailFooter(email);
+
+  const subject = '🔑 Your new access link to YouFoundMyBag.com';
+
+  const textBody = `
+Your New Access Link
+
+We've generated a new magic link for you to access your bags and conversations on YouFoundMyBag.com.
+
+Click here to access your dashboard:
+${magicLink}
+
+This link expires in 7 days.
+
+If you didn't request this, you can safely ignore this email.
+
+${textFooter}
+  `;
+
+  const htmlBody = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #1f2937;">
+      <h1 style="color: #1f2937; font-size: 28px; font-weight: 700; margin-bottom: 24px;">
+        🔑 Your New Access Link
+      </h1>
+
+      <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
+        We've generated a new magic link for you to access your bags and conversations on YouFoundMyBag.com.
+      </p>
+
+      <div style="text-align: center; margin: 32px 0;">
+        <a href="${magicLink}" style="background-color: #4f46e5; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block;">
+          Access Your Dashboard
+        </a>
+      </div>
+
+      <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
+        <p style="margin: 0; color: #92400e; font-size: 14px;">
+          🔒 <strong>Security Notice:</strong> This link expires in 7 days.
+        </p>
+      </div>
+
+      <p style="color: #6b7280; font-size: 14px; line-height: 1.6; margin-top: 24px;">
+        If you didn't request this, you can safely ignore this email. Your account remains secure.
+      </p>
+
+${htmlFooter}
+    </div>
+  `;
+
+  const transporter = getTransporter();
+  if (!transporter) {
+    logger.error('Email transporter not available');
+    throw new Error('Email service not configured');
+  }
+
+  try {
+    await transporter.sendMail({
+      from: config.SMTP_FROM,
+      to: email,
+      subject,
+      text: textBody,
+      html: htmlBody,
+    });
+    logger.info(
+      `Magic link reissue email sent to ${email} for ${bagIds.length} bags`
+    );
+  } catch (error) {
+    logger.error(`Magic link reissue email failed to ${email}:`, error);
+    throw error;
+  }
+}
+
+export async function sendFinderMagicLinkReissueEmail(
+  email: string,
+  magicLinkToken: string,
+  conversationId: string
+): Promise<void> {
+  const magicLink = `${config.FRONTEND_URL}/finder/conversation/${conversationId}?token=${magicLinkToken}`;
+
+  const { textFooter, htmlFooter } = await getEmailFooter(email);
+
+  const subject = '🔑 Your new conversation link';
+
+  const textBody = `
+Your New Conversation Link
+
+We've generated a new link for you to continue your conversation on YouFoundMyBag.com.
+
+Click here to continue:
+${magicLink}
+
+This link expires in 7 days.
+
+If you didn't request this, you can safely ignore this email.
+
+${textFooter}
+  `;
+
+  const htmlBody = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #1f2937;">
+      <h1 style="color: #1f2937; font-size: 28px; font-weight: 700; margin-bottom: 24px;">
+        🔑 Your New Conversation Link
+      </h1>
+
+      <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
+        We've generated a new link for you to continue your conversation on YouFoundMyBag.com.
+      </p>
+
+      <div style="text-align: center; margin: 32px 0;">
+        <a href="${magicLink}" style="background-color: #4f46e5; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block;">
+          Continue Conversation
+        </a>
+      </div>
+
+      <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
+        <p style="margin: 0; color: #92400e; font-size: 14px;">
+          🔒 <strong>Security Notice:</strong> This link expires in 7 days.
+        </p>
+      </div>
+
+      <p style="color: #6b7280; font-size: 14px; line-height: 1.6; margin-top: 24px;">
+        If you didn't request this, you can safely ignore this email.
+      </p>
+
+${htmlFooter}
+    </div>
+  `;
+
+  const transporter = getTransporter();
+  if (!transporter) {
+    logger.error('Email transporter not available');
+    throw new Error('Email service not configured');
+  }
+
+  try {
+    await transporter.sendMail({
+      from: config.SMTP_FROM,
+      to: email,
+      subject,
+      text: textBody,
+      html: htmlBody,
+    });
+    logger.info(
+      `Finder magic link reissue email sent to ${email} for conversation ${conversationId}`
+    );
+  } catch (error) {
+    logger.error(`Finder magic link reissue email failed to ${email}:`, error);
+    throw error;
+  }
+}

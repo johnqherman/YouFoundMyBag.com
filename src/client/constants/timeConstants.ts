@@ -14,6 +14,7 @@ export const TIME_MS = {
   ONE_HOUR: HOUR,
   ONE_DAY: DAY,
   THREE_DAYS: 3 * DAY,
+  SEVEN_DAYS: 7 * DAY,
 } as const;
 
 export const TIME_SECONDS = {
@@ -22,4 +23,5 @@ export const TIME_SECONDS = {
   TEN_MINUTES: 10 * 60,
   FIFTEEN_MINUTES: 15 * 60,
   ONE_HOUR: 60 * 60,
+  SEVEN_DAYS: 7 * 24 * 60 * 60,
 } as const;

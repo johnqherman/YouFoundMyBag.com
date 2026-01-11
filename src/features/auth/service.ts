@@ -1,19 +1,28 @@
 import crypto from 'crypto';
 import type { OwnerSession } from '../../client/types/index.js';
 import { logger } from '../../infrastructure/logger/index.js';
-import { sendMagicLinkEmail } from '../../infrastructure/email/index.js';
+import {
+  sendMagicLinkEmail,
+  sendMagicLinkReissueEmail,
+  sendFinderMagicLinkReissueEmail,
+} from '../../infrastructure/email/index.js';
 import * as authRepository from './repository.js';
+import * as bagRepository from '../bags/repository.js';
+import * as conversationRepository from '../conversations/repository.js';
 import { TIME_MS as t } from 'client/constants/timeConstants.js';
+import { hashForLookup } from '../../infrastructure/security/encryption.js';
+import { cacheGet, cacheSet } from '../../infrastructure/cache/index.js';
 
 export async function generateMagicLinkToken(
   email: string,
   conversationId?: string,
-  bagIds?: string[]
+  bagIds?: string[],
+  expirationMs: number = t.ONE_DAY
 ): Promise<{ magicLinkToken: string; expiresAt: Date }> {
   await authRepository.deleteExpiredSessions();
 
   const magicLinkToken = crypto.randomBytes(32).toString('hex');
-  const expiresAt = new Date(Date.now() + t.ONE_DAY);
+  const expiresAt = new Date(Date.now() + expirationMs);
 
   let targetBagIds = bagIds;
   if (!targetBagIds) {
@@ -147,12 +156,13 @@ export async function getOwnerDashboard(): Promise<{
 
 export async function generateFinderMagicLinkToken(
   email: string,
-  conversationId: string
+  conversationId: string,
+  expirationMs: number = t.ONE_DAY
 ): Promise<{ magicLinkToken: string; expiresAt: Date }> {
   await authRepository.deleteExpiredSessions();
 
   const magicLinkToken = crypto.randomBytes(32).toString('hex');
-  const expiresAt = new Date(Date.now() + t.ONE_DAY);
+  const expiresAt = new Date(Date.now() + expirationMs);
 
   await authRepository.createOwnerSession(
     email,
@@ -230,7 +240,9 @@ export async function verifyFinderMagicLink(magicLinkToken: string): Promise<{
     magicSession.conversation_id
   );
   if (!hasAccess) {
-    throw new Error('Access denied - invalid conversation access');
+    throw new Error(
+      'This conversation has been deleted by the owner or no longer exists. The magic link is no longer valid.'
+    );
   }
 
   const sessionToken = crypto.randomBytes(32).toString('hex');
@@ -279,4 +291,66 @@ export function extractEmailFromConversationAccess(
 ): string | null {
   logger.info(`Extracting email for conversation: ${conversationId}`);
   return ownerEmail || null;
+}
+
+export async function requestMagicLinkReissue(
+  email: string,
+  conversationId?: string
+): Promise<{
+  ownerLinksSent: number;
+  finderLinksSent: number;
+}> {
+  const emailHash = hashForLookup(email);
+  const rateLimitKey = `rate_limit:magic_reissue:${emailHash}`;
+  const attempts = await cacheGet<number>(rateLimitKey, 'rate_limit');
+
+  if (attempts && attempts >= 3) {
+    throw new Error('Too many requests. Please try again in an hour.');
+  }
+
+  await cacheSet(rateLimitKey, (attempts || 0) + 1, t.ONE_HOUR, 'rate_limit');
+
+  let ownerLinksSent = 0;
+  let finderLinksSent = 0;
+
+  if (conversationId) {
+    const hasAccess =
+      await conversationRepository.verifyFinderEmailForConversation(
+        email,
+        conversationId
+      );
+
+    if (hasAccess) {
+      const { magicLinkToken } = await generateFinderMagicLinkToken(
+        email,
+        conversationId,
+        t.SEVEN_DAYS
+      );
+      await sendFinderMagicLinkReissueEmail(
+        email,
+        magicLinkToken,
+        conversationId
+      );
+      finderLinksSent = 1;
+      logger.info(
+        `Sent magic link reissue to finder for conversation ${conversationId}`
+      );
+    }
+  } else {
+    const bags = await bagRepository.getBagsByOwnerEmail(email);
+    if (bags.length > 0) {
+      const bagIds = bags.map((bag) => bag.id);
+      const { magicLinkToken } = await generateMagicLinkToken(
+        email,
+        undefined,
+        bagIds,
+        t.SEVEN_DAYS
+      );
+      await sendMagicLinkReissueEmail(email, magicLinkToken, bagIds);
+      ownerLinksSent = 1;
+      logger.info(`Sent magic link reissue to owner for ${bagIds.length} bags`);
+    }
+  }
+
+  return { ownerLinksSent, finderLinksSent };
 }
