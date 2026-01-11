@@ -181,9 +181,7 @@ export default function FinderConversationPage() {
         loadConversation();
         setLoading(false);
       } else {
-        setError(
-          'No valid authentication found. Please use your magic link to access this conversation.'
-        );
+        setError('No valid authentication found.');
         setLoading(false);
       }
     }
@@ -251,10 +249,6 @@ export default function FinderConversationPage() {
                     Lost your secure chat link?
                   </button>
                   <br />
-                  <p className="text-sm text-neutral-500">
-                    If you need to access this conversation, please check your
-                    email for the original magic link.
-                  </p>
                 </>
               )}
           </div>

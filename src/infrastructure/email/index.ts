@@ -100,14 +100,14 @@ YouFoundMyBag.com - Privacy-first lost item recovery
 Manage your email preferences: ${preferencesUrl}`;
 
   const htmlFooter = `
-      <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+      <hr style="border: none; border-top: 1px solid #b4cae4; margin: 30px 0;">
 
-      <p style="color: #6b7280; font-size: 12px; text-align: center; margin-bottom: 8px;">
+      <p style="color: #6894ca; font-size: 12px; text-align: center; margin-bottom: 8px;">
         YouFoundMyBag.com - Privacy-first lost item recovery
       </p>
 
-      <p style="color: #6b7280; font-size: 12px; text-align: center;">
-        <a href="${preferencesUrl}" style="color: #6b7280; text-decoration: underline;">Manage your email preferences</a>
+      <p style="color: #6894ca; font-size: 12px; text-align: center;">
+        <a href="${preferencesUrl}" style="color: #6894ca; text-decoration: underline;">Manage your email preferences</a>
       </p>`;
 
   return { textFooter, htmlFooter };
@@ -164,26 +164,26 @@ This message was sent through YouFoundMyBag.com's secure messaging system.${text
   const htmlBody = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="color: #2563eb; font-size: 24px;">
+        <h1 style="color: #356197; font-size: 24px;">
           ${isFromOwner ? '📬 The bag owner responded!' : '💬 New message about your bag'}
         </h1>
       </div>
 
-      <div style="background-color: #f8fafc; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
-        <h3 style="margin-top: 0; color: #374151;">${safeSenderName} wrote:</h3>
-        <p style="color: #4b5563; margin: 0; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">"${safeMessage}"</p>
+      <div style="background-color: #ecf2f8; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+        <h3 style="margin-top: 0; color: #1b314b;">${safeSenderName} wrote:</h3>
+        <p style="color: #284971; margin: 0; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">"${safeMessage}"</p>
       </div>
 
       <div style="text-align: center; margin: 30px 0;">
         <a href="${continueUrl}"
-           style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
+           style="background-color: #356197; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
           Continue Conversation
         </a>
       </div>
 
-      <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+      <hr style="border: none; border-top: 1px solid #b4cae4; margin: 30px 0;">
 
-      <p style="color: #6b7280; font-size: 12px; text-align: center;">
+      <p style="color: #6894ca; font-size: 12px; text-align: center;">
         This message was sent through YouFoundMyBag.com's secure messaging system.
       </p>
 ${htmlFooter}
@@ -257,12 +257,12 @@ If you didn't request this access, you can safely ignore this email.${textFooter
   const htmlBody = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="color: #2563eb; font-size: 24px;">
+        <h1 style="color: #356197; font-size: 24px;">
           ${conversationId ? `🎒 Someone found your ${bagType}!` : '🔐 Access your dashboard'}
         </h1>
       </div>
 
-      <p style="color: #4b5563; margin-bottom: 20px;">
+      <p style="color: #284971; margin-bottom: 20px;">
         ${
           conversationId
             ? `Great news! Someone found your ${bagType} and wants to return it. Click the secure link below to respond to the finder.`
@@ -272,18 +272,18 @@ If you didn't request this access, you can safely ignore this email.${textFooter
 
       <div style="text-align: center; margin: 30px 0;">
         <a href="${magicLinkUrl}"
-           style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
+           style="background-color: #356197; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
           ${conversationId ? 'Respond to Finder' : 'Access Dashboard'}
         </a>
       </div>
 
-      <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
-        <p style="margin: 0; color: #92400e; font-size: 14px;">
+      <div style="background-color: #fdf8e8; border-left: 4px solid #e7ba18; padding: 15px; margin: 20px 0;">
+        <p style="margin: 0; color: #5c4a0a; font-size: 14px;">
           🔒 <strong>Security Notice:</strong> This link expires in 24 hours.
         </p>
       </div>
 
-      <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
+      <p style="color: #6894ca; font-size: 14px; margin-top: 30px;">
         If you didn't request this access, you can safely ignore this email.
       </p>
 ${htmlFooter}
@@ -347,29 +347,29 @@ Save this email to easily access the conversation later.${textFooter}
   const htmlBody = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="color: #2563eb; font-size: 24px;">
+        <h1 style="color: #356197; font-size: 24px;">
           ✅ Your message was sent!
         </h1>
       </div>
 
-      <p style="color: #4b5563; margin-bottom: 20px;">
+      <p style="color: #284971; margin-bottom: 20px;">
         Your message has been delivered to the bag owner. Click the secure link below to continue the conversation and arrange the return.
       </p>
 
       <div style="text-align: center; margin: 30px 0;">
         <a href="${magicLinkUrl}"
-           style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
+           style="background-color: #356197; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
           Continue Conversation
         </a>
       </div>
 
-      <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
-        <p style="margin: 0; color: #92400e; font-size: 14px;">
+      <div style="background-color: #fdf8e8; border-left: 4px solid #e7ba18; padding: 15px; margin: 20px 0;">
+        <p style="margin: 0; color: #5c4a0a; font-size: 14px;">
           🔒 <strong>Security Notice:</strong> This link expires in 24 hours.
         </p>
       </div>
 
-      <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
+      <p style="color: #6894ca; font-size: 14px; margin-top: 30px;">
         Save this email to easily access the conversation later.
       </p>
 ${htmlFooter}
@@ -446,25 +446,25 @@ This link will expire in 24 hours.${textFooter}
   const htmlBody = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="color: #2563eb; font-size: 24px;">
+        <h1 style="color: #356197; font-size: 24px;">
           📬 ${safeSenderName} responded!
         </h1>
       </div>
 
-      <div style="background-color: #f8fafc; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
-        <h3 style="margin-top: 0; color: #374151;">${safeSenderName} wrote:</h3>
-        <p style="color: #4b5563; margin: 0; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">"${safeMessage}"</p>
+      <div style="background-color: #ecf2f8; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+        <h3 style="margin-top: 0; color: #1b314b;">${safeSenderName} wrote:</h3>
+        <p style="color: #284971; margin: 0; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">"${safeMessage}"</p>
       </div>
 
       <div style="text-align: center; margin: 30px 0;">
         <a href="${magicLinkUrl}"
-           style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
+           style="background-color: #356197; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
           Continue Conversation
         </a>
       </div>
 
-      <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
-        <p style="margin: 0; color: #92400e; font-size: 14px;">
+      <div style="background-color: #fdf8e8; border-left: 4px solid #e7ba18; padding: 15px; margin: 20px 0;">
+        <p style="margin: 0; color: #5c4a0a; font-size: 14px;">
           🔒 <strong>Security Notice:</strong> This link expires in 24 hours.
         </p>
       </div>
@@ -545,25 +545,25 @@ This link will expire in 24 hours.${textFooter}
   const htmlBody = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="color: #2563eb; font-size: 24px;">
+        <h1 style="color: #356197; font-size: 24px;">
           💬 ${safeSenderName} responded!
         </h1>
       </div>
 
-      <div style="background-color: #f8fafc; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
-        <h3 style="margin-top: 0; color: #374151;">${safeSenderName} wrote:</h3>
-        <p style="color: #4b5563; margin: 0; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">"${safeMessage}"</p>
+      <div style="background-color: #ecf2f8; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+        <h3 style="margin-top: 0; color: #1b314b;">${safeSenderName} wrote:</h3>
+        <p style="color: #284971; margin: 0; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">"${safeMessage}"</p>
       </div>
 
       <div style="text-align: center; margin: 30px 0;">
         <a href="${magicLinkUrl}"
-           style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
+           style="background-color: #356197; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
           Continue Conversation
         </a>
       </div>
 
-      <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
-        <p style="margin: 0; color: #92400e; font-size: 14px;">
+      <div style="background-color: #fdf8e8; border-left: 4px solid #e7ba18; padding: 15px; margin: 20px 0;">
+        <p style="margin: 0; color: #5c4a0a; font-size: 14px;">
           🔒 <strong>Security Notice:</strong> This link expires in 24 hours.
         </p>
       </div>
@@ -674,29 +674,29 @@ This link will expire in 24 hours.${textFooter}
   const htmlBody = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="color: #2563eb; font-size: 24px;">
+        <h1 style="color: #356197; font-size: 24px;">
           ${greeting}
         </h1>
       </div>
 
-      <p style="color: #4b5563; margin-bottom: 20px;">
+      <p style="color: #284971; margin-bottom: 20px;">
         ${contextDescription}
       </p>
 
-      <div style="background-color: #f8fafc; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
-        <h3 style="margin-top: 0; color: #374151;">${safeSenderName} wrote:</h3>
-        <p style="color: #4b5563; margin: 0; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">"${safeMessage}"</p>
+      <div style="background-color: #ecf2f8; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+        <h3 style="margin-top: 0; color: #1b314b;">${safeSenderName} wrote:</h3>
+        <p style="color: #284971; margin: 0; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">"${safeMessage}"</p>
       </div>
 
       <div style="text-align: center; margin: 30px 0;">
         <a href="${magicLinkUrl}"
-           style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
+           style="background-color: #356197; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
           Continue Conversation
         </a>
       </div>
 
-      <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
-        <p style="margin: 0; color: #92400e; font-size: 14px;">
+      <div style="background-color: #fdf8e8; border-left: 4px solid #e7ba18; padding: 15px; margin: 20px 0;">
+        <p style="margin: 0; color: #5c4a0a; font-size: 14px;">
           🔒 <strong>Security Notice:</strong> This link expires in 24 hours.
         </p>
       </div>
@@ -802,29 +802,29 @@ This link will expire in 24 hours.${textFooter}
   const htmlBody = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="color: #2563eb; font-size: 24px;">
+        <h1 style="color: #356197; font-size: 24px;">
           ${greeting}
         </h1>
       </div>
 
-      <p style="color: #4b5563; margin-bottom: 20px;">
+      <p style="color: #284971; margin-bottom: 20px;">
         ${contextDescription}
       </p>
 
-      <div style="background-color: #f8fafc; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
-        <h3 style="margin-top: 0; color: #374151;">${safeSenderName} wrote:</h3>
-        <p style="color: #4b5563; margin: 0; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">"${safeMessage}"</p>
+      <div style="background-color: #ecf2f8; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+        <h3 style="margin-top: 0; color: #1b314b;">${safeSenderName} wrote:</h3>
+        <p style="color: #284971; margin: 0; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">"${safeMessage}"</p>
       </div>
 
       <div style="text-align: center; margin: 30px 0;">
         <a href="${magicLinkUrl}"
-           style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
+           style="background-color: #356197; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
           Continue Conversation
         </a>
       </div>
 
-      <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
-        <p style="margin: 0; color: #92400e; font-size: 14px;">
+      <div style="background-color: #fdf8e8; border-left: 4px solid #e7ba18; padding: 15px; margin: 20px 0;">
+        <p style="margin: 0; color: #5c4a0a; font-size: 14px;">
           🔒 <strong>Security Notice:</strong> This link expires in 24 hours.
         </p>
       </div>
@@ -907,8 +907,6 @@ export async function sendConversationResolvedNotification({
   const textBody = `
 ✅ Good news! The conversation about ${bagDisplayName} has been marked as resolved.
 
-The bag owner has indicated that this matter has been successfully completed.
-
 You can still view the full conversation history by clicking this secure link:
 ${magicLinkUrl}
 
@@ -920,39 +918,33 @@ Thank you for using YouFoundMyBag.com to help reunite lost items with their owne
   const htmlBody = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="color: #10b981; font-size: 24px;">
+        <h1 style="color: #2aa248; font-size: 24px;">
           ✅ Conversation Resolved!
         </h1>
       </div>
 
-      <p style="color: #4b5563; margin-bottom: 20px;">
+      <p style="color: #284971; margin-bottom: 20px;">
         Good news! The conversation about <strong>${bagDisplayName}</strong> has been marked as resolved by the bag owner.
       </p>
 
-      <div style="background-color: #ecfdf5; border-left: 4px solid #10b981; padding: 15px; margin: 20px 0;">
-        <p style="margin: 0; color: #047857; font-size: 14px;">
-          🎉 <strong>Success:</strong> This matter has been successfully completed.
-        </p>
-      </div>
-
-      <p style="color: #4b5563; margin-bottom: 20px;">
+      <p style="color: #284971; margin-bottom: 20px;">
         You can still view the full conversation history if needed:
       </p>
 
       <div style="text-align: center; margin: 30px 0;">
         <a href="${magicLinkUrl}"
-           style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
+           style="background-color: #356197; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
           View Conversation
         </a>
       </div>
 
-      <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
-        <p style="margin: 0; color: #92400e; font-size: 14px;">
+      <div style="background-color: #fdf8e8; border-left: 4px solid #e7ba18; padding: 15px; margin: 20px 0;">
+        <p style="margin: 0; color: #5c4a0a; font-size: 14px;">
           🔒 <strong>Security Notice:</strong> This link expires in 24 hours.
         </p>
       </div>
 
-      <p style="color: #4b5563; text-align: center; margin: 30px 0;">
+      <p style="color: #284971; text-align: center; margin: 30px 0;">
         Thank you for using YouFoundMyBag.com to help reunite lost items with their owners!
       </p>
 ${htmlFooter}
@@ -981,7 +973,6 @@ ${htmlFooter}
 
 export async function sendBagCreatedEmail({
   email,
-  ownerName,
   bagName,
   shortId,
   bagUrl,
@@ -1011,11 +1002,9 @@ export async function sendBagCreatedEmail({
   const dashboardUrl = getDashboardUrl();
   const magicLinkUrl = `${dashboardUrl}/auth/verify?token=${magicLinkToken}`;
 
-  const { content: safeOwnerName } = secureEmailContent(ownerName || '');
   const bagType = lowercaseBagName(bagName);
   const { content: safeBagType } = secureEmailContent(bagType);
 
-  const greeting = ownerName ? `Hi ${safeOwnerName}` : 'Hi';
   const yourBag = bagName ? `your ${safeBagType}` : 'your bag';
 
   const subject = `Your ${bagType} tag is ready! Access your dashboard`;
@@ -1023,7 +1012,6 @@ export async function sendBagCreatedEmail({
   const { textFooter, htmlFooter } = await getEmailFooter(email);
 
   const textBody = `
-${greeting},
 
 Your ${bagType} tag (${shortId}) has been successfully created!
 
@@ -1043,27 +1031,23 @@ This link will expire in 24 hours. You can request a new one anytime.${textFoote
   const htmlBody = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="color: #2563eb; font-size: 24px;">
+        <h1 style="color: #356197; font-size: 24px;">
           Your ${safeBagType} tag is ready!
         </h1>
       </div>
 
-      <p style="color: #4b5563; margin-bottom: 20px;">
-        ${greeting},
-      </p>
-
-      <p style="color: #4b5563; margin-bottom: 20px;">
+      <p style="color: #284971; margin-bottom: 20px;">
         Your ${safeBagType} tag <strong>(${shortId})</strong> has been successfully created!
       </p>
 
-      <div style="background-color: #f8fafc; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
-        <p style="margin: 0 0 10px 0; color: #374151; font-weight: bold;">Your bag's unique page:</p>
-        <a href="${bagUrl}" style="color: #2563eb; word-break: break-all;">${bagUrl}</a>
+      <div style="background-color: #ecf2f8; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+        <p style="margin: 0 0 10px 0; color: #1b314b; font-weight: bold;">Your bag's unique page:</p>
+        <a href="${bagUrl}" style="color: #356197; word-break: break-all;">${bagUrl}</a>
       </div>
 
-      <div style="background-color: #eff6ff; border-left: 4px solid #2563eb; padding: 15px; margin: 20px 0;">
-        <h3 style="margin: 0 0 10px 0; color: #1e40af; font-size: 16px;">What's next?</h3>
-        <ul style="margin: 0; padding-left: 20px; color: #4b5563;">
+      <div style="background-color: #ecf2f8; border-left: 4px solid #356197; padding: 15px; margin: 20px 0;">
+        <h3 style="margin: 0 0 10px 0; color: #284971; font-size: 16px;">What's next?</h3>
+        <ul style="margin: 0; padding-left: 20px; color: #284971;">
           <li style="margin-bottom: 8px;">Print and attach the QR code to ${yourBag}</li>
           <li style="margin-bottom: 8px;">If someone finds ${yourBag}, they'll scan the code and can contact you securely</li>
           <li>Access your dashboard anytime to manage ${yourBag} and view messages</li>
@@ -1072,13 +1056,13 @@ This link will expire in 24 hours. You can request a new one anytime.${textFoote
 
       <div style="text-align: center; margin: 30px 0;">
         <a href="${magicLinkUrl}"
-           style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
+           style="background-color: #356197; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
           Access Your Dashboard
         </a>
       </div>
 
-      <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
-        <p style="margin: 0; color: #92400e; font-size: 14px;">
+      <div style="background-color: #fdf8e8; border-left: 4px solid #e7ba18; padding: 15px; margin: 20px 0;">
+        <p style="margin: 0; color: #5c4a0a; font-size: 14px;">
           🔒 <strong>Security Notice:</strong> This link expires in 24 hours. You can request a new one anytime.
         </p>
       </div>
@@ -1110,7 +1094,7 @@ export async function sendMagicLinkReissueEmail(
 
   const { textFooter, htmlFooter } = await getEmailFooter(email);
 
-  const subject = '🔑 Your new access link to YouFoundMyBag.com';
+  const subject = 'Your new access link for YouFoundMyBag.com';
 
   const textBody = `
 Your New Access Link
@@ -1128,28 +1112,28 @@ ${textFooter}
   `;
 
   const htmlBody = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #1f2937;">
-      <h1 style="color: #1f2937; font-size: 28px; font-weight: 700; margin-bottom: 24px;">
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #1b314b;">
+      <h1 style="color: #1b314b; font-size: 28px; font-weight: 700; margin-bottom: 24px;">
         🔑 Your New Access Link
       </h1>
 
-      <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
+      <p style="color: #284971; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
         We've generated a new magic link for you to access your bags and conversations on YouFoundMyBag.com.
       </p>
 
       <div style="text-align: center; margin: 32px 0;">
-        <a href="${magicLink}" style="background-color: #4f46e5; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block;">
+        <a href="${magicLink}" style="background-color: #356197; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block;">
           Access Your Dashboard
         </a>
       </div>
 
-      <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
-        <p style="margin: 0; color: #92400e; font-size: 14px;">
+      <div style="background-color: #fdf8e8; border-left: 4px solid #e7ba18; padding: 15px; margin: 20px 0;">
+        <p style="margin: 0; color: #5c4a0a; font-size: 14px;">
           🔒 <strong>Security Notice:</strong> This link expires in 7 days.
         </p>
       </div>
 
-      <p style="color: #6b7280; font-size: 14px; line-height: 1.6; margin-top: 24px;">
+      <p style="color: #6894ca; font-size: 14px; line-height: 1.6; margin-top: 24px;">
         If you didn't request this, you can safely ignore this email. Your account remains secure.
       </p>
 
@@ -1189,7 +1173,7 @@ export async function sendFinderMagicLinkReissueEmail(
 
   const { textFooter, htmlFooter } = await getEmailFooter(email);
 
-  const subject = '🔑 Your new conversation link';
+  const subject = 'Your new conversation link for YouFoundMyBag.com';
 
   const textBody = `
 Your New Conversation Link
@@ -1207,28 +1191,28 @@ ${textFooter}
   `;
 
   const htmlBody = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #1f2937;">
-      <h1 style="color: #1f2937; font-size: 28px; font-weight: 700; margin-bottom: 24px;">
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #1b314b;">
+      <h1 style="color: #1b314b; font-size: 28px; font-weight: 700; margin-bottom: 24px;">
         🔑 Your New Conversation Link
       </h1>
 
-      <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
+      <p style="color: #284971; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
         We've generated a new link for you to continue your conversation on YouFoundMyBag.com.
       </p>
 
       <div style="text-align: center; margin: 32px 0;">
-        <a href="${magicLink}" style="background-color: #4f46e5; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block;">
+        <a href="${magicLink}" style="background-color: #356197; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block;">
           Continue Conversation
         </a>
       </div>
 
-      <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
-        <p style="margin: 0; color: #92400e; font-size: 14px;">
+      <div style="background-color: #fdf8e8; border-left: 4px solid #e7ba18; padding: 15px; margin: 20px 0;">
+        <p style="margin: 0; color: #5c4a0a; font-size: 14px;">
           🔒 <strong>Security Notice:</strong> This link expires in 7 days.
         </p>
       </div>
 
-      <p style="color: #6b7280; font-size: 14px; line-height: 1.6; margin-top: 24px;">
+      <p style="color: #6894ca; font-size: 14px; line-height: 1.6; margin-top: 24px;">
         If you didn't request this, you can safely ignore this email.
       </p>
 

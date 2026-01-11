@@ -491,7 +491,7 @@ export default function BagManagementModal({
 
             {qrLoading ? (
               <div className="flex flex-col items-center justify-center py-16 text-slate-500">
-                <div className="w-12 h-12 border-4 border-slate-200 border-t-saffron-500 rounded-full animate-spin mb-4" />
+                <div className="w-12 h-12 border-4 border-slate-200 border-t-regal-navy-600 rounded-full animate-spin mb-4" />
                 <p>Loading QR code...</p>
               </div>
             ) : qrData ? (
@@ -527,7 +527,7 @@ export default function BagManagementModal({
                 <div className="flex gap-3 mt-6">
                   <button
                     onClick={downloadQR}
-                    className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-saffron-500 hover:bg-saffron-600 text-saffron-950 font-semibold rounded-xl transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
+                    className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-regal-navy-600 hover:bg-regal-navy-700 text-white font-semibold rounded-xl transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
                   >
                     <DownloadActionIcon color="currentColor" />
                     Download QR
@@ -598,7 +598,7 @@ export default function BagManagementModal({
                   maxLength={30}
                   disabled={!cooldownInfo?.canUpdate || loading}
                   placeholder="Enter bag name"
-                  className="w-full px-4 py-3.5 text-base border-2 border-slate-300 rounded-xl bg-white text-slate-900 transition-all focus:outline-none focus:border-saffron-500 focus:ring-4 focus:ring-saffron-500/10 disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed"
+                  className="w-full px-4 py-3.5 text-base border-2 border-slate-300 rounded-xl bg-white text-slate-900 transition-all focus:outline-none focus:border-regal-navy-600 focus:ring-4 focus:ring-regal-navy-600/10 disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed"
                 />
                 <p className="mt-2 text-sm text-slate-500">
                   {newName.length}/30 characters
@@ -621,7 +621,7 @@ export default function BagManagementModal({
                     !newName.trim() ||
                     newName === bag.bag_name
                   }
-                  className="flex-1 px-6 py-4 bg-saffron-500 hover:bg-saffron-600 text-saffron-950 font-semibold rounded-xl transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-sm"
+                  className="flex-1 px-6 py-4 bg-regal-navy-600 hover:bg-regal-navy-700 text-white font-semibold rounded-xl transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-sm"
                 >
                   {loading ? 'Saving...' : 'Save Changes'}
                 </button>
@@ -693,7 +693,7 @@ export default function BagManagementModal({
                   (rotationCooldownInfo !== null &&
                     !rotationCooldownInfo.canRotate)
                 }
-                className="w-full px-6 py-4 bg-orange-100 hover:bg-orange-200 border border-orange-300 text-orange-900 font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full px-6 py-4 bg-saffron-400 hover:bg-saffron-500 border border-saffron-600 text-saffron-950 font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {rotateLoading ? 'Rotating...' : 'Rotate Short Link'}
               </button>
@@ -763,8 +763,8 @@ export default function BagManagementModal({
                 onClick={() => setConfirmStatusToggle(true)}
                 className={`w-full px-6 py-4 font-semibold rounded-xl transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 ${
                   bag.status === 'active'
-                    ? 'bg-orange-100 hover:bg-orange-200 border border-orange-300 text-orange-900'
-                    : 'bg-saffron-500 hover:bg-saffron-600 text-saffron-950'
+                    ? 'bg-saffron-400 hover:bg-saffron-500 border border-saffron-600 text-saffron-950'
+                    : 'bg-regal-navy-600 hover:bg-regal-navy-700 text-white'
                 }`}
               >
                 {bag.status === 'active' ? 'Disable Bag' : 'Enable Bag'}
@@ -799,7 +799,7 @@ export default function BagManagementModal({
               <button
                 onClick={openEmailPreferences}
                 disabled={loading}
-                className="w-full px-6 py-4 bg-saffron-500 hover:bg-saffron-600 text-saffron-950 font-semibold rounded-xl transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-sm"
+                className="w-full px-6 py-4 bg-regal-navy-600 hover:bg-regal-navy-700 text-white font-semibold rounded-xl transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-sm"
               >
                 {loading ? 'Opening...' : 'Manage Email Preferences'}
               </button>
@@ -834,7 +834,7 @@ export default function BagManagementModal({
 
               <button
                 onClick={() => setConfirmResolveAll(true)}
-                className="w-full px-6 py-4 bg-orange-100 hover:bg-orange-200 border border-orange-300 text-orange-900 font-semibold rounded-xl transition-all"
+                className="w-full px-6 py-4 bg-saffron-400 hover:bg-saffron-500 border border-saffron-600 text-saffron-950 font-semibold rounded-xl transition-all"
               >
                 Resolve All Conversations
               </button>
@@ -939,7 +939,7 @@ export default function BagManagementModal({
                       onClick={() => setActiveSection(item.id)}
                       className={`w-full flex items-center gap-3 px-6 py-3 text-base font-medium transition-all border-l-3 ${
                         activeSection === item.id
-                          ? 'bg-saffron-500/10 border-l-saffron-500 text-saffron-400'
+                          ? 'bg-regal-navy-600/20 border-l-regal-navy-400 text-regal-navy-300'
                           : 'border-l-transparent text-slate-300 hover:bg-white/5 hover:text-white'
                       }`}
                     >
@@ -962,7 +962,7 @@ export default function BagManagementModal({
                       onClick={() => setActiveSection(item.id)}
                       className={`w-full flex items-center gap-3 px-6 py-3 text-base font-medium transition-all border-l-3 ${
                         activeSection === item.id
-                          ? 'bg-saffron-500/10 border-l-saffron-500 text-saffron-400'
+                          ? 'bg-regal-navy-600/20 border-l-regal-navy-400 text-regal-navy-300'
                           : 'border-l-transparent text-slate-300 hover:bg-white/5 hover:text-white'
                       }`}
                     >
@@ -987,7 +987,7 @@ export default function BagManagementModal({
                         activeSection === item.id
                           ? item.id === 'delete'
                             ? 'bg-red-500/10 border-l-red-400 text-red-400'
-                            : 'bg-saffron-500/10 border-l-saffron-500 text-saffron-400'
+                            : 'bg-regal-navy-600/20 border-l-regal-navy-400 text-regal-navy-300'
                           : item.id === 'delete'
                             ? 'border-l-transparent text-red-300 hover:bg-red-500/5 hover:text-red-200'
                             : 'border-l-transparent text-slate-300 hover:bg-white/5 hover:text-white'
