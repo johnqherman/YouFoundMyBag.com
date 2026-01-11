@@ -252,7 +252,7 @@ router.post(
       res.status(500).json({
         success: false,
         error: 'logout_error',
-        message: 'Failed to logout',
+        message: 'Failed to log out',
       });
     }
   }

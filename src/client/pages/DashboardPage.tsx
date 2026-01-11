@@ -10,6 +10,7 @@ import type {
 import LoadingSpinner from '../components/LoadingSpinner';
 import ConfirmModal from '../components/ConfirmModal';
 import BagManagementModal from '../components/BagManagementModal';
+import RequestMagicLinkModal from '../components/RequestMagicLinkModal';
 import Twemoji from '../components/Twemoji';
 import {
   MessageIcon,
@@ -138,6 +139,7 @@ export default function DashboardPage() {
     status: 'active' | 'disabled';
     owner_email?: string;
   } | null>(null);
+  const [showReissueModal, setShowReissueModal] = useState(false);
 
   useEffect(() => {
     loadDashboard();
@@ -148,7 +150,7 @@ export default function DashboardPage() {
       const token = localStorage.getItem('owner_session_token');
       if (!token) {
         setError(
-          'Not authenticated. Please check your email for a magic link.'
+          'Not authenticated. Please check your email for an access link.'
         );
         setLoading(false);
         return;
@@ -298,6 +300,8 @@ export default function DashboardPage() {
   }
 
   if (error || !dashboardData) {
+    const isAuthError = error?.toLowerCase().includes('not authenticated');
+
     return (
       <div className="min-h-screen bg-regal-navy-50 text-regal-navy-900">
         <Helmet>
@@ -311,11 +315,28 @@ export default function DashboardPage() {
             <p className="text-regal-navy-600 mb-6">
               {error || 'Unable to load your dashboard.'}
             </p>
-            <a href="/" className="link">
-              Return to homepage
-            </a>
+            {isAuthError && (
+              <button
+                onClick={() => setShowReissueModal(true)}
+                className="link mb-4"
+              >
+                Lost your secure chat link?
+              </button>
+            )}
+            {!isAuthError && (
+              <a href="/" className="link">
+                Return to homepage
+              </a>
+            )}
           </div>
         </div>
+
+        {showReissueModal && (
+          <RequestMagicLinkModal
+            isOpen={showReissueModal}
+            onClose={() => setShowReissueModal(false)}
+          />
+        )}
       </div>
     );
   }
@@ -738,7 +759,7 @@ export default function DashboardPage() {
             }}
             className="link ml-4"
           >
-            Logout
+            Log out
           </button>
         </footer>
       </div>

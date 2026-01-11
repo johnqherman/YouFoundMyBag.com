@@ -17,12 +17,12 @@ export default function HomePage() {
   }
 
   return (
-    <div className="h-screen bg-regal-navy-50 text-regal-navy-900 overflow-y-auto pb-20">
+    <div className="h-screen bg-regal-navy-50 text-regal-navy-900 overflow-y-auto pb-16">
       <Helmet>
         <title>Create New Bag | YouFoundMyBag.com</title>
       </Helmet>
       <div className="max-w-md mx-auto p-6 lg:max-w-2xl">
-        <header className="text-center mb-12 mt-4">
+        <header className="text-center mb-8 mt-2">
           <h1 className="text-4xl font-semibold mb-3 text-regal-navy-900">
             YouFoundMyBag
             <span className="text-xl text-regal-navy-500 font-normal ml-1">

@@ -1099,7 +1099,7 @@ export async function sendMagicLinkReissueEmail(
   const textBody = `
 Your New Access Link
 
-We've generated a new magic link for you to access your bags and conversations on YouFoundMyBag.com.
+We've generated a new link for you to access your bags and conversations on YouFoundMyBag.com.
 
 Click here to access your dashboard:
 ${magicLink}
@@ -1118,7 +1118,7 @@ ${textFooter}
       </h1>
 
       <p style="color: #284971; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
-        We've generated a new magic link for you to access your bags and conversations on YouFoundMyBag.com.
+        We've generated a new link for you to access your bags and conversations on YouFoundMyBag.com.
       </p>
 
       <div style="text-align: center; margin: 32px 0;">

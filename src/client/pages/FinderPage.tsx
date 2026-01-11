@@ -163,18 +163,43 @@ export default function FinderPage() {
           )}
 
           <div className="space-y-5">
-            {activeBagData.secure_messaging_enabled ? (
-              <p className="text-lg font-medium text-center text-regal-navy-900 mb-2">
-                Choose how you&apos;d like to contact me:
-              </p>
-            ) : (
-              <>
+            {(() => {
+              const totalContactMethods =
+                (activeBagData.secure_messaging_enabled ? 1 : 0) +
+                activeBagData.contact_options.length;
+
+              if (totalContactMethods === 1) {
+                if (activeBagData.contact_options.length === 1) {
+                  return (
+                    <p className="text-lg font-medium text-center text-regal-navy-900 mb-2">
+                      Contact{' '}
+                      <Twemoji>{activeBagData.owner_name || 'me'}</Twemoji>{' '}
+                      directly:
+                    </p>
+                  );
+                }
+                return (
+                  <p className="text-lg font-medium text-center text-regal-navy-900 mb-2">
+                    You can message me here:
+                  </p>
+                );
+              }
+
+              if (activeBagData.secure_messaging_enabled) {
+                return (
+                  <p className="text-lg font-medium text-center text-regal-navy-900 mb-2">
+                    Choose how you&apos;d like to contact me:
+                  </p>
+                );
+              }
+
+              return (
                 <p className="text-lg font-medium text-center text-regal-navy-900 mb-2">
                   Contact <Twemoji>{activeBagData.owner_name || 'me'}</Twemoji>{' '}
                   directly:
                 </p>
-              </>
-            )}
+              );
+            })()}
 
             {activeBagData.secure_messaging_enabled && (
               <div className="bg-regal-navy-50 border border-regal-navy-200 rounded-lg p-5">

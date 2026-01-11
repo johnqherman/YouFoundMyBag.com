@@ -65,7 +65,7 @@ export default function FinderConversationPage() {
         if (response.status === 401) {
           localStorage.removeItem('finder_session_token');
           setError(
-            'Session expired. Please use your original magic link to access the conversation.'
+            'Session expired. Please use your original access link to access the conversation.'
           );
           return;
         }
@@ -84,7 +84,7 @@ export default function FinderConversationPage() {
   const authenticateWithMagicLink = useCallback(async () => {
     const token = searchParams.get('token');
     if (!token) {
-      setError('Invalid magic link - no token found');
+      setError('Invalid access link - no token found');
       setLoading(false);
       return;
     }
@@ -128,7 +128,7 @@ export default function FinderConversationPage() {
     const token = localStorage.getItem('finder_session_token');
     if (!token) {
       setError(
-        'Session expired. Please use your original magic link to access the conversation.'
+        'Session expired. Please use your original access link to access the conversation.'
       );
       return;
     }
@@ -461,7 +461,7 @@ export default function FinderConversationPage() {
           </h4>
           <p className="text-xs text-blue-800 font-medium">
             This conversation is secure and private. Only you and the item owner
-            can see these messages. Your magic link provides secure access to
+            can see these messages. Your access link provides secure access to
             this conversation only.
           </p>
         </div>

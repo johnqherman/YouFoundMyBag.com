@@ -1,3 +1,4 @@
+import { useRef, useEffect } from 'react';
 import { ContactWithId } from '../../types';
 import ContactInput from '../ContactInput';
 import PhoneInputErrorBoundary from '../PhoneInputErrorBoundary';
@@ -34,6 +35,16 @@ export default function ContactDetails({
   getAvailableContactTypes,
   error,
 }: ContactDetailsProps) {
+  const contactsEndRef = useRef<HTMLDivElement>(null);
+  const prevContactsLength = useRef(formData.contacts.length);
+
+  useEffect(() => {
+    if (formData.contacts.length > prevContactsLength.current) {
+      contactsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+    prevContactsLength.current = formData.contacts.length;
+  }, [formData.contacts.length]);
+
   return (
     <div className="space-y-6">
       <div>
@@ -97,48 +108,49 @@ export default function ContactDetails({
           </p>
         </div>
 
-        {formData.contacts.length > 0 &&
-          getAvailableContactTypes(-1).length > 0 && (
-            <div className="mb-3">
-              <button
-                type="button"
-                onClick={addContact}
-                className="text-sm link flex items-center gap-1"
-              >
-                + Add contact method
-              </button>
-            </div>
-          )}
-
         <div className="space-y-3">
           {formData.contacts.length === 0 ? (
-            <div className="text-center py-8 bg-white rounded-lg border-2 border-dashed border-regal-navy-300">
-              <button
-                type="button"
-                onClick={addContact}
-                className="text-sm link"
-              >
+            <div
+              onClick={addContact}
+              className="text-center py-8 bg-white rounded-lg border-2 border-dashed border-regal-navy-300 cursor-pointer hover:border-regal-navy-400 hover:bg-regal-navy-50 transition-colors"
+            >
+              <span className="text-sm text-regal-navy-700 font-medium">
                 + Add direct contact method
-              </button>
+              </span>
             </div>
           ) : (
-            formData.contacts.map((contact, index) => (
-              <PhoneInputErrorBoundary key={`boundary-${contact.id}`}>
-                <ContactInput
-                  key={contact.id}
-                  contact={contact}
-                  onUpdate={(updatedContact) =>
-                    updateContact(index, updatedContact)
-                  }
-                  onRemove={() => removeContact(index)}
-                  availableTypes={getAvailableContactTypes(index)}
-                  showRemoveButton={
-                    formData.secure_messaging_enabled ||
-                    formData.contacts.length > 1
-                  }
-                />
-              </PhoneInputErrorBoundary>
-            ))
+            <>
+              {formData.contacts.map((contact, index) => (
+                <PhoneInputErrorBoundary key={`boundary-${contact.id}`}>
+                  <ContactInput
+                    key={contact.id}
+                    contact={contact}
+                    onUpdate={(updatedContact) =>
+                      updateContact(index, updatedContact)
+                    }
+                    onRemove={() => removeContact(index)}
+                    availableTypes={getAvailableContactTypes(index)}
+                    showRemoveButton={
+                      formData.secure_messaging_enabled ||
+                      formData.contacts.length > 1
+                    }
+                  />
+                </PhoneInputErrorBoundary>
+              ))}
+
+              {getAvailableContactTypes(-1).length > 0 && (
+                <div
+                  onClick={addContact}
+                  className="text-center py-8 bg-white rounded-lg border-2 border-dashed border-regal-navy-300 cursor-pointer hover:border-regal-navy-400 hover:bg-regal-navy-50 transition-colors"
+                >
+                  <span className="text-sm text-regal-navy-700 font-medium">
+                    + Add contact method
+                  </span>
+                </div>
+              )}
+
+              <div ref={contactsEndRef} />
+            </>
           )}
         </div>
       </div>

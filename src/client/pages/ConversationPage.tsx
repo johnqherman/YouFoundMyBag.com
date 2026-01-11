@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import LoadingSpinner from '../components/LoadingSpinner';
 import CharacterLimitTextArea from '../components/CharacterLimitTextArea';
 import ConfirmModal from '../components/ConfirmModal';
+import RequestMagicLinkModal from '../components/RequestMagicLinkModal';
 import Twemoji from '../components/Twemoji';
 import type { ConversationThread, ConversationMessage } from '../types/index';
 import { api } from '../utils/api';
@@ -47,6 +48,7 @@ export default function ConversationPage() {
   const [resolving, setResolving] = useState(false);
   const [archiving, setArchiving] = useState(false);
   const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
+  const [showReissueModal, setShowReissueModal] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const replyInputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -249,6 +251,11 @@ export default function ConversationPage() {
   }
 
   if (error) {
+    const isAuthError =
+      error?.toLowerCase().includes('not authenticated') ||
+      error?.toLowerCase().includes('authentication required') ||
+      error?.toLowerCase().includes('invalid or expired session');
+
     return (
       <div className="min-h-screen bg-regal-navy-50 text-regal-navy-900">
         <Helmet>
@@ -263,11 +270,30 @@ export default function ConversationPage() {
               Error Loading Conversation
             </h1>
             <p className="text-regal-navy-600 mb-6">{error}</p>
+            {isAuthError && (
+              <>
+                <button
+                  onClick={() => setShowReissueModal(true)}
+                  className="link mb-4"
+                >
+                  Lost your secure chat link?
+                </button>
+                <br />
+              </>
+            )}
             <Link to="/dashboard" className="link">
               Return to Dashboard
             </Link>
           </div>
         </div>
+
+        {showReissueModal && (
+          <RequestMagicLinkModal
+            isOpen={showReissueModal}
+            onClose={() => setShowReissueModal(false)}
+            conversationId={conversationId}
+          />
+        )}
       </div>
     );
   }

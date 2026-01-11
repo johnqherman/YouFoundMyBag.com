@@ -67,13 +67,13 @@ export default function RequestMagicLinkModal({
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to send magic link');
+        throw new Error(data.message || 'Failed to send access link');
       }
 
       setSuccess(true);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : 'Failed to send magic link'
+        err instanceof Error ? err.message : 'Failed to send access link'
       );
     } finally {
       setLoading(false);
@@ -101,7 +101,7 @@ export default function RequestMagicLinkModal({
             </h2>
             <p className="text-regal-navy-700 mb-6 leading-relaxed">
               If your email address <strong>({email})</strong> is in our system,
-              you&apos;ll receive a new magic link shortly.
+              you&apos;ll receive a new secure chat link shortly.
               <br />
               <br />
               The link will be valid for <strong>7 days</strong>.
@@ -126,7 +126,7 @@ export default function RequestMagicLinkModal({
       >
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold text-regal-navy-900">
-            Lost Your Secure Chat Link?
+            Lost your secure chat link?
           </h2>
           <button
             onClick={onClose}
@@ -137,7 +137,7 @@ export default function RequestMagicLinkModal({
         </div>
 
         <p className="text-regal-navy-700 mb-6 leading-relaxed">
-          Enter your email address and we&apos;ll send you a new magic link to
+          Enter your email address and we&apos;ll send you a new secure link to
           access your {conversationId ? 'conversation' : 'dashboard'}.
         </p>
 
@@ -161,7 +161,7 @@ export default function RequestMagicLinkModal({
               autoFocus
             />
             <p className="text-xs text-regal-navy-600 mt-1.5">
-              We&apos;ll send a new 7-day magic link to this address if
+              We&apos;ll send a new 7-day access link to this address if
               it&apos;s in our system.
             </p>
           </div>
@@ -189,7 +189,7 @@ export default function RequestMagicLinkModal({
               disabled={loading || !email.trim()}
               className="btn-primary flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Sending...' : 'Send Magic Link'}
+              {loading ? 'Sending...' : 'Send Access Link'}
             </button>
           </div>
         </form>
