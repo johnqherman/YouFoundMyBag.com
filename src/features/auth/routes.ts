@@ -205,6 +205,7 @@ router.get(
       res.json({
         success: true,
         data: {
+          owner_email: session.email,
           bags: bags.sort(
             (a, b) =>
               new Date(b.latest_conversation || b.created_at).getTime() -

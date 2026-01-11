@@ -9,11 +9,13 @@ import type {
 } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ConfirmModal from '../components/ConfirmModal';
+import BagManagementModal from '../components/BagManagementModal';
 import Twemoji from '../components/Twemoji';
 import {
   MessageIcon,
   MailIcon,
   ArchiveIcon,
+  BagSettingsIcon,
 } from '../components/icons/AppIcons';
 
 function formatBagDisplayName(
@@ -34,6 +36,7 @@ function formatBagDisplayName(
 }
 
 interface DashboardData {
+  owner_email?: string;
   bags: Array<{
     id: string;
     short_id: string;
@@ -126,6 +129,14 @@ export default function DashboardPage() {
   const [confirmArchive, setConfirmArchive] = useState<{
     conversationId: string;
     event: React.MouseEvent;
+  } | null>(null);
+  const [managementModalBag, setManagementModalBag] = useState<{
+    id: string;
+    short_id: string;
+    owner_name?: string;
+    bag_name?: string;
+    status: 'active' | 'disabled';
+    owner_email?: string;
   } | null>(null);
 
   useEffect(() => {
@@ -353,15 +364,34 @@ export default function DashboardPage() {
                             )}
                           </Twemoji>
                         </h3>
-                        <span
-                          className={`badge ${
-                            bag.status === 'active'
-                              ? 'badge-success'
-                              : 'badge-neutral'
-                          }`}
-                        >
-                          {bag.status}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`badge ${
+                              bag.status === 'active'
+                                ? 'badge-success'
+                                : 'badge-neutral'
+                            }`}
+                          >
+                            {bag.status}
+                          </span>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setManagementModalBag({
+                                id: bag.id,
+                                short_id: bag.short_id,
+                                owner_name: bag.owner_name,
+                                bag_name: bag.bag_name,
+                                status: bag.status,
+                                owner_email: dashboardData?.owner_email,
+                              });
+                            }}
+                            className="text-regal-navy-600 hover:text-regal-navy-900 transition-colors p-1"
+                            title="Manage bag"
+                          >
+                            <BagSettingsIcon color="currentColor" />
+                          </button>
+                        </div>
                       </div>
 
                       <p className="text-sm text-regal-navy-600 mb-3">
@@ -729,6 +759,17 @@ export default function DashboardPage() {
         onConfirm={handleArchiveConversation}
         onCancel={() => setConfirmArchive(null)}
       />
+
+      {managementModalBag && (
+        <BagManagementModal
+          isOpen={true}
+          onClose={() => setManagementModalBag(null)}
+          bag={managementModalBag}
+          onBagUpdated={() => {
+            loadDashboard();
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -61,3 +61,64 @@ export async function createBagWithQR(
     created_at: bag.created_at.toISOString(),
   };
 }
+
+export async function generateQRCode(bagUrl: string): Promise<string> {
+  return QRCode.toDataURL(bagUrl, {
+    width: 300,
+    margin: 2,
+    color: { dark: '#000000', light: '#ffffff' },
+  });
+}
+
+export async function getBagQRCode(shortId: string): Promise<{
+  qr_code: string;
+  url: string;
+  short_id: string;
+}> {
+  const bag = await repository.getBagByShortId(shortId);
+  if (!bag) {
+    throw new Error('Bag not found');
+  }
+
+  const bagUrl = `${config.FRONTEND_URL}/b/${shortId}`;
+  const qrCodeDataUrl = await generateQRCode(bagUrl);
+
+  return {
+    qr_code: qrCodeDataUrl,
+    url: bagUrl,
+    short_id: shortId,
+  };
+}
+
+export async function rotateBagShortId(bagId: string): Promise<{
+  new_short_id: string;
+  qr_code: string;
+  url: string;
+}> {
+  let newShortId: string;
+  let attempts = 0;
+  const maxAttempts = 10;
+
+  do {
+    newShortId = createReadableShortId();
+    attempts++;
+
+    const existingBagId = await repository.getBagId(newShortId);
+    if (!existingBagId) break;
+
+    if (attempts >= maxAttempts) {
+      throw new Error('Failed to generate unique ID');
+    }
+  } while (attempts < maxAttempts);
+
+  await repository.rotateShortId(bagId, newShortId);
+
+  const bagUrl = `${config.FRONTEND_URL}/b/${newShortId}`;
+  const qrCodeDataUrl = await generateQRCode(bagUrl);
+
+  return {
+    new_short_id: newShortId,
+    qr_code: qrCodeDataUrl,
+    url: bagUrl,
+  };
+}

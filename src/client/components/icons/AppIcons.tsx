@@ -16,6 +16,12 @@ import ShieldIcon from '@atlaskit/icon/core/shield';
 import BriefcaseIcon from '@atlaskit/icon/core/briefcase';
 import CheckMarkIcon from '@atlaskit/icon/core/check-mark';
 import ArchiveBoxIcon from '@atlaskit/icon/core/archive-box';
+import SettingsIcon from '@atlaskit/icon/core/settings';
+import EditIcon from '@atlaskit/icon/core/edit';
+import RefreshIcon from '@atlaskit/icon/core/refresh';
+import LightbulbIcon from '@atlaskit/icon/core/lightbulb';
+import GridIcon from '@atlaskit/icon/core/grid';
+import DeleteIconAtlas from '@atlaskit/icon/core/delete';
 
 export type IconSize = 'small' | 'medium' | 'large';
 export type IconColor = 'currentColor';
@@ -269,6 +275,76 @@ export const ArchiveIcon = ({
       spacing="compact"
       color={color}
       label={label || 'Archive'}
+    />
+  </IconWrapper>
+);
+
+export const BagSettingsIcon = ({
+  size: _size = 'medium',
+  color = 'currentColor',
+  label = '',
+  className = '',
+}: IconProps) => (
+  <IconWrapper className={className}>
+    <SettingsIcon spacing="compact" color={color} label={label || 'Settings'} />
+  </IconWrapper>
+);
+
+export const EditPencilIcon = ({
+  size: _size = 'medium',
+  color = 'currentColor',
+  label = '',
+  className = '',
+}: IconProps) => (
+  <IconWrapper className={className}>
+    <EditIcon spacing="compact" color={color} label={label || 'Edit'} />
+  </IconWrapper>
+);
+
+export const RefreshRotateIcon = ({
+  size: _size = 'medium',
+  color = 'currentColor',
+  label = '',
+  className = '',
+}: IconProps) => (
+  <IconWrapper className={className}>
+    <RefreshIcon spacing="compact" color={color} label={label || 'Refresh'} />
+  </IconWrapper>
+);
+
+export const StatusIcon = ({
+  size: _size = 'medium',
+  color = 'currentColor',
+  label = '',
+  className = '',
+}: IconProps) => (
+  <IconWrapper className={className}>
+    <LightbulbIcon spacing="compact" color={color} label={label || 'Status'} />
+  </IconWrapper>
+);
+
+export const QRCodeIcon = ({
+  size: _size = 'medium',
+  color = 'currentColor',
+  label = '',
+  className = '',
+}: IconProps) => (
+  <IconWrapper className={className}>
+    <GridIcon spacing="compact" color={color} label={label || 'QR Code'} />
+  </IconWrapper>
+);
+
+export const DeleteIcon = ({
+  size: _size = 'medium',
+  color = 'currentColor',
+  label = '',
+  className = '',
+}: IconProps) => (
+  <IconWrapper className={className}>
+    <DeleteIconAtlas
+      spacing="compact"
+      color={color}
+      label={label || 'Delete'}
     />
   </IconWrapper>
 );

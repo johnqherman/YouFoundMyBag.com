@@ -16,6 +16,10 @@ CREATE TABLE public.bags (
   status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'disabled')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  last_name_update TIMESTAMP WITH TIME ZONE,
+  name_update_count INTEGER DEFAULT 0,
+  last_rotation TIMESTAMP WITH TIME ZONE,
+  rotation_count INTEGER DEFAULT 0,
   CONSTRAINT bags_email_required_for_secure_messaging CHECK (
     (
       secure_messaging_enabled = TRUE
@@ -26,6 +30,15 @@ CREATE TABLE public.bags (
       AND owner_email IS NULL
     )
   )
+);
+
+CREATE TABLE public.short_id_history (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
+  bag_id UUID NOT NULL REFERENCES public.bags (id) ON DELETE CASCADE,
+  short_id VARCHAR(6) NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  replaced_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  CONSTRAINT unique_short_id_history UNIQUE (short_id)
 );
 
 CREATE TABLE public.contacts (
@@ -104,6 +117,10 @@ CREATE INDEX idx_bags_secure_messaging ON public.bags (secure_messaging_enabled)
 
 CREATE INDEX idx_bags_opt_out_timestamp ON public.bags (opt_out_timestamp);
 
+CREATE INDEX idx_short_id_history_bag_id ON public.short_id_history (bag_id);
+
+CREATE INDEX idx_short_id_history_short_id ON public.short_id_history (short_id);
+
 CREATE INDEX idx_contacts_bag_id ON public.contacts (bag_id);
 
 CREATE INDEX idx_messages_bag_id ON public.messages (bag_id);
@@ -179,7 +196,140 @@ CREATE TRIGGER email_preferences_updated_at BEFORE
 UPDATE ON public.email_preferences FOR EACH ROW
 EXECUTE FUNCTION update_email_preferences_updated_at ();
 
+CREATE OR REPLACE FUNCTION get_bag_by_any_short_id (p_short_id VARCHAR(6)) RETURNS TABLE (
+  id UUID,
+  short_id VARCHAR(6),
+  owner_name VARCHAR(30),
+  bag_name VARCHAR(30),
+  owner_message VARCHAR(150),
+  owner_email VARCHAR(254),
+  owner_email_hash VARCHAR(64),
+  secure_messaging_enabled BOOLEAN,
+  opt_out_timestamp TIMESTAMP WITH TIME ZONE,
+  opt_out_ip_address INET,
+  status VARCHAR(20),
+  created_at TIMESTAMP WITH TIME ZONE,
+  updated_at TIMESTAMP WITH TIME ZONE
+) AS $$
+BEGIN
+  
+  RETURN QUERY
+  SELECT b.id, b.short_id, b.owner_name, b.bag_name, b.owner_message,
+         b.owner_email, b.owner_email_hash, b.secure_messaging_enabled,
+         b.opt_out_timestamp, b.opt_out_ip_address, b.status,
+         b.created_at, b.updated_at
+  FROM bags b
+  WHERE b.short_id = p_short_id;
+
+  
+  IF NOT FOUND THEN
+    RETURN QUERY
+    SELECT b.id, b.short_id, b.owner_name, b.bag_name, b.owner_message,
+           b.owner_email, b.owner_email_hash, b.secure_messaging_enabled,
+           b.opt_out_timestamp, b.opt_out_ip_address, b.status,
+           b.created_at, b.updated_at
+    FROM bags b
+    INNER JOIN short_id_history sh ON sh.bag_id = b.id
+    WHERE sh.short_id = p_short_id;
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION can_update_bag_name (p_bag_id UUID) RETURNS BOOLEAN AS $$
+DECLARE
+  v_last_update TIMESTAMP WITH TIME ZONE;
+  v_cooldown_end TIMESTAMP WITH TIME ZONE;
+BEGIN
+  SELECT last_name_update INTO v_last_update
+  FROM bags WHERE id = p_bag_id;
+
+  
+  IF v_last_update IS NULL THEN
+    RETURN TRUE;
+  END IF;
+
+  
+  v_cooldown_end := v_last_update + INTERVAL '7 days';
+
+  
+  RETURN NOW() >= v_cooldown_end;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION can_rotate_short_id (p_bag_id UUID) RETURNS BOOLEAN AS $$
+DECLARE
+  v_last_rotation TIMESTAMP WITH TIME ZONE;
+  v_cooldown_end TIMESTAMP WITH TIME ZONE;
+BEGIN
+  SELECT last_rotation INTO v_last_rotation
+  FROM bags WHERE id = p_bag_id;
+
+  
+  IF v_last_rotation IS NULL THEN
+    RETURN TRUE;
+  END IF;
+
+  
+  v_cooldown_end := v_last_rotation + INTERVAL '7 days';
+
+  
+  RETURN NOW() >= v_cooldown_end;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION enforce_bag_name_cooldown () RETURNS TRIGGER AS $$
+DECLARE
+  v_can_update BOOLEAN;
+  v_cooldown_end TIMESTAMP WITH TIME ZONE;
+BEGIN
+  
+  IF NEW.bag_name IS DISTINCT FROM OLD.bag_name THEN
+    v_can_update := can_update_bag_name(NEW.id);
+
+    IF NOT v_can_update THEN
+      v_cooldown_end := OLD.last_name_update + INTERVAL '7 days';
+      RAISE EXCEPTION 'Bag name can only be updated once per week. Next update allowed after %', v_cooldown_end;
+    END IF;
+
+    
+    NEW.last_name_update := NOW();
+    NEW.name_update_count := COALESCE(OLD.name_update_count, 0) + 1;
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER bag_name_cooldown_check BEFORE
+UPDATE ON public.bags FOR EACH ROW
+EXECUTE FUNCTION enforce_bag_name_cooldown ();
+
+CREATE OR REPLACE FUNCTION update_bags_updated_at () RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER bags_updated_at BEFORE
+UPDATE ON public.bags FOR EACH ROW
+EXECUTE FUNCTION update_bags_updated_at ();
+
 GRANT ALL ON public.email_preferences TO PUBLIC;
+
+GRANT
+SELECT
+,
+  INSERT ON public.short_id_history TO PUBLIC;
+
+GRANT
+EXECUTE ON FUNCTION get_bag_by_any_short_id (VARCHAR) TO PUBLIC;
+
+GRANT
+EXECUTE ON FUNCTION can_update_bag_name (UUID) TO PUBLIC;
+
+GRANT
+EXECUTE ON FUNCTION can_rotate_short_id (UUID) TO PUBLIC;
 
 GRANT USAGE,
 SELECT

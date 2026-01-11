@@ -701,3 +701,27 @@ export async function getArchivedConversationsByOwnerEmail(
     },
   }));
 }
+
+export async function resolveAndArchiveAllByBagId(
+  bagId: string
+): Promise<{ count: number }> {
+  const result = await pool.query(
+    `UPDATE conversations
+     SET status = 'archived', archived_at = NOW()
+     WHERE bag_id = $1
+     AND status IN ('active', 'resolved')
+     AND archived_at IS NULL
+     RETURNING id`,
+    [bagId]
+  );
+
+  for (const row of result.rows) {
+    await invalidateConversationCaches(row.id);
+  }
+
+  logger.info(
+    `Resolved and archived ${result.rowCount || 0} conversations for bag ${bagId}`
+  );
+
+  return { count: result.rowCount || 0 };
+}

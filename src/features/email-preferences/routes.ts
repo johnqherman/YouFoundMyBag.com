@@ -1,8 +1,45 @@
 import express from 'express';
 import { logger } from '../../infrastructure/logger/index.js';
 import * as emailPreferencesService from './service.js';
+import { verifyOwnerSession } from '../auth/service.js';
 
 const router = express.Router();
+
+router.get('/token', async (req, res): Promise<void> => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith('Bearer ')) {
+      res.status(401).json({ error: 'Authentication required' });
+      return;
+    }
+
+    const authToken = authHeader.substring(7);
+    const session = await verifyOwnerSession(authToken);
+    if (!session) {
+      res.status(401).json({ error: 'Invalid or expired session' });
+      return;
+    }
+
+    const email = req.query.email as string;
+    if (!email || email !== session.email) {
+      res.status(403).json({ error: 'Access denied' });
+      return;
+    }
+
+    const token = await emailPreferencesService.getUnsubscribeToken(email);
+
+    res.json({
+      success: true,
+      token,
+    });
+  } catch (error) {
+    logger.error('Failed to get email preferences token:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: 'Failed to get email preferences token',
+    });
+  }
+});
 
 router.get('/:token', async (req, res): Promise<void> => {
   try {

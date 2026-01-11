@@ -11,7 +11,11 @@ import {
   decryptField,
   hashForLookup,
 } from '../../infrastructure/security/encryption.js';
-import { cacheGet, cacheSet } from '../../infrastructure/cache/index.js';
+import {
+  cacheGet,
+  cacheSet,
+  cacheDel,
+} from '../../infrastructure/cache/index.js';
 import { logger } from '../../infrastructure/logger/index.js';
 import { TIME_SECONDS as t } from '../../client/constants/timeConstants.js';
 
@@ -250,6 +254,179 @@ export async function getBagsByOwnerEmail(ownerEmail: string): Promise<Bag[]> {
     ...row,
     owner_email: decryptField(row.owner_email) ?? undefined,
   }));
+}
+
+export async function getBagById(bagId: string): Promise<Bag | null> {
+  const result = await pool.query('SELECT * FROM bags WHERE id = $1', [bagId]);
+  if (result.rows.length === 0) return null;
+
+  return {
+    ...result.rows[0],
+    owner_email: decryptField(result.rows[0].owner_email) ?? undefined,
+  };
+}
+
+export async function canRotateShortId(bagId: string): Promise<{
+  canRotate: boolean;
+  nextRotationAt?: Date;
+}> {
+  const result = await pool.query(
+    'SELECT can_rotate_short_id($1) as can_rotate, last_rotation FROM bags WHERE id = $1',
+    [bagId]
+  );
+
+  const row = result.rows[0];
+  const canRotate = row?.can_rotate ?? true;
+  const lastRotation = row?.last_rotation;
+
+  if (!canRotate && lastRotation) {
+    const nextRotationAt = new Date(lastRotation);
+    nextRotationAt.setDate(nextRotationAt.getDate() + 7);
+    return { canRotate: false, nextRotationAt };
+  }
+
+  return { canRotate: true };
+}
+
+export async function rotateShortId(
+  bagId: string,
+  newShortId: string
+): Promise<void> {
+  return withTransaction(async (client) => {
+    const cooldownCheck = await canRotateShortId(bagId);
+    if (!cooldownCheck.canRotate) {
+      const nextDate = cooldownCheck.nextRotationAt?.toISOString();
+      throw new Error(
+        `Short link can only be rotated once per week. Next rotation allowed after ${nextDate}`
+      );
+    }
+
+    const bagResult = await client.query(
+      'SELECT short_id, rotation_count FROM bags WHERE id = $1',
+      [bagId]
+    );
+    const oldShortId = bagResult.rows[0]?.short_id;
+    const rotationCount = bagResult.rows[0]?.rotation_count ?? 0;
+
+    if (!oldShortId) {
+      throw new Error('Bag not found');
+    }
+
+    await client.query(
+      'INSERT INTO short_id_history (bag_id, short_id) VALUES ($1, $2)',
+      [bagId, oldShortId]
+    );
+
+    await client.query(
+      'UPDATE bags SET short_id = $1, last_rotation = NOW(), rotation_count = $2, updated_at = NOW() WHERE id = $3',
+      [newShortId, rotationCount + 1, bagId]
+    );
+
+    await cacheDel(`bag:short:${oldShortId}`, 'bag');
+    await cacheDel(`bag:finder:${oldShortId}`, 'bag_finder');
+    logger.info(
+      `Rotated short_id for bag ${bagId}: ${oldShortId} -> ${newShortId}`
+    );
+  });
+}
+
+export async function updateBagName(
+  bagId: string,
+  newName: string
+): Promise<void> {
+  try {
+    await pool.query('UPDATE bags SET bag_name = $1 WHERE id = $2', [
+      newName,
+      bagId,
+    ]);
+
+    const bag = await pool.query('SELECT short_id FROM bags WHERE id = $1', [
+      bagId,
+    ]);
+    if (bag.rows[0]) {
+      await cacheDel(`bag:short:${bag.rows[0].short_id}`, 'bag');
+      await cacheDel(`bag:finder:${bag.rows[0].short_id}`, 'bag_finder');
+    }
+
+    logger.info(`Updated bag name for bag ${bagId} to "${newName}"`);
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('once per week')) {
+      throw error;
+    }
+    throw new Error('Failed to update bag name');
+  }
+}
+
+export async function canUpdateBagName(bagId: string): Promise<{
+  canUpdate: boolean;
+  nextUpdateAt?: Date;
+}> {
+  const result = await pool.query(
+    'SELECT can_update_bag_name($1) as can_update, last_name_update FROM bags WHERE id = $1',
+    [bagId]
+  );
+
+  const row = result.rows[0];
+  const canUpdate = row?.can_update ?? true;
+  const lastUpdate = row?.last_name_update;
+
+  if (!canUpdate && lastUpdate) {
+    const nextUpdateAt = new Date(lastUpdate);
+    nextUpdateAt.setDate(nextUpdateAt.getDate() + 7);
+    return { canUpdate: false, nextUpdateAt };
+  }
+
+  return { canUpdate: true };
+}
+
+export async function updateBagStatus(
+  bagId: string,
+  status: 'active' | 'disabled'
+): Promise<void> {
+  await pool.query(
+    'UPDATE bags SET status = $1, updated_at = NOW() WHERE id = $2',
+    [status, bagId]
+  );
+
+  const bag = await pool.query('SELECT short_id FROM bags WHERE id = $1', [
+    bagId,
+  ]);
+  if (bag.rows[0]) {
+    await cacheDel(`bag:short:${bag.rows[0].short_id}`, 'bag');
+    await cacheDel(`bag:finder:${bag.rows[0].short_id}`, 'bag_finder');
+  }
+
+  const historyResult = await pool.query(
+    'SELECT short_id FROM short_id_history WHERE bag_id = $1',
+    [bagId]
+  );
+  for (const row of historyResult.rows) {
+    await cacheDel(`bag:short:${row.short_id}`, 'bag');
+    await cacheDel(`bag:finder:${row.short_id}`, 'bag_finder');
+  }
+
+  logger.info(
+    `Updated bag ${bagId} status to ${status}, cleared ${historyResult.rows.length + 1} cache entries`
+  );
+}
+
+export async function deleteBag(bagId: string): Promise<void> {
+  return withTransaction(async (client) => {
+    const bagResult = await client.query(
+      'SELECT short_id FROM bags WHERE id = $1',
+      [bagId]
+    );
+    const shortId = bagResult.rows[0]?.short_id;
+
+    await client.query('DELETE FROM bags WHERE id = $1', [bagId]);
+
+    if (shortId) {
+      await cacheDel(`bag:short:${shortId}`, 'bag');
+      await cacheDel(`bag:finder:${shortId}`, 'bag_finder');
+    }
+
+    logger.info(`Deleted bag ${bagId}`);
+  });
 }
 
 function getContactLabel(type: string): string {
