@@ -97,7 +97,7 @@ function generateIdempotencyKey(
   ...parts: (string | undefined)[]
 ): string {
   const filteredParts = parts.filter((p) => p !== undefined);
-  return `email:${type}:${filteredParts.join(':')}:${randomUUID()}`;
+  return `email_${type}_${filteredParts.join('_')}_${randomUUID()}`;
 }
 
 async function sendDirectEmail(
