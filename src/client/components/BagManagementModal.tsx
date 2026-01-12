@@ -13,6 +13,7 @@ import {
   CheckIcon,
   DeleteIcon,
 } from './icons/AppIcons';
+import { TIME_MS as t } from '../constants/timeConstants';
 
 interface BagManagementModalProps {
   isOpen: boolean;
@@ -265,7 +266,7 @@ export default function BagManagementModal({
     document.body.removeChild(link);
 
     setSuccess('QR code downloaded!');
-    setTimeout(() => setSuccess(null), 3000);
+    setTimeout(() => setSuccess(null), t.THREE_SECONDS);
   };
 
   const copyShortLink = () => {
@@ -273,7 +274,7 @@ export default function BagManagementModal({
 
     navigator.clipboard.writeText(qrData.url);
     setSuccess('Link copied to clipboard!');
-    setTimeout(() => setSuccess(null), 3000);
+    setTimeout(() => setSuccess(null), t.THREE_SECONDS);
   };
 
   const handleRotateShortId = async () => {
@@ -299,7 +300,7 @@ export default function BagManagementModal({
       setSuccess(
         'Short link rotated successfully! Old QR codes will no longer work for new finders.'
       );
-      setTimeout(() => setSuccess(null), 5000);
+      setTimeout(() => setSuccess(null), t.FIVE_SECONDS);
       setConfirmRotate(false);
       setActiveSection('qr');
       onBagUpdated();
@@ -333,7 +334,7 @@ export default function BagManagementModal({
       }
 
       setSuccess('Bag name updated successfully!');
-      setTimeout(() => setSuccess(null), 3000);
+      setTimeout(() => setSuccess(null), t.THREE_SECONDS);
       onBagUpdated();
     } catch (err) {
       setError(
@@ -363,7 +364,7 @@ export default function BagManagementModal({
 
       const data = await response.json();
       setSuccess(data.message);
-      setTimeout(() => setSuccess(null), 3000);
+      setTimeout(() => setSuccess(null), t.THREE_SECONDS);
       setConfirmResolveAll(false);
       onBagUpdated();
     } catch (err) {
@@ -399,7 +400,7 @@ export default function BagManagementModal({
       setSuccess(
         `Bag ${newStatus === 'active' ? 'enabled' : 'disabled'} successfully!`
       );
-      setTimeout(() => setSuccess(null), 3000);
+      setTimeout(() => setSuccess(null), t.THREE_SECONDS);
       setConfirmStatusToggle(false);
       onBagUpdated();
     } catch (err) {
@@ -431,7 +432,7 @@ export default function BagManagementModal({
         setSuccess(null);
         handleClose();
         onBagUpdated();
-      }, 2000);
+      }, t.TWO_SECONDS);
       setConfirmDelete(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete bag');

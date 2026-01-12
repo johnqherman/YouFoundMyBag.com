@@ -8,6 +8,7 @@ import RequestMagicLinkModal from '../components/RequestMagicLinkModal';
 import Twemoji from '../components/Twemoji';
 import type { ConversationThread, ConversationMessage } from '../types/index';
 import { api } from '../utils/api';
+import { formatRelativeTimestamp } from '../utils/dateTime';
 import {
   formatConversationParticipant,
   getContextualReplyPlaceholder,
@@ -410,13 +411,7 @@ export default function ConversationPage() {
                       : 'text-regal-navy-500'
                   }`}
                 >
-                  {new Date(message.sent_at).toLocaleString('default', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric',
-                    hour: 'numeric',
-                    minute: '2-digit',
-                  })}
+                  {formatRelativeTimestamp(message.sent_at)}
                 </span>
               </div>
               <Twemoji tag="p" className="text-wrap-aggressive leading-relaxed">

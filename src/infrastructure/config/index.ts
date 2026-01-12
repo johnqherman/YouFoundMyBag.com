@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import fs from 'fs';
+import { TIME_MS as t } from '../../client/constants/timeConstants.js';
 
 const configSchema = z.object({
   NODE_ENV: z
@@ -25,8 +26,8 @@ const configSchema = z.object({
     .default('false')
     .transform((val) => val === 'true'),
   REDIS_MAX_RETRIES: z.coerce.number().default(3),
-  REDIS_CONNECT_TIMEOUT: z.coerce.number().default(10000),
-  REDIS_COMMAND_TIMEOUT: z.coerce.number().default(5000),
+  REDIS_CONNECT_TIMEOUT: z.coerce.number().default(t.TEN_SECONDS),
+  REDIS_COMMAND_TIMEOUT: z.coerce.number().default(t.FIVE_SECONDS),
 
   CLOUDFLARE_TURNSTILE_SECRET_KEY: z.string().optional(),
   SMTP_HOST: z.string().optional(),

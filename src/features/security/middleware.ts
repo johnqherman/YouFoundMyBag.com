@@ -7,7 +7,7 @@ import type { Request, Response, NextFunction } from 'express';
 import {
   TIME_MS as tm,
   TIME_SECONDS as ts,
-} from 'client/constants/timeConstants.js';
+} from '../../client/constants/timeConstants.js';
 
 export const basicRateLimit = rateLimit({
   windowMs: tm.FIFTEEN_MINUTES,
@@ -34,15 +34,52 @@ export const createBagRateLimit = rateLimit({
 });
 
 export const sendMessageRateLimit = rateLimit({
-  windowMs: tm.FIVE_MINUTES,
-  max: 3,
+  windowMs: tm.ONE_MINUTE,
+  max: 5,
   message: {
     error: 'Rate limit exceeded',
     message: 'Too many messages sent, please try again later',
-    retry_after: ts.FIVE_MINUTES,
+    retry_after: ts.ONE_MINUTE,
   },
   skip: () => process.env.NODE_ENV === 'development',
 });
+
+export function qrScanRateLimit() {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    if (process.env.NODE_ENV === 'development') {
+      return next();
+    }
+
+    const shortId = req.params.shortId;
+    if (!shortId) {
+      return next();
+    }
+
+    const rateLimitKey = `ratelimit:qr-scan:${shortId}`;
+
+    const count = await cacheIncr(rateLimitKey, 'qr-scan-ratelimit');
+
+    if (count === 1) {
+      await cacheExpire(rateLimitKey, ts.ONE_HOUR);
+    }
+
+    if (count > 20) {
+      logger.warn('QR scan rate limit exceeded', {
+        shortId,
+        count,
+      });
+
+      return res.status(429).json({
+        error: 'Rate limit exceeded',
+        message:
+          'This QR code has been scanned too many times. Please try again later.',
+        retry_after: ts.ONE_HOUR,
+      });
+    }
+
+    return next();
+  };
+}
 
 export const securityHeaders = helmet({
   contentSecurityPolicy: {

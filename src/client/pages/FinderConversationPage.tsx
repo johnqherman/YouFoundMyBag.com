@@ -5,6 +5,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import CharacterLimitTextArea from '../components/CharacterLimitTextArea';
 import Twemoji from '../components/Twemoji';
 import type { ConversationThread, ConversationMessage } from '../types/index';
+import { formatRelativeTimestamp } from '../utils/dateTime';
 import {
   formatConversationParticipant,
   getContextualReplyPlaceholder,
@@ -371,13 +372,7 @@ export default function FinderConversationPage() {
                       : 'text-neutral-600'
                   }`}
                 >
-                  {new Date(message.sent_at).toLocaleString('default', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric',
-                    hour: 'numeric',
-                    minute: '2-digit',
-                  })}
+                  {formatRelativeTimestamp(message.sent_at)}
                 </span>
               </div>
               <Twemoji

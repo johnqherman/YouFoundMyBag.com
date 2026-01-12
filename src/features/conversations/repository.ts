@@ -78,22 +78,26 @@ export async function createConversation(
   const finderEmailEncrypted = finderEmail ? encryptField(finderEmail) : null;
   const finderEmailHash = finderEmail ? hashForLookup(finderEmail) : null;
 
+  const result = await pool.query(
+    'SELECT create_conversation_with_message($1, $2, $3, $4, $5, $6) as conversation_id',
+    [
+      bagId,
+      finderEmailEncrypted,
+      finderEmailHash,
+      finderDisplayName || null,
+      encrypt(finderMessage),
+      'finder',
+    ]
+  );
+
+  const conversationId = result.rows[0].conversation_id;
+
   const conversationResult = await pool.query(
-    'INSERT INTO conversations (bag_id, finder_email, finder_email_hash, finder_display_name) VALUES ($1, $2, $3, $4) RETURNING *',
-    [bagId, finderEmailEncrypted, finderEmailHash, finderDisplayName || null]
+    'SELECT * FROM conversations WHERE id = $1',
+    [conversationId]
   );
 
   const conversation = conversationResult.rows[0];
-
-  await pool.query(
-    'INSERT INTO conversation_messages (conversation_id, sender_type, message_content) VALUES ($1, $2, $3)',
-    [conversation.id, 'finder', encrypt(finderMessage)]
-  );
-
-  await pool.query(
-    'UPDATE conversations SET last_message_at = NOW() WHERE id = $1',
-    [conversation.id]
-  );
 
   return {
     ...conversation,
@@ -106,14 +110,16 @@ export async function addMessage(
   senderType: 'finder' | 'owner',
   messageContent: string
 ): Promise<ConversationMessage> {
-  const messageResult = await pool.query(
-    'INSERT INTO conversation_messages (conversation_id, sender_type, message_content) VALUES ($1, $2, $3) RETURNING *',
+  const result = await pool.query(
+    'SELECT add_message_to_conversation($1, $2, $3) as message_id',
     [conversationId, senderType, encrypt(messageContent)]
   );
 
-  await pool.query(
-    'UPDATE conversations SET last_message_at = NOW() WHERE id = $1',
-    [conversationId]
+  const messageId = result.rows[0].message_id;
+
+  const messageResult = await pool.query(
+    'SELECT * FROM conversation_messages WHERE id = $1',
+    [messageId]
   );
 
   if (senderType === 'finder') {
@@ -279,6 +285,30 @@ export async function getConversationsByOwnerEmail(
   return threads;
 }
 
+export async function conversationExists(
+  conversationId: string
+): Promise<boolean> {
+  const cacheKey = `conversation:exists:${conversationId}`;
+  const cached = await cacheGet<boolean>(cacheKey, 'conversation_exists');
+
+  if (cached !== null) {
+    logger.debug('Conversation exists cache HIT', { conversationId });
+    return cached;
+  }
+
+  const result = await pool.query(
+    'SELECT EXISTS(SELECT 1 FROM conversations WHERE id = $1) as exists',
+    [conversationId]
+  );
+
+  const exists = result.rows[0]?.exists || false;
+
+  await cacheSet(cacheKey, exists, t.TEN_MINUTES, 'conversation_exists');
+
+  logger.debug('Conversation exists check from DB', { conversationId, exists });
+  return exists;
+}
+
 export async function getConversationById(
   conversationId: string
 ): Promise<ConversationThread | null> {
@@ -396,19 +426,12 @@ export async function markMessagesAsRead(
 ): Promise<void> {
   const oppositeSender = senderType === 'finder' ? 'owner' : 'finder';
 
-  let unreadCount = 0;
-  if (oppositeSender === 'finder') {
-    const countResult = await pool.query(
-      'SELECT COUNT(*) as count FROM conversation_messages WHERE conversation_id = $1 AND sender_type = $2 AND read_at IS NULL',
-      [conversationId, oppositeSender]
-    );
-    unreadCount = parseInt(countResult.rows[0].count);
-  }
-
-  await pool.query(
-    'UPDATE conversation_messages SET read_at = NOW() WHERE conversation_id = $1 AND sender_type = $2 AND read_at IS NULL',
+  const result = await pool.query(
+    'SELECT mark_messages_as_read($1, $2) as count',
     [conversationId, oppositeSender]
   );
+
+  const unreadCount = result.rows[0].count;
 
   if (oppositeSender === 'finder' && unreadCount > 0) {
     const convResult = await pool.query(
@@ -459,18 +482,11 @@ export async function getUnreadMessageCount(bagId: string): Promise<number> {
   }
 
   const result = await pool.query(
-    `
-    SELECT COUNT(*) as unread_count
-    FROM conversation_messages cm
-    JOIN conversations c ON cm.conversation_id = c.id
-    WHERE c.bag_id = $1
-    AND cm.sender_type = 'finder'
-    AND cm.read_at IS NULL
-  `,
+    'SELECT get_unread_count_for_bag($1) as unread_count',
     [bagId]
   );
 
-  const count = parseInt(result.rows[0].unread_count);
+  const count = result.rows[0].unread_count;
 
   await cacheSet(`unread:bag:${bagId}`, count, t.ONE_HOUR, 'unread_count');
   logger.debug('Unread count cache warmed from DB', { bagId, count });
@@ -585,47 +601,26 @@ export async function restoreConversation(
 
 export async function autoArchiveResolvedConversations(): Promise<number> {
   const result = await pool.query(
-    `UPDATE conversations
-     SET status = 'archived', archived_at = NOW(), permanently_deleted_at = NOW() + INTERVAL '6 months'
-     WHERE status = 'resolved'
-     AND archived_at IS NULL
-     AND last_message_at < NOW() - INTERVAL '30 days'
-     RETURNING id`
+    'SELECT archive_old_resolved_conversations(30) as count'
   );
 
-  const archivedIds = result.rows.map((row) => row.id);
+  const count = result.rows[0].count;
 
-  for (const conversationId of archivedIds) {
-    await invalidateConversationCaches(conversationId);
-  }
+  logger.info('Auto-archived resolved conversations', { count });
 
-  logger.info('Auto-archived resolved conversations', {
-    count: result.rowCount,
-  });
-
-  return result.rowCount || 0;
+  return count;
 }
 
 export async function permanentlyDeleteConversations(): Promise<number> {
   const result = await pool.query(
-    `DELETE FROM conversations
-     WHERE status = 'archived'
-     AND permanently_deleted_at IS NOT NULL
-     AND permanently_deleted_at < NOW()
-     RETURNING id`
+    'SELECT permanently_delete_old_archived_conversations(6) as count'
   );
 
-  const deletedIds = result.rows.map((row) => row.id);
+  const count = result.rows[0].count;
 
-  for (const conversationId of deletedIds) {
-    await invalidateConversationCaches(conversationId);
-  }
+  logger.info('Permanently deleted archived conversations', { count });
 
-  logger.info('Permanently deleted archived conversations', {
-    count: result.rowCount,
-  });
-
-  return result.rowCount || 0;
+  return count;
 }
 
 export async function getArchivedConversationsByOwnerEmail(

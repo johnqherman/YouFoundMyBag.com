@@ -2,6 +2,10 @@ import cron from 'node-cron';
 import { pool } from '../database/index.js';
 import { getRedisClient, cacheSet } from './index.js';
 import { logger } from '../logger/index.js';
+import {
+  TIME_MS as tm,
+  TIME_SECONDS as ts,
+} from '../../client/constants/timeConstants.js';
 
 export async function reconcileCounters(): Promise<{
   checked: number;
@@ -59,7 +63,7 @@ export async function reconcileCounters(): Promise<{
             await cacheSet(
               `unread:conversation:${conv.id}`,
               dbUnreadCount,
-              3600,
+              ts.ONE_HOUR,
               'unread_count'
             );
           } else {
@@ -106,7 +110,7 @@ export async function reconcileCounters(): Promise<{
           await cacheSet(
             `unread:bag:${bag.bag_id}`,
             dbCount,
-            3600,
+            ts.ONE_HOUR,
             'unread_count'
           );
 
@@ -152,7 +156,7 @@ export function startBackgroundJobs(): void {
         error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
-  }, 60000);
+  }, tm.ONE_MINUTE);
 
   logger.info('Cache background jobs started (unread reconcile: hourly)');
 }

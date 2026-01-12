@@ -2,16 +2,16 @@ import crypto from 'crypto';
 import type { OwnerSession } from '../../client/types/index.js';
 import { logger } from '../../infrastructure/logger/index.js';
 import {
-  sendMagicLinkEmail,
-  sendMagicLinkReissueEmail,
-  sendFinderMagicLinkReissueEmail,
-} from '../../infrastructure/email/index.js';
+  sendMagicLink,
+  sendMagicLinkReissue,
+} from '../../infrastructure/email/service.js';
 import * as authRepository from './repository.js';
 import * as bagRepository from '../bags/repository.js';
 import * as conversationRepository from '../conversations/repository.js';
-import { TIME_MS as t } from 'client/constants/timeConstants.js';
+import { TIME_MS as t } from '../../client/constants/timeConstants.js';
 import { hashForLookup } from '../../infrastructure/security/encryption.js';
 import { cacheGet, cacheSet } from '../../infrastructure/cache/index.js';
+import { config } from '../../infrastructure/config/index.js';
 
 export async function generateMagicLinkToken(
   email: string,
@@ -67,7 +67,8 @@ export async function generateMagicLink(
   }
 
   try {
-    await sendMagicLinkEmail({
+    await sendMagicLink({
+      userType: 'owner',
       email,
       magicLinkToken,
       conversationId,
@@ -186,14 +187,12 @@ export async function generateFinderMagicLink(
   );
 
   try {
-    await import('../../infrastructure/email/index.js').then(
-      ({ sendFinderMagicLinkEmail }) =>
-        sendFinderMagicLinkEmail({
-          email,
-          magicLinkToken,
-          conversationId,
-        })
-    );
+    await sendMagicLink({
+      userType: 'finder',
+      email,
+      magicLinkToken,
+      conversationId,
+    });
     logger.info(`Finder magic link sent to ${email}`);
   } catch (emailError) {
     logger.error(`Failed to send finder magic link to ${email}:`, emailError);
@@ -300,15 +299,17 @@ export async function requestMagicLinkReissue(
   ownerLinksSent: number;
   finderLinksSent: number;
 }> {
-  const emailHash = hashForLookup(email);
-  const rateLimitKey = `rate_limit:magic_reissue:${emailHash}`;
-  const attempts = await cacheGet<number>(rateLimitKey, 'rate_limit');
+  if (config.NODE_ENV !== 'development') {
+    const emailHash = hashForLookup(email);
+    const rateLimitKey = `rate_limit:magic_reissue:${emailHash}`;
+    const attempts = await cacheGet<number>(rateLimitKey, 'rate_limit');
 
-  if (attempts && attempts >= 3) {
-    throw new Error('Too many requests. Please try again in an hour.');
+    if (attempts && attempts >= 3) {
+      throw new Error('Too many requests. Please try again in an hour.');
+    }
+
+    await cacheSet(rateLimitKey, (attempts || 0) + 1, t.ONE_HOUR, 'rate_limit');
   }
-
-  await cacheSet(rateLimitKey, (attempts || 0) + 1, t.ONE_HOUR, 'rate_limit');
 
   let ownerLinksSent = 0;
   let finderLinksSent = 0;
@@ -324,13 +325,14 @@ export async function requestMagicLinkReissue(
       const { magicLinkToken } = await generateFinderMagicLinkToken(
         email,
         conversationId,
-        t.SEVEN_DAYS
+        t.ONE_WEEK
       );
-      await sendFinderMagicLinkReissueEmail(
+      await sendMagicLinkReissue({
+        userType: 'finder',
         email,
         magicLinkToken,
-        conversationId
-      );
+        conversationId,
+      });
       finderLinksSent = 1;
       logger.info(
         `Sent magic link reissue to finder for conversation ${conversationId}`
@@ -344,9 +346,14 @@ export async function requestMagicLinkReissue(
         email,
         undefined,
         bagIds,
-        t.SEVEN_DAYS
+        t.ONE_WEEK
       );
-      await sendMagicLinkReissueEmail(email, magicLinkToken, bagIds);
+      await sendMagicLinkReissue({
+        userType: 'owner',
+        email,
+        magicLinkToken,
+        bagIds,
+      });
       ownerLinksSent = 1;
       logger.info(`Sent magic link reissue to owner for ${bagIds.length} bags`);
     }

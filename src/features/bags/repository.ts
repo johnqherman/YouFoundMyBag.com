@@ -57,61 +57,46 @@ export async function createBag(
   shortId: string,
   ipAddress?: string
 ): Promise<Bag> {
-  return withTransaction(async (client) => {
-    const secureMessagingEnabled = data.secure_messaging_enabled !== false;
-    const optOutTimestamp = !secureMessagingEnabled ? new Date() : null;
-    const optOutIpAddress = !secureMessagingEnabled ? ipAddress : null;
+  const secureMessagingEnabled = data.secure_messaging_enabled !== false;
+  const optOutTimestamp = !secureMessagingEnabled ? new Date() : null;
+  const optOutIpAddress = !secureMessagingEnabled ? ipAddress : null;
 
-    const ownerEmail = secureMessagingEnabled ? data.owner_email : null;
-    const ownerEmailEncrypted = ownerEmail ? encryptField(ownerEmail) : null;
-    const ownerEmailHash = ownerEmail ? hashForLookup(ownerEmail) : null;
+  const ownerEmail = secureMessagingEnabled ? data.owner_email : null;
+  const ownerEmailEncrypted = ownerEmail ? encryptField(ownerEmail) : null;
+  const ownerEmailHash = ownerEmail ? hashForLookup(ownerEmail) : null;
 
-    const bagResult = await client.query(
-      `INSERT INTO bags (
-        short_id, owner_name, bag_name, owner_message, owner_email, owner_email_hash,
-        secure_messaging_enabled, opt_out_timestamp, opt_out_ip_address
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
-      [
-        shortId,
-        data.owner_name || null,
-        data.bag_name || null,
-        data.owner_message || null,
-        ownerEmailEncrypted,
-        ownerEmailHash,
-        secureMessagingEnabled,
-        optOutTimestamp,
-        optOutIpAddress,
-      ]
-    );
+  const contacts =
+    data.contacts && data.contacts.length > 0
+      ? data.contacts.map((contact, i) => ({
+          type: contact.type,
+          value: encryptField(contact.value),
+          is_primary: contact.is_primary || i === 0,
+          display_order: i,
+          label: contact.label || null,
+        }))
+      : null;
 
-    const bag = bagResult.rows[0];
+  const result = await pool.query(
+    `SELECT create_bag_with_contacts($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) as bag_id`,
+    [
+      shortId,
+      data.owner_name || null,
+      data.bag_name || null,
+      data.owner_message || null,
+      ownerEmailEncrypted,
+      ownerEmailHash,
+      secureMessagingEnabled,
+      optOutTimestamp,
+      optOutIpAddress,
+      contacts ? JSON.stringify(contacts) : null,
+    ]
+  );
 
-    if (data.contacts && data.contacts.length > 0) {
-      for (let i = 0; i < data.contacts.length; i++) {
-        const contact = data.contacts[i];
-        if (contact) {
-          await client.query(
-            `INSERT INTO contacts (
-              bag_id, type, value, is_primary, display_order, label
-            ) VALUES ($1, $2, $3, $4, $5, $6)`,
-            [
-              bag.id,
-              contact.type,
-              encryptField(contact.value),
-              contact.is_primary || i === 0,
-              i,
-              contact.label || null,
-            ]
-          );
-        }
-      }
-    }
+  const bagId = result.rows[0].bag_id;
+  const bag = await getBagById(bagId);
+  if (!bag) throw new Error('Failed to create bag');
 
-    return {
-      ...bag,
-      owner_email: decryptField(bag.owner_email),
-    };
-  });
+  return bag;
 }
 
 export async function getBagByShortId(shortId: string): Promise<Bag | null> {
@@ -292,42 +277,30 @@ export async function rotateShortId(
   bagId: string,
   newShortId: string
 ): Promise<void> {
-  return withTransaction(async (client) => {
-    const cooldownCheck = await canRotateShortId(bagId);
-    if (!cooldownCheck.canRotate) {
-      const nextDate = cooldownCheck.nextRotationAt?.toISOString();
-      throw new Error(
-        `Short link can only be rotated once per week. Next rotation allowed after ${nextDate}`
-      );
+  const bagResult = await pool.query(
+    'SELECT short_id FROM bags WHERE id = $1',
+    [bagId]
+  );
+  const oldShortId = bagResult.rows[0]?.short_id;
+
+  if (!oldShortId) {
+    throw new Error('Bag not found');
+  }
+
+  try {
+    await pool.query('SELECT rotate_short_id($1, $2)', [bagId, newShortId]);
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
     }
+    throw new Error('Failed to rotate short ID');
+  }
 
-    const bagResult = await client.query(
-      'SELECT short_id, rotation_count FROM bags WHERE id = $1',
-      [bagId]
-    );
-    const oldShortId = bagResult.rows[0]?.short_id;
-    const rotationCount = bagResult.rows[0]?.rotation_count ?? 0;
-
-    if (!oldShortId) {
-      throw new Error('Bag not found');
-    }
-
-    await client.query(
-      'INSERT INTO short_id_history (bag_id, short_id) VALUES ($1, $2)',
-      [bagId, oldShortId]
-    );
-
-    await client.query(
-      'UPDATE bags SET short_id = $1, last_rotation = NOW(), rotation_count = $2, updated_at = NOW() WHERE id = $3',
-      [newShortId, rotationCount + 1, bagId]
-    );
-
-    await cacheDel(`bag:short:${oldShortId}`, 'bag');
-    await cacheDel(`bag:finder:${oldShortId}`, 'bag_finder');
-    logger.info(
-      `Rotated short_id for bag ${bagId}: ${oldShortId} -> ${newShortId}`
-    );
-  });
+  await cacheDel(`bag:short:${oldShortId}`, 'bag');
+  await cacheDel(`bag:finder:${oldShortId}`, 'bag_finder');
+  logger.info(
+    `Rotated short_id for bag ${bagId}: ${oldShortId} -> ${newShortId}`
+  );
 }
 
 export async function updateBagName(

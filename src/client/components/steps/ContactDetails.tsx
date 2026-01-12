@@ -114,7 +114,7 @@ export default function ContactDetails({
               onClick={addContact}
               className="text-center py-8 bg-white rounded-lg border-2 border-dashed border-regal-navy-300 cursor-pointer hover:border-regal-navy-400 hover:bg-regal-navy-50 transition-colors"
             >
-              <span className="text-sm text-regal-navy-700 font-medium">
+              <span className="text-sm text-regal-navy-700 font-medium select-none">
                 + Add direct contact method
               </span>
             </div>
@@ -143,7 +143,7 @@ export default function ContactDetails({
                   onClick={addContact}
                   className="text-center py-8 bg-white rounded-lg border-2 border-dashed border-regal-navy-300 cursor-pointer hover:border-regal-navy-400 hover:bg-regal-navy-50 transition-colors"
                 >
-                  <span className="text-sm text-regal-navy-700 font-medium">
+                  <span className="text-sm text-regal-navy-700 font-medium select-none">
                     + Add contact method
                   </span>
                 </div>
@@ -157,7 +157,7 @@ export default function ContactDetails({
 
       {error && <div className="alert-error">{error}</div>}
 
-      <div className="flex justify-between pt-2">
+      <div className="flex justify-between pt-2 select-none">
         <button type="button" onClick={onBack} className="btn-ghost">
           ← Back
         </button>

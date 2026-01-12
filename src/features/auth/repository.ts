@@ -16,9 +16,18 @@ export async function createOwnerSession(
   conversationId?: string,
   sessionType: 'owner' | 'finder' | 'magic_owner' | 'magic_finder' = 'owner'
 ): Promise<OwnerSession> {
+  await pool.query('SELECT create_owner_session($1, $2, $3, $4, $5, $6)', [
+    token,
+    email,
+    bagIds,
+    expiresAt,
+    conversationId,
+    sessionType,
+  ]);
+
   const result = await pool.query(
-    'INSERT INTO owner_sessions (token, email, bag_ids, expires_at, conversation_id, session_type) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-    [token, email, bagIds, expiresAt, conversationId, sessionType]
+    'SELECT * FROM owner_sessions WHERE token = $1',
+    [token]
   );
 
   const session = result.rows[0];
@@ -126,13 +135,9 @@ export async function verifyFinderAccessToConversation(
   const finderEmailHash = hashForLookup(finderEmail);
 
   const result = await pool.query(
-    `SELECT COUNT(*) as count
-     FROM conversations
-     WHERE id = $1
-     AND finder_email_hash = $2
-     AND permanently_deleted_at IS NULL`,
+    'SELECT verify_conversation_access_finder($1, $2) as has_access',
     [conversationId, finderEmailHash]
   );
 
-  return parseInt(result.rows[0].count) > 0;
+  return result.rows[0].has_access;
 }

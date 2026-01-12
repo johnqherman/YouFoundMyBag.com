@@ -4,7 +4,7 @@ import { logger } from '../../infrastructure/logger/index.js';
 import { createReadableShortId } from '../../infrastructure/utils/short-id.js';
 import * as repository from './repository.js';
 import type { CreateBagRequest } from '../../client/types/index.js';
-import { sendBagCreatedEmail } from '../../infrastructure/email/index.js';
+import { sendBagCreated } from '../../infrastructure/email/service.js';
 
 export async function createBagWithQR(
   data: CreateBagRequest,
@@ -38,9 +38,8 @@ export async function createBagWithQR(
 
   if (bag.owner_email && bag.secure_messaging_enabled) {
     try {
-      await sendBagCreatedEmail({
+      await sendBagCreated({
         email: bag.owner_email,
-        ownerName: bag.owner_name,
         bagName: bag.bag_name,
         shortId: bag.short_id,
         bagUrl,

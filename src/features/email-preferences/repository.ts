@@ -24,10 +24,7 @@ export async function getOrCreatePreferences(
   email: string
 ): Promise<EmailPreferences> {
   const result = await pool.query(
-    `INSERT INTO email_preferences (email, unsubscribe_token)
-     VALUES ($1, generate_unsubscribe_token())
-     ON CONFLICT (email) DO UPDATE SET email = EXCLUDED.email
-     RETURNING *`,
+    'SELECT * FROM get_or_create_email_preferences($1)',
     [email]
   );
   return result.rows[0];

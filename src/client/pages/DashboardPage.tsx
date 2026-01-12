@@ -18,6 +18,7 @@ import {
   ArchiveIcon,
   BagSettingsIcon,
 } from '../components/icons/AppIcons';
+import { formatRelativeTimestamp } from '../utils/dateTime';
 
 function formatBagDisplayName(
   ownerName?: string,
@@ -68,13 +69,14 @@ function analyzeMessageContext(
   const lastMessage = messages[messages.length - 1];
   const lastSenderType = lastMessage ? lastMessage.sender_type : null;
 
-  const isFirstFromSender = senderMessages.length === 0;
+  const isFirstFromFinder =
+    currentSenderType === 'finder' && senderMessages.length === 1;
 
   const hasRecipientReplied = recipientMessages.length > 0;
 
   let context: MessageContext;
 
-  if (isFirstFromSender) {
+  if (isFirstFromFinder && !hasRecipientReplied) {
     context = 'initial';
   } else if (!hasRecipientReplied) {
     context = 'follow-up';
@@ -84,7 +86,7 @@ function analyzeMessageContext(
 
   return {
     context,
-    isFirstFromSender,
+    isFirstFromSender: isFirstFromFinder,
     hasRecipientReplied,
     lastSenderType,
   };
@@ -92,17 +94,14 @@ function analyzeMessageContext(
 
 function getMessageContextLabel(
   context: MessageContext,
-  senderType: 'finder' | 'owner',
-  viewerType: 'finder' | 'owner'
+  senderType: 'finder' | 'owner'
 ): string {
-  const isOwnMessage = senderType === viewerType;
-
   if (context === 'initial') {
-    return isOwnMessage ? 'Your initial message' : 'Initial contact';
+    return 'First message';
   } else if (context === 'follow-up') {
-    return isOwnMessage ? 'Your follow-up' : 'Follow-up message';
+    return senderType === 'owner' ? 'Your follow-up' : 'Follow-up message';
   } else {
-    return isOwnMessage ? 'Your reply' : 'Reply';
+    return senderType === 'owner' ? 'Your reply' : 'Reply';
   }
 }
 
@@ -319,7 +318,7 @@ export default function DashboardPage() {
             {isAuthError && (
               <button
                 onClick={() => setShowReissueModal(true)}
-                className="link mb-4"
+                className="btn-primary"
               >
                 Lost your secure chat link?
               </button>
@@ -506,8 +505,7 @@ export default function DashboardPage() {
                         );
                         contextLabel = getMessageContextLabel(
                           contextInfo.context,
-                          lastMessage.sender_type,
-                          'owner'
+                          lastMessage.sender_type
                         );
                         ContextIcon = getMessageContextIcon(
                           contextInfo.context,
@@ -609,16 +607,7 @@ export default function DashboardPage() {
                                 </Twemoji>
                               </p>
                               <p className="text-xs text-regal-navy-500 mt-1.5">
-                                {new Date(lastMessage.sent_at).toLocaleString(
-                                  'default',
-                                  {
-                                    month: 'short',
-                                    day: 'numeric',
-                                    year: 'numeric',
-                                    hour: 'numeric',
-                                    minute: '2-digit',
-                                  }
-                                )}
+                                {formatRelativeTimestamp(lastMessage.sent_at)}
                               </p>
                             </div>
                           )}
@@ -724,16 +713,7 @@ export default function DashboardPage() {
                                 {lastMessage.message_content}
                               </Twemoji>
                               <p className="text-xs text-regal-navy-500 mt-1.5">
-                                {new Date(lastMessage.sent_at).toLocaleString(
-                                  'default',
-                                  {
-                                    month: 'short',
-                                    day: 'numeric',
-                                    year: 'numeric',
-                                    hour: 'numeric',
-                                    minute: '2-digit',
-                                  }
-                                )}
+                                {formatRelativeTimestamp(lastMessage.sent_at)}
                               </p>
                             </div>
                           )}

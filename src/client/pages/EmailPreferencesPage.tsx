@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { SuccessIcon } from '../components/icons/AppIcons';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { TIME_MS as t } from '../constants/timeConstants';
 
 interface EmailPreferences {
   email: string;
@@ -69,7 +70,7 @@ export default function EmailPreferencesPage() {
       setPreferences(data.data);
       setSuccess(true);
 
-      setTimeout(() => setSuccess(false), 3000);
+      setTimeout(() => setSuccess(false), t.THREE_SECONDS);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : 'Failed to update preferences'

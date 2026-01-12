@@ -8,6 +8,12 @@ import { initializeCache, closeCache } from './infrastructure/cache/index.js';
 import { startBackgroundJobs } from './infrastructure/cache/sync-jobs.js';
 import { scheduleConversationCleanup } from './infrastructure/scheduler/conversationCleanup.js';
 import {
+  initializeQueues,
+  initializeWorkers,
+  closeQueues,
+} from './infrastructure/queue/index.js';
+import { processEmailJob } from './infrastructure/queue/email-processor.js';
+import {
   basicRateLimit,
   securityHeaders,
   createBagRateLimit,
@@ -90,6 +96,8 @@ async function startServer() {
   try {
     await initializeDatabase();
     await initializeCache();
+    await initializeQueues();
+    await initializeWorkers(processEmailJob);
     startBackgroundJobs();
     scheduleConversationCleanup();
 
@@ -100,6 +108,7 @@ async function startServer() {
         `Database: ${config.DATABASE_URL ? 'configured' : 'using default'}`
       );
       logger.info(`Redis cache: ${config.REDIS_HOST}:${config.REDIS_PORT}`);
+      logger.info('BullMQ queues and workers initialized');
     });
   } catch (error) {
     logger.error('Failed to start server:', error);
@@ -109,12 +118,14 @@ async function startServer() {
 
 process.on('SIGTERM', async () => {
   logger.info('SIGTERM received, shutting down gracefully');
+  await closeQueues();
   await closeCache();
   process.exit(0);
 });
 
 process.on('SIGINT', async () => {
   logger.info('SIGINT received, shutting down gracefully');
+  await closeQueues();
   await closeCache();
   process.exit(0);
 });

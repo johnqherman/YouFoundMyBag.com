@@ -1,6 +1,7 @@
 import Redis from 'ioredis';
 import { config } from '../config/index.js';
 import { logger } from '../logger/index.js';
+import { TIME_MS as t } from '../../client/constants/timeConstants.js';
 
 interface RedisError extends Error {
   code?: string;
@@ -48,7 +49,7 @@ export async function initializeCache(): Promise<void> {
           logger.error('Redis connection failed after max retries');
           return null;
         }
-        const delay = Math.min(times * 50, 2000);
+        const delay = Math.min(times * 50, t.TWO_SECONDS);
         logger.warn(`Redis reconnect attempt ${times}, delay: ${delay}ms`);
         return delay;
       },

@@ -10,6 +10,7 @@ import * as bagRepository from './repository.js';
 import * as conversationRepository from '../conversations/repository.js';
 import { emailValidationMiddleware } from '../../infrastructure/utils/email-validation.js';
 import { verifyOwnerSession } from '../auth/service.js';
+import { qrScanRateLimit } from '../security/middleware.js';
 import type { Bag } from './repository.js';
 
 const router = express.Router();
@@ -89,7 +90,7 @@ router.post(
   }
 );
 
-router.get('/:shortId', async (req, res): Promise<void> => {
+router.get('/:shortId', qrScanRateLimit(), async (req, res): Promise<void> => {
   try {
     const parseResult = shortIdSchema.safeParse(req.params.shortId);
     if (!parseResult.success) {

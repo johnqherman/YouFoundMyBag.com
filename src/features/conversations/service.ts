@@ -21,11 +21,16 @@ export interface MessageContextInfo {
 import { getBagByShortId } from '../bags/repository.js';
 import { verifyTurnstile } from '../messaging/service.js';
 import {
-  sendContextualFinderNotification,
-  sendContextualOwnerNotification,
-  sendConversationResolvedNotification,
-} from '../../infrastructure/email/index.js';
-import { generateMagicLink, generateFinderMagicLink } from '../auth/service.js';
+  queueMagicLinkEmail,
+  queueFinderMagicLinkEmail,
+  queueContextualFinderNotification,
+  queueContextualOwnerNotification,
+  queueConversationResolvedNotification,
+} from '../../infrastructure/email/queue-helpers.js';
+import {
+  generateMagicLinkToken,
+  generateFinderMagicLinkToken,
+} from '../auth/service.js';
 import * as conversationRepository from './repository.js';
 import {
   getContextualSubject,
@@ -146,12 +151,19 @@ export async function startConversation(
 
   if (bag.owner_email) {
     try {
-      await generateMagicLink(
+      const { magicLinkToken } = await generateMagicLinkToken(
         bag.owner_email,
         conversation.id,
-        [bag.id],
-        bag.bag_name
+        [bag.id]
       );
+
+      await queueMagicLinkEmail({
+        email: bag.owner_email,
+        magicLinkToken,
+        conversationId: conversation.id,
+        bagIds: [bag.id],
+        bagName: bag.bag_name,
+      });
 
       await conversationRepository.incrementNotificationCounter(
         conversation.id,
@@ -159,10 +171,13 @@ export async function startConversation(
       );
 
       logger.info(
-        `Magic link sent to owner for bag ${shortId}, conversation ${conversation.id}`
+        `Magic link queued for owner for bag ${shortId}, conversation ${conversation.id}`
       );
     } catch (emailError) {
-      logger.error(`Failed to send magic link for bag ${shortId}:`, emailError);
+      logger.error(
+        `Failed to queue magic link for bag ${shortId}:`,
+        emailError
+      );
     }
   } else {
     logger.info(
@@ -171,13 +186,23 @@ export async function startConversation(
   }
 
   try {
-    await generateFinderMagicLink(messageData.finder_email!, conversation.id);
+    const { magicLinkToken } = await generateFinderMagicLinkToken(
+      messageData.finder_email!,
+      conversation.id
+    );
+
+    await queueFinderMagicLinkEmail({
+      email: messageData.finder_email!,
+      magicLinkToken,
+      conversationId: conversation.id,
+    });
+
     logger.info(
-      `Finder magic link sent to ${messageData.finder_email} for conversation ${conversation.id}`
+      `Finder magic link queued for ${messageData.finder_email} for conversation ${conversation.id}`
     );
   } catch (emailError) {
     logger.error(
-      `Failed to send finder magic link to ${messageData.finder_email}:`,
+      `Failed to queue finder magic link to ${messageData.finder_email}:`,
       emailError
     );
   }
@@ -235,7 +260,7 @@ export async function sendReply(
           names,
           messageContext.context
         );
-        await sendContextualFinderNotification({
+        await queueContextualFinderNotification({
           finderEmail: conversationThread.conversation.finder_email,
           senderName,
           message: replyData.message_content,
@@ -251,7 +276,7 @@ export async function sendReply(
             names,
             messageContext.context
           );
-          await sendContextualOwnerNotification({
+          await queueContextualOwnerNotification({
             ownerEmail: bag.owner_email,
             senderName,
             message: replyData.message_content,
@@ -351,7 +376,7 @@ export async function resolveConversation(
         finderName: thread.conversation.finder_display_name,
       };
 
-      await sendConversationResolvedNotification({
+      await queueConversationResolvedNotification({
         finderEmail: thread.conversation.finder_email,
         conversationId,
         names,
