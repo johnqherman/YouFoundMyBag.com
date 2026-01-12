@@ -1,9 +1,7 @@
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 CREATE TABLE public.bags (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   short_id VARCHAR(6) UNIQUE NOT NULL,
   owner_name VARCHAR(30),
   bag_name VARCHAR(30),
@@ -33,7 +31,7 @@ CREATE TABLE public.bags (
 );
 
 CREATE TABLE public.short_id_history (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   bag_id UUID NOT NULL REFERENCES public.bags (id) ON DELETE CASCADE,
   short_id VARCHAR(6) NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -42,7 +40,7 @@ CREATE TABLE public.short_id_history (
 );
 
 CREATE TABLE public.contacts (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   bag_id UUID REFERENCES public.bags (id) ON DELETE CASCADE,
   type VARCHAR(20) NOT NULL CHECK (
     type IN (
@@ -63,7 +61,7 @@ CREATE TABLE public.contacts (
 );
 
 CREATE TABLE public.messages (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   bag_id UUID REFERENCES public.bags (id) ON DELETE CASCADE,
   from_message VARCHAR(300) NOT NULL,
   sender_info VARCHAR(30),
@@ -72,7 +70,7 @@ CREATE TABLE public.messages (
 );
 
 CREATE TABLE public.conversations (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   bag_id UUID REFERENCES public.bags (id) ON DELETE CASCADE,
   status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'resolved', 'archived')),
   finder_email VARCHAR(254),
@@ -85,7 +83,7 @@ CREATE TABLE public.conversations (
 );
 
 CREATE TABLE public.conversation_messages (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   conversation_id UUID REFERENCES public.conversations (id) ON DELETE CASCADE,
   sender_type VARCHAR(10) NOT NULL CHECK (sender_type IN ('finder', 'owner')),
   message_content TEXT NOT NULL,
@@ -161,7 +159,7 @@ CREATE INDEX idx_owner_sessions_conversation ON public.owner_sessions (conversat
 CREATE INDEX idx_owner_sessions_type ON public.owner_sessions (session_type);
 
 CREATE TABLE public.email_preferences (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email VARCHAR(254) UNIQUE NOT NULL,
   unsubscribe_token VARCHAR(64) UNIQUE NOT NULL,
   all_emails_enabled BOOLEAN DEFAULT TRUE,
