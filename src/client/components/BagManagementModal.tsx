@@ -397,12 +397,13 @@ export default function BagManagementModal({
       }
 
       setSuccess('Bag deleted successfully!');
+      setConfirmDelete(false);
+      onBagUpdated();
+
       setTimeout(() => {
         setSuccess(null);
         handleClose();
-        onBagUpdated();
       }, t.TWO_SECONDS);
-      setConfirmDelete(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete bag');
     } finally {

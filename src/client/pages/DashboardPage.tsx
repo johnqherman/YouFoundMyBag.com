@@ -221,6 +221,12 @@ export default function DashboardPage() {
       );
 
       if (!response.ok) {
+        if (response.status === 404 || response.status === 500) {
+          await loadDashboard();
+          throw new Error(
+            'This conversation no longer exists. Dashboard has been refreshed.'
+          );
+        }
         throw new Error('Failed to archive conversation');
       }
 

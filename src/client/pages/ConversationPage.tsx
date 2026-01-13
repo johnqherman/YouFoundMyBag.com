@@ -1,5 +1,11 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import {
+  useParams,
+  useNavigate,
+  useSearchParams,
+  Link,
+  useLocation,
+} from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import LoadingSpinner from '../components/LoadingSpinner';
 import CharacterLimitTextArea from '../components/CharacterLimitTextArea';
@@ -40,6 +46,11 @@ function formatBagDisplayName(
 export default function ConversationPage() {
   const { conversationId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+
+  const isFinderView = location.pathname.includes('/finder/');
+
   const [conversation, setConversation] = useState<ConversationThread | null>(
     null
   );
@@ -47,6 +58,7 @@ export default function ConversationPage() {
   const [error, setError] = useState<string | null>(null);
   const [replyMessage, setReplyMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const [authenticating, setAuthenticating] = useState(false);
   const [resolving, setResolving] = useState(false);
   const [archiving, setArchiving] = useState(false);
   const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
@@ -54,28 +66,45 @@ export default function ConversationPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const replyInputRef = useRef<HTMLTextAreaElement>(null);
 
+  const tokenKey = isFinderView
+    ? 'finder_session_token'
+    : 'owner_session_token';
+
   const loadConversation = useCallback(async () => {
-    const token = localStorage.getItem('owner_session_token');
+    const token = localStorage.getItem(tokenKey);
     if (!token) {
-      navigate('/auth/verify');
-      return;
+      if (isFinderView) {
+        setError('No authentication token found');
+        return;
+      } else {
+        navigate('/auth/verify');
+        return;
+      }
     }
 
     try {
-      const response = await fetch(
-        `/api/conversations/${conversationId}?viewer_type=owner`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const apiEndpoint = isFinderView
+        ? `/api/finder/conversation/${conversationId}`
+        : `/api/conversations/${conversationId}?viewer_type=owner`;
+
+      const response = await fetch(apiEndpoint, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (!response.ok) {
         if (response.status === 401) {
-          localStorage.removeItem('owner_session_token');
-          navigate('/auth/verify');
-          return;
+          localStorage.removeItem(tokenKey);
+          if (isFinderView) {
+            setError(
+              'Session expired. Please use your original access link to access the conversation.'
+            );
+            return;
+          } else {
+            navigate('/auth/verify');
+            return;
+          }
         }
         throw new Error('Failed to load conversation');
       }
@@ -87,36 +116,87 @@ export default function ConversationPage() {
         err instanceof Error ? err.message : 'Failed to load conversation'
       );
     } finally {
+      if (!isFinderView) {
+        setLoading(false);
+      }
+    }
+  }, [conversationId, navigate, tokenKey, isFinderView]);
+
+  const authenticateWithMagicLink = useCallback(async () => {
+    const token = searchParams.get('token');
+    if (!token) {
+      setError('Invalid access link - no token found');
+      setLoading(false);
+      return;
+    }
+
+    setAuthenticating(true);
+    try {
+      const response = await fetch('/api/finder/auth/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ magic_token: token }),
+      });
+
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.message || 'Authentication failed');
+      }
+
+      const result = await response.json();
+
+      localStorage.setItem('finder_session_token', result.data.session_token);
+
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete('token');
+      window.history.replaceState({}, '', newUrl.toString());
+
+      await loadConversation();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to authenticate');
+    } finally {
+      setAuthenticating(false);
       setLoading(false);
     }
-  }, [conversationId, navigate]);
+  }, [searchParams, loadConversation]);
 
   const sendReply = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!replyMessage.trim() || sending) return;
 
-    const token = localStorage.getItem('owner_session_token');
+    const token = localStorage.getItem(tokenKey);
     if (!token) {
-      navigate('/auth/verify');
-      return;
+      if (isFinderView) {
+        setError(
+          'Session expired. Please use your original access link to access the conversation.'
+        );
+        return;
+      } else {
+        navigate('/auth/verify');
+        return;
+      }
     }
 
     setSending(true);
     try {
-      const response = await fetch(
-        `/api/conversations/${conversationId}/reply`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            message_content: replyMessage,
-            sender_type: 'owner',
-          }),
-        }
-      );
+      const apiEndpoint = isFinderView
+        ? `/api/finder/conversation/${conversationId}/reply`
+        : `/api/conversations/${conversationId}/reply`;
+
+      const requestBody = isFinderView
+        ? { message_content: replyMessage }
+        : { message_content: replyMessage, sender_type: 'owner' };
+
+      const response = await fetch(apiEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(requestBody),
+      });
 
       if (!response.ok) {
         throw new Error('Failed to send reply');
@@ -227,9 +307,30 @@ export default function ConversationPage() {
 
   useEffect(() => {
     if (conversationId) {
-      loadConversation();
+      if (isFinderView) {
+        const urlToken = searchParams.get('token');
+        const storedToken = localStorage.getItem('finder_session_token');
+
+        if (urlToken) {
+          authenticateWithMagicLink();
+        } else if (storedToken) {
+          loadConversation();
+          setLoading(false);
+        } else {
+          setError('No valid authentication found.');
+          setLoading(false);
+        }
+      } else {
+        loadConversation();
+      }
     }
-  }, [conversationId, loadConversation]);
+  }, [
+    conversationId,
+    searchParams,
+    authenticateWithMagicLink,
+    loadConversation,
+    isFinderView,
+  ]);
 
   useEffect(() => {
     if (!conversation?.messages.length) return;
@@ -241,12 +342,20 @@ export default function ConversationPage() {
     return () => clearTimeout(timeout);
   }, [conversation?.messages.length]);
 
-  if (loading) {
+  if (loading || authenticating) {
     return (
       <div className="min-h-screen bg-regal-navy-50 text-regal-navy-900 flex items-center justify-center">
+        <Helmet>
+          <title>
+            {authenticating ? 'Authenticating...' : 'Loading Conversation...'} |
+            YouFoundMyBag.com
+          </title>
+        </Helmet>
         <div className="text-center">
           <LoadingSpinner />
-          <p className="mt-4 text-regal-navy-600">Loading conversation...</p>
+          <p className="mt-4 text-regal-navy-600">
+            {authenticating ? 'Authenticating...' : 'Loading conversation...'}
+          </p>
         </div>
       </div>
     );
@@ -256,12 +365,16 @@ export default function ConversationPage() {
     const isAuthError =
       error?.toLowerCase().includes('not authenticated') ||
       error?.toLowerCase().includes('authentication required') ||
-      error?.toLowerCase().includes('invalid or expired session');
+      error?.toLowerCase().includes('invalid or expired session') ||
+      error?.includes('Session expired') ||
+      error?.includes('No authentication token found');
 
     return (
       <div className="min-h-screen bg-regal-navy-50 text-regal-navy-900">
         <Helmet>
-          <title>Error | YouFoundMyBag.com</title>
+          <title>
+            {isFinderView ? 'Access Error' : 'Error'} | YouFoundMyBag.com
+          </title>
         </Helmet>
         <div className="max-w-readable mx-auto p-6">
           <div className="text-center">
@@ -269,10 +382,13 @@ export default function ConversationPage() {
               <ErrorIcon color="currentColor" size="large" />
             </div>
             <h1 className="text-2xl font-semibold text-cinnabar-600 mb-4">
-              Error Loading Conversation
+              {isFinderView ? 'Access Error' : 'Error Loading Conversation'}
             </h1>
             <p className="text-regal-navy-600 mb-6">{error}</p>
-            {isAuthError && (
+            {(isAuthError ||
+              (isFinderView &&
+                !error?.includes('deleted') &&
+                !error?.includes('no longer exists'))) && (
               <>
                 <button
                   onClick={() => setShowReissueModal(true)}
@@ -283,9 +399,11 @@ export default function ConversationPage() {
                 <br />
               </>
             )}
-            <Link to="/dashboard" className="link">
-              Return to Dashboard
-            </Link>
+            {!isFinderView && (
+              <Link to="/dashboard" className="link">
+                Return to Dashboard
+              </Link>
+            )}
           </div>
         </div>
 
@@ -318,9 +436,11 @@ export default function ConversationPage() {
               The conversation you&apos;re looking for doesn&apos;t exist or you
               don&apos;t have access to it.
             </p>
-            <Link to="/dashboard" className="link">
-              Return to Dashboard
-            </Link>
+            {!isFinderView && (
+              <Link to="/dashboard" className="link">
+                Return to Dashboard
+              </Link>
+            )}
           </div>
         </div>
       </div>
@@ -343,9 +463,13 @@ export default function ConversationPage() {
       </Helmet>
       <div className="max-w-4xl mx-auto p-6">
         <div className="sticky top-0 z-10 bg-regal-navy-50 pb-4 mb-6 -mx-6 px-6 pt-6 shadow-sm">
-          <Link to="/dashboard" className="link mb-4 inline-block">
-            ← Back to Dashboard
-          </Link>
+          {!isFinderView ? (
+            <Link to="/dashboard" className="link mb-4 inline-block">
+              ← Back to Dashboard
+            </Link>
+          ) : (
+            <div className="mb-4" />
+          )}
           <h1 className="text-3xl font-semibold mb-2">
             Conversation about{' '}
             <Twemoji>
@@ -371,7 +495,12 @@ export default function ConversationPage() {
                 ? 'Resolved'
                 : 'Active'}
             </span>
-            {conversation.conversation.finder_display_name && (
+            {isFinderView && conversation.bag.owner_name && (
+              <span className="ml-4">
+                • Owner: <Twemoji>{conversation.bag.owner_name}</Twemoji>
+              </span>
+            )}
+            {!isFinderView && conversation.conversation.finder_display_name && (
               <span className="ml-4">
                 • Finder:{' '}
                 <Twemoji>
@@ -383,42 +512,52 @@ export default function ConversationPage() {
         </div>
 
         <div className="space-y-3 mb-6">
-          {conversation.messages.map((message: ConversationMessage) => (
-            <div
-              key={message.id}
-              className={`p-4 rounded-lg ${
-                message.sender_type === 'owner'
-                  ? 'bg-regal-navy-600 text-white ml-12 shadow-soft'
-                  : 'bg-white border border-regal-navy-200 text-regal-navy-900 mr-12 shadow-soft'
-              }`}
-            >
-              <div className="flex justify-between items-start mb-2">
-                <Twemoji className="font-medium text-sm">
-                  {formatConversationParticipant(
-                    message.sender_type,
-                    {
-                      ownerName: conversation.bag.owner_name,
-                      bagName: conversation.bag.bag_name,
-                      finderName: conversation.conversation.finder_display_name,
-                    },
-                    message.sender_type === 'owner'
-                  )}
-                </Twemoji>
-                <span
-                  className={`text-xs ${
-                    message.sender_type === 'owner'
-                      ? 'text-regal-navy-200'
-                      : 'text-regal-navy-500'
-                  }`}
+          {conversation.messages.map((message: ConversationMessage) => {
+            const isCurrentUserMessage = isFinderView
+              ? message.sender_type === 'finder'
+              : message.sender_type === 'owner';
+
+            return (
+              <div
+                key={message.id}
+                className={`p-4 rounded-lg ${
+                  isCurrentUserMessage
+                    ? 'bg-regal-navy-600 text-white ml-12 shadow-soft'
+                    : 'bg-white border border-regal-navy-200 text-regal-navy-900 mr-12 shadow-soft'
+                }`}
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <Twemoji className="font-medium text-sm">
+                    {formatConversationParticipant(
+                      message.sender_type,
+                      {
+                        ownerName: conversation.bag.owner_name,
+                        bagName: conversation.bag.bag_name,
+                        finderName:
+                          conversation.conversation.finder_display_name,
+                      },
+                      isCurrentUserMessage
+                    )}
+                  </Twemoji>
+                  <span
+                    className={`text-xs ${
+                      isCurrentUserMessage
+                        ? 'text-regal-navy-200'
+                        : 'text-regal-navy-500'
+                    }`}
+                  >
+                    {formatRelativeTimestamp(message.sent_at)}
+                  </span>
+                </div>
+                <Twemoji
+                  tag="p"
+                  className="text-wrap-aggressive leading-relaxed"
                 >
-                  {formatRelativeTimestamp(message.sent_at)}
-                </span>
+                  {message.message_content}
+                </Twemoji>
               </div>
-              <Twemoji tag="p" className="text-wrap-aggressive leading-relaxed">
-                {message.message_content}
-              </Twemoji>
-            </div>
-          ))}
+            );
+          })}
           <div ref={messagesEndRef} />
         </div>
 
@@ -434,7 +573,7 @@ export default function ConversationPage() {
                 onChange={setReplyMessage}
                 maxLength={300}
                 placeholder={getContextualReplyPlaceholder(
-                  'finder',
+                  isFinderView ? 'owner' : 'finder',
                   {
                     ownerName: conversation.bag.owner_name,
                     bagName: conversation.bag.bag_name,
@@ -447,14 +586,18 @@ export default function ConversationPage() {
               />
             </div>
             <div className="mt-4 flex justify-between gap-3">
-              <button
-                type="button"
-                onClick={handleResolveConversation}
-                className="bg-regal-navy-100 hover:bg-regal-navy-200 text-regal-navy-800 border border-regal-navy-300 px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={sending || resolving}
-              >
-                {resolving ? 'Resolving...' : 'Mark as Resolved'}
-              </button>
+              {!isFinderView ? (
+                <button
+                  type="button"
+                  onClick={handleResolveConversation}
+                  className="bg-regal-navy-100 hover:bg-regal-navy-200 text-regal-navy-800 border border-regal-navy-300 px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={sending || resolving}
+                >
+                  {resolving ? 'Resolving...' : 'Mark as Resolved'}
+                </button>
+              ) : (
+                <div />
+              )}
               <button
                 type="submit"
                 disabled={!replyMessage.trim() || sending}
@@ -477,18 +620,23 @@ export default function ConversationPage() {
               </p>
               <p className="text-sm">No further replies can be sent.</p>
             </div>
-            <button
-              onClick={handleArchiveClick}
-              disabled={archiving}
-              className="bg-saffron-100 hover:bg-saffron-200 text-saffron-800 border border-saffron-300 w-full py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              <ArchiveIcon color="currentColor" />
-              {archiving ? 'Archiving...' : 'Archive Conversation'}
-            </button>
-            <p className="text-xs text-regal-navy-600 text-center mt-2">
-              Resolved conversations are automatically archived after 30 days.
-              Archived conversations are permanently deleted after 6 months.
-            </p>
+            {!isFinderView && (
+              <>
+                <button
+                  onClick={handleArchiveClick}
+                  disabled={archiving}
+                  className="bg-saffron-100 hover:bg-saffron-200 text-saffron-800 border border-saffron-300 w-full py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  <ArchiveIcon color="currentColor" />
+                  {archiving ? 'Archiving...' : 'Archive Conversation'}
+                </button>
+                <p className="text-xs text-regal-navy-600 text-center mt-2">
+                  Resolved conversations are automatically archived after 30
+                  days. Archived conversations are permanently deleted after 6
+                  months.
+                </p>
+              </>
+            )}
           </div>
         )}
 
@@ -499,16 +647,18 @@ export default function ConversationPage() {
         )}
       </div>
 
-      <ConfirmModal
-        isOpen={showArchiveConfirm}
-        title="Archive Conversation"
-        message="Archive this conversation? It will be automatically deleted after 6 months."
-        confirmText="Archive"
-        cancelText="Cancel"
-        variant="warning"
-        onConfirm={handleArchiveConversation}
-        onCancel={() => setShowArchiveConfirm(false)}
-      />
+      {!isFinderView && (
+        <ConfirmModal
+          isOpen={showArchiveConfirm}
+          title="Archive Conversation"
+          message="Archive this conversation? It will be automatically deleted after 6 months."
+          confirmText="Archive"
+          cancelText="Cancel"
+          variant="warning"
+          onConfirm={handleArchiveConversation}
+          onCancel={() => setShowArchiveConfirm(false)}
+        />
+      )}
     </div>
   );
 }

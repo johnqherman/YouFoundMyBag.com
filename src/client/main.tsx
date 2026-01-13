@@ -9,7 +9,6 @@ import NotFoundPage from './pages/NotFoundPage';
 import DashboardPage from './pages/DashboardPage';
 import AuthVerifyPage from './pages/AuthVerifyPage';
 import ConversationPage from './pages/ConversationPage';
-import FinderConversationPage from './pages/FinderConversationPage';
 import EmailPreferencesPage from './pages/EmailPreferencesPage';
 
 function App() {
@@ -27,7 +26,7 @@ function App() {
             />
             <Route
               path="/finder/conversation/:conversationId"
-              element={<FinderConversationPage />}
+              element={<ConversationPage />}
             />
             <Route path="/auth/verify" element={<AuthVerifyPage />} />
             <Route
