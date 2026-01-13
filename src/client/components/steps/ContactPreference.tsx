@@ -1,12 +1,4 @@
-interface ContactPreferenceProps {
-  formData: {
-    secure_messaging_enabled: boolean;
-  };
-  onChange: (updates: Partial<ContactPreferenceProps['formData']>) => void;
-  onNext: () => void;
-  onBack: () => void;
-  onContactPreferenceChange: (useSecureMessaging: boolean) => void;
-}
+import type { ContactPreferenceProps } from '../../types';
 
 export default function ContactPreference({
   formData,

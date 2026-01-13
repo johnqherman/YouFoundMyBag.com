@@ -4,14 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { SuccessIcon } from '../components/icons/AppIcons';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { TIME_MS as t } from '../constants/timeConstants';
-
-interface EmailPreferences {
-  email: string;
-  all_emails_enabled: boolean;
-  bag_created_enabled: boolean;
-  conversation_notifications_enabled: boolean;
-  reply_notifications_enabled: boolean;
-}
+import type { EmailPreferences } from '../types';
 
 export default function EmailPreferencesPage() {
   const { token } = useParams<{ token: string }>();

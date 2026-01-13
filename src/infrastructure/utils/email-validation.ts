@@ -1,18 +1,12 @@
 import { validate } from 'deep-email-validator';
 import { z } from 'zod';
-import type { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import { logger } from '../logger/index.js';
-
-export interface EmailValidationResult {
-  valid: boolean;
-  warnings: string[];
-  details: {
-    syntaxValid: boolean;
-    mxRecords: boolean | null;
-    disposableEmail: boolean | null;
-    typoDetected: boolean | null;
-  };
-}
+import {
+  EmailValidationResult,
+  EmailValidationOptions,
+  RequestWithEmailValidation,
+} from '../types/index.js';
 
 export async function isValidEmail(email: string): Promise<boolean> {
   const result = await validateEmail(email);
@@ -80,14 +74,6 @@ export const emailValidationSchema = z.string().refine(
   },
   { message: 'Please enter a valid email address' }
 );
-
-interface RequestWithEmailValidation extends Request {
-  emailValidation?: Record<string, EmailValidationResult>;
-}
-
-export interface EmailValidationOptions {
-  fields?: string[];
-}
 
 export const emailValidationMiddleware = (
   options: EmailValidationOptions = {}

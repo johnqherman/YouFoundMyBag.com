@@ -1,10 +1,9 @@
-import { Router } from 'express';
-import type { Request, Response } from 'express';
+import { Router, Request, Response } from 'express';
 import { logger } from '../../infrastructure/logger/index.js';
 import * as authService from './service.js';
 import * as conversationService from '../conversations/service.js';
 import * as bagRepository from '../bags/repository.js';
-import type { ConversationThread } from '../../client/types/index.js';
+import { ConversationThread } from '../../client/types/index.js';
 import {
   magicLinkSchema,
   verifyMagicLinkSchema,

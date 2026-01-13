@@ -3,7 +3,7 @@ import { config } from '../../infrastructure/config/index.js';
 import { logger } from '../../infrastructure/logger/index.js';
 import { createReadableShortId } from '../../infrastructure/utils/short-id.js';
 import * as repository from './repository.js';
-import type { CreateBagRequest } from '../../client/types/index.js';
+import { CreateBagRequest } from '../../client/types/index.js';
 import { sendBagCreated } from '../../infrastructure/email/service.js';
 
 export async function createBagWithQR(

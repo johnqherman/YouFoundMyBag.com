@@ -2,11 +2,7 @@ import Redis from 'ioredis';
 import { config } from '../config/index.js';
 import { logger } from '../logger/index.js';
 import { TIME_MS as t } from '../../client/constants/timeConstants.js';
-
-interface RedisError extends Error {
-  code?: string;
-  errno?: number;
-}
+import { RedisError } from '../types/index.js';
 
 let redisClient: Redis | null = null;
 

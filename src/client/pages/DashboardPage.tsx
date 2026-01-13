@@ -6,6 +6,7 @@ import type {
   ConversationMessage,
   MessageContext,
   MessageContextInfo,
+  DashboardData,
 } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ConfirmModal from '../components/ConfirmModal';
@@ -35,22 +36,6 @@ function formatBagDisplayName(
     return `${ownerName}'s bag`;
   }
   return `Bag ${shortId}`;
-}
-
-interface DashboardData {
-  owner_email?: string;
-  bags: Array<{
-    id: string;
-    short_id: string;
-    owner_name?: string;
-    bag_name?: string;
-    status: 'active' | 'disabled';
-    created_at: string;
-    conversation_count: number;
-    unread_count: number;
-    latest_conversation?: string;
-  }>;
-  conversations: ConversationThread[];
 }
 
 function analyzeMessageContext(

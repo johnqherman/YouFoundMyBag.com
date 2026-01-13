@@ -1,16 +1,7 @@
 import CharacterLimitInput from '../CharacterLimitInput';
 import CharacterLimitTextArea from '../CharacterLimitTextArea';
 import PrivacyWarning from '../PrivacyWarning';
-
-interface BasicInfoProps {
-  formData: {
-    owner_name: string;
-    bag_name: string;
-    owner_message: string;
-  };
-  onChange: (updates: Partial<BasicInfoProps['formData']>) => void;
-  onNext: () => void;
-}
+import type { BasicInfoProps } from '../../types';
 
 export default function BasicInfo({
   formData,

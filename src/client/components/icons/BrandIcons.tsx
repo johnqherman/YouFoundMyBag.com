@@ -1,8 +1,4 @@
-export interface BrandIconProps {
-  size?: number;
-  className?: string;
-  style?: React.CSSProperties;
-}
+import type { BrandIconProps } from '../../types';
 
 export const SignalIcon = ({
   size = 20,

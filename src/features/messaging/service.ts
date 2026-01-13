@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import type { Request } from 'express';
+import { Request } from 'express';
 import { logger } from '../../infrastructure/logger/index.js';
 
 export function getClientIpHash(

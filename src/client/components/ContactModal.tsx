@@ -6,13 +6,7 @@ import Twemoji from './Twemoji';
 import { emailSchema } from '../../infrastructure/utils/validation';
 import { lowercaseBagName } from '../../infrastructure/utils/formatting';
 import { SuccessIcon } from './icons/AppIcons';
-
-interface Props {
-  shortId: string;
-  ownerName?: string;
-  bagName?: string;
-  onClose: () => void;
-}
+import type { ContactModalProps } from '../types';
 
 declare global {
   interface Window {
@@ -28,7 +22,7 @@ export default function ContactModal({
   ownerName,
   bagName,
   onClose,
-}: Props) {
+}: ContactModalProps) {
   const [message, setMessage] = useState('');
   const [senderInfo, setSenderInfo] = useState('');
   const [senderName, setSenderName] = useState('');

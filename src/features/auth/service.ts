@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import type { OwnerSession } from '../../client/types/index.js';
+import { OwnerSession } from '../../client/types/index.js';
 import { logger } from '../../infrastructure/logger/index.js';
 import {
   sendMagicLink,

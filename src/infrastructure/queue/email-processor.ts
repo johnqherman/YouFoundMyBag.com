@@ -3,8 +3,8 @@ import { config } from '../config/index.js';
 import { logger } from '../logger/index.js';
 import { TIME_MS as t } from '../../client/constants/timeConstants.js';
 import { getTransporter } from '../email/smtp.js';
+import { EmailJobData } from '../types/index.js';
 import {
-  EmailJobData,
   recordEmailSuccess,
   recordEmailFailure,
   getCircuitBreakerState,

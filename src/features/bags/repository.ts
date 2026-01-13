@@ -1,5 +1,5 @@
 import { pool, withTransaction } from '../../infrastructure/database/index';
-import type {
+import {
   CreateBagRequest,
   CachedBag,
   CachedFinderPageData,
@@ -18,39 +18,7 @@ import {
 } from '../../infrastructure/cache/index.js';
 import { logger } from '../../infrastructure/logger/index.js';
 import { TIME_SECONDS as t } from '../../client/constants/timeConstants.js';
-
-export interface Bag {
-  id: string;
-  short_id: string;
-  owner_name?: string;
-  bag_name?: string;
-  owner_message?: string;
-  owner_email?: string;
-  secure_messaging_enabled: boolean;
-  opt_out_timestamp?: Date;
-  opt_out_ip_address?: string;
-  status: 'active' | 'disabled';
-  created_at: Date;
-  updated_at: Date;
-}
-
-export interface Contact {
-  id: string;
-  bag_id: string;
-  type:
-    | 'sms'
-    | 'whatsapp'
-    | 'email'
-    | 'instagram'
-    | 'telegram'
-    | 'signal'
-    | 'other';
-  value: string;
-  is_primary?: boolean;
-  display_order?: number;
-  label?: string;
-  created_at: Date;
-}
+import { Bag, Contact } from '../types/index.js';
 
 export async function createBag(
   data: CreateBagRequest,

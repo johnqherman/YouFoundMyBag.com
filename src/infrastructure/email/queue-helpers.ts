@@ -3,8 +3,8 @@ import {
   sendContextualNotification,
   sendConversationResolved,
 } from './service.js';
-import type { MessageContext } from '../../features/conversations/service.js';
-import type { NameInfo } from '../utils/personalization.js';
+import { MessageContext } from '../../features/types/index.js';
+import { NameInfo } from '../types/index.js';
 
 export async function queueMagicLinkEmail({
   email,

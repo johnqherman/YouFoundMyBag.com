@@ -6,26 +6,11 @@ import {
   TIME_MS as tm,
   TIME_SECONDS as ts,
 } from '../../client/constants/timeConstants.js';
-
-export interface EmailJobData {
-  type: 'magic_link_owner' | 'magic_link_finder' | 'new_message_notification';
-  to: string;
-  subject: string;
-  html: string;
-  idempotencyKey: string;
-  conversationId?: string;
-  bagShortId?: string;
-}
+import { EmailJobData, CircuitBreakerState } from '../types/index.js';
 
 let emailQueue: Queue<EmailJobData> | null = null;
 let emailWorker: Worker<EmailJobData> | null = null;
 let queueEvents: QueueEvents | null = null;
-
-interface CircuitBreakerState {
-  failures: number;
-  lastFailureTime: number | null;
-  state: 'closed' | 'open' | 'half-open';
-}
 
 const circuitBreaker: CircuitBreakerState = {
   failures: 0,

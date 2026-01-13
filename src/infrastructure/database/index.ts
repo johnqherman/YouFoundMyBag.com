@@ -3,13 +3,7 @@ import fs from 'fs';
 import { config } from '../config/index.js';
 import { logger } from '../logger/index.js';
 import { TIME_MS as t } from '../../client/constants/timeConstants.js';
-
-interface DatabaseSSLConfig {
-  rejectUnauthorized: boolean;
-  ca?: string;
-  cert?: string;
-  key?: string;
-}
+import { DatabaseSSLConfig } from '../types/index.js';
 
 function getDatabaseSSLConfig(): DatabaseSSLConfig | false {
   const sslMode = config.DATABASE_SSL_MODE;

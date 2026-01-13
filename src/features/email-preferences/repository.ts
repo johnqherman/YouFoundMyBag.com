@@ -6,19 +6,7 @@ import {
 } from '../../infrastructure/cache/index.js';
 import { logger } from '../../infrastructure/logger/index.js';
 import { TIME_SECONDS as t } from '../../client/constants/timeConstants.js';
-
-export interface EmailPreferences {
-  id: string;
-  email: string;
-  unsubscribe_token: string;
-  all_emails_enabled: boolean;
-  bag_created_enabled: boolean;
-  conversation_notifications_enabled: boolean;
-  reply_notifications_enabled: boolean;
-  unsubscribed_at: Date | null;
-  created_at: Date;
-  updated_at: Date;
-}
+import { EmailPreferences } from '../types/index.js';
 
 export async function getOrCreatePreferences(
   email: string

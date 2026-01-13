@@ -6,7 +6,7 @@ import {
   decryptField,
   hashForLookup,
 } from '../../infrastructure/security/encryption.js';
-import type {
+import {
   Conversation,
   ConversationMessage,
   ConversationThread,
@@ -25,15 +25,7 @@ import {
 } from '../../infrastructure/cache/index.js';
 import { logger } from '../../infrastructure/logger/index.js';
 import { TIME_SECONDS as t } from '../../client/constants/timeConstants.js';
-
-interface DatabaseMessage {
-  id: string | null;
-  conversation_id: string;
-  sender_type: 'finder' | 'owner';
-  message_content: string;
-  read_at: string | null;
-  sent_at: string;
-}
+import { DatabaseMessage } from '../types/index.js';
 
 function decryptMessageContent(encryptedContent: string): string {
   return decrypt(encryptedContent);

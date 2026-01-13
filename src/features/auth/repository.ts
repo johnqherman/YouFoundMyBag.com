@@ -1,5 +1,5 @@
 import { pool } from '../../infrastructure/database/index.js';
-import type { OwnerSession } from '../../client/types/index.js';
+import { OwnerSession } from '../../client/types/index.js';
 import { hashForLookup } from '../../infrastructure/security/encryption.js';
 import {
   cacheGet,

@@ -1,16 +1,5 @@
 import { useState } from 'react';
-
-interface CharacterLimitInputProps {
-  value: string;
-  onChange: (value: string) => void;
-  maxLength: number;
-  placeholder?: string;
-  className?: string;
-  disabled?: boolean;
-  required?: boolean;
-  type?: 'text' | 'email';
-  name?: string;
-}
+import type { CharacterLimitInputProps } from '../types';
 
 export default function CharacterLimitInput({
   value,

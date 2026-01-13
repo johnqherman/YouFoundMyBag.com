@@ -21,76 +21,17 @@ import {
   getContextualSubject,
   getContextualGreeting,
   getContextualDescription,
-  type PersonalizationContext,
-  type NameInfo,
 } from '../utils/personalization.js';
-import type { MessageContext } from '../../features/conversations/service.js';
-import { addEmailJob, type EmailJobData } from '../queue/index.js';
-
-type UserType = 'owner' | 'finder';
-
-interface BaseMagicLinkParams {
-  email: string;
-  magicLinkToken: string;
-  conversationId?: string;
-}
-
-interface OwnerMagicLinkParams extends BaseMagicLinkParams {
-  userType: 'owner';
-  bagIds?: string[];
-  bagName?: string;
-}
-
-interface FinderMagicLinkParams extends BaseMagicLinkParams {
-  userType: 'finder';
-  conversationId: string;
-}
-
-type MagicLinkParams = OwnerMagicLinkParams | FinderMagicLinkParams;
-
-interface BaseNotificationParams {
-  senderName: string;
-  message: string;
-  conversationId: string;
-}
-
-interface OwnerNotificationParams extends BaseNotificationParams {
-  userType: 'owner';
-  ownerEmail: string;
-  bagIds: string[];
-  context: MessageContext;
-  names: NameInfo;
-}
-
-interface FinderNotificationParams extends BaseNotificationParams {
-  userType: 'finder';
-  finderEmail: string;
-  context: MessageContext;
-  names: NameInfo;
-}
-
-type NotificationParams = OwnerNotificationParams | FinderNotificationParams;
-
-interface ConversationResolvedParams {
-  finderEmail: string;
-  conversationId: string;
-  names: NameInfo;
-}
-
-interface BagCreatedParams {
-  email: string;
-  bagName?: string;
-  shortId: string;
-  bagUrl: string;
-}
-
-interface ReissueParams {
-  userType: UserType;
-  email: string;
-  magicLinkToken: string;
-  conversationId?: string;
-  bagIds?: string[];
-}
+import {
+  PersonalizationContext,
+  MagicLinkParams,
+  NotificationParams,
+  ConversationResolvedParams,
+  BagCreatedParams,
+  ReissueParams,
+  EmailJobData,
+} from '../types/index.js';
+import { addEmailJob } from '../queue/index.js';
 
 function generateIdempotencyKey(
   type: string,

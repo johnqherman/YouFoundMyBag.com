@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react';
-import { ContactWithId } from '../../types';
+import type {
+  ContactWithId,
+  ReviewSubmitProps,
+  SortableContactItemProps,
+} from '../../types';
 import {
   formatContactValue,
   formatPhoneNumber,
@@ -32,28 +36,6 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-
-interface ReviewSubmitProps {
-  formData: {
-    owner_name: string;
-    bag_name: string;
-    owner_message: string;
-    owner_email: string;
-    contacts: ContactWithId[];
-    secure_messaging_enabled: boolean;
-  };
-  onBack: () => void;
-  onSubmit: (e: React.FormEvent) => void;
-  onContactsReorder?: (contacts: ContactWithId[]) => void;
-  loading: boolean;
-  error: string | null;
-}
-
-interface SortableContactItemProps {
-  contact: ContactWithId;
-  index: number;
-  isDragDisabled: boolean;
-}
 
 function SortableContactItem({
   contact,

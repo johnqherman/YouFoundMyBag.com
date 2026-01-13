@@ -1,8 +1,4 @@
-interface StepIndicatorProps {
-  currentStep: number;
-  totalSteps: number;
-  stepNames: string[];
-}
+import type { StepIndicatorProps } from '../types';
 
 export default function StepIndicator({
   currentStep,

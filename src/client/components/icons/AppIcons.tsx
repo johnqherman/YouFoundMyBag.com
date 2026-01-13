@@ -22,9 +22,7 @@ import RefreshIcon from '@atlaskit/icon/core/refresh';
 import LightbulbIcon from '@atlaskit/icon/core/lightbulb';
 import GridIcon from '@atlaskit/icon/core/grid';
 import DeleteIconAtlas from '@atlaskit/icon/core/delete';
-
-export type IconSize = 'small' | 'medium' | 'large';
-export type IconColor = 'currentColor';
+import type { IconSize, IconColor } from '../../types';
 
 import {
   SignalIcon,

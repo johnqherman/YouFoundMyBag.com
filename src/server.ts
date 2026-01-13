@@ -19,14 +19,14 @@ import {
   createBagRateLimit,
   sendMessageRateLimit,
   dbRateLimit,
-} from './features/security/index.js';
+} from './features/security/middleware.js';
 
-import { routes as bagRoutes } from './features/bags/index.js';
-import { routes as messagingRoutes } from './features/messaging/index.js';
-import { conversationRoutes } from './features/conversations/index.js';
+import { default as bagRoutes } from './features/bags/routes.js';
+import { default as messagingRoutes } from './features/messaging/routes.js';
+import { conversationRoutes } from './features/conversations/routes.js';
 import { finderRoutes } from './features/conversations/finderRoutes.js';
-import { authRoutes } from './features/auth/index.js';
-import { routes as emailPreferencesRoutes } from './features/email-preferences/index.js';
+import { authRoutes } from './features/auth/routes.js';
+import { default as emailPreferencesRoutes } from './features/email-preferences/routes.js';
 
 const app = express();
 

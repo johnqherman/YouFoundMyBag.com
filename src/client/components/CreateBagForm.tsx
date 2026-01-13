@@ -2,8 +2,9 @@ import { useState, useCallback } from 'react';
 import { api } from '../utils/api';
 import type {
   CreateBagRequest,
-  CreateBagResponse,
   ContactWithId,
+  CreateBagFormProps,
+  FormData,
 } from '../types/index';
 import StepIndicator from './StepIndicator';
 import BasicInfo from './steps/BasicInfo';
@@ -12,20 +13,7 @@ import ContactPreference from './steps/ContactPreference';
 import ContactDetails from './steps/ContactDetails';
 import ReviewSubmit from './steps/ReviewSubmit';
 
-interface Props {
-  onSuccess: (bagData: CreateBagResponse) => void;
-}
-
-interface FormData {
-  owner_name: string;
-  bag_name: string;
-  owner_message: string;
-  owner_email: string;
-  contacts: ContactWithId[];
-  secure_messaging_enabled: boolean;
-}
-
-export default function CreateBagForm({ onSuccess }: Props) {
+export default function CreateBagForm({ onSuccess }: CreateBagFormProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<FormData>({
     owner_name: '',

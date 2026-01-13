@@ -1,12 +1,7 @@
 import { useState, useEffect } from 'react';
 import { emailSchema } from '../../infrastructure/utils/validation';
 import { SuccessIcon, ErrorIcon } from './icons/AppIcons';
-
-interface RequestMagicLinkModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  conversationId?: string;
-}
+import type { RequestMagicLinkModalProps } from '../types';
 
 export default function RequestMagicLinkModal({
   isOpen,

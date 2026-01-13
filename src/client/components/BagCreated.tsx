@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import type { CreateBagResponse } from '../types/index.js';
+import type { BagCreatedProps } from '../types/index.js';
 import { TIME_MS as t } from '../constants/timeConstants';
 import {
   SuccessIcon,
@@ -10,12 +10,10 @@ import {
   PlusIcon,
 } from './icons/AppIcons';
 
-interface Props {
-  bagData: CreateBagResponse;
-  onCreateAnother: () => void;
-}
-
-export default function BagCreated({ bagData, onCreateAnother }: Props) {
+export default function BagCreated({
+  bagData,
+  onCreateAnother,
+}: BagCreatedProps) {
   const [copied, setCopied] = useState(false);
 
   const copyToClipboard = async (text: string) => {

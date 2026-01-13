@@ -1,5 +1,4 @@
-import { Router } from 'express';
-import type { Request, Response } from 'express';
+import { Router, Request, Response } from 'express';
 import { logger } from '../../infrastructure/logger/index.js';
 import { verifyFinderMagicLink, verifyFinderSession } from '../auth/service.js';
 import * as conversationService from './service.js';

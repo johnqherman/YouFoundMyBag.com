@@ -3,7 +3,7 @@ import helmet from 'helmet';
 import { logger } from '../../infrastructure/logger/index.js';
 import { cacheIncr, cacheExpire } from '../../infrastructure/cache/index.js';
 import crypto from 'crypto';
-import type { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import {
   TIME_MS as tm,
   TIME_SECONDS as ts,

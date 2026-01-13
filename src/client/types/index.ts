@@ -229,3 +229,235 @@ export interface TwemojiProps {
 }
 
 export type { IntlTelInputRef } from 'intl-tel-input/reactWithUtils';
+
+export interface DashboardData {
+  owner_email?: string;
+  bags: Array<{
+    id: string;
+    short_id: string;
+    owner_name?: string;
+    bag_name?: string;
+    status: 'active' | 'disabled';
+    created_at: string;
+    conversation_count: number;
+    unread_count: number;
+    latest_conversation?: string;
+  }>;
+  conversations: ConversationThread[];
+}
+
+export interface EmailPreferences {
+  email: string;
+  all_emails_enabled: boolean;
+  bag_created_enabled: boolean;
+  conversation_notifications_enabled: boolean;
+  reply_notifications_enabled: boolean;
+}
+
+export interface QRCodeData {
+  qr_code: string;
+  url: string;
+  short_id: string;
+}
+
+export type SectionId =
+  | 'qr'
+  | 'name'
+  | 'rotate'
+  | 'status'
+  | 'email'
+  | 'resolve'
+  | 'delete';
+
+export interface NavigationItem {
+  id: SectionId;
+  label: string;
+  icon: React.ReactNode;
+  group: 'primary' | 'settings' | 'advanced';
+}
+
+export type IconSize = 'small' | 'medium' | 'large';
+export type IconColor = 'currentColor';
+
+export interface BrandIconProps {
+  size?: number;
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+export interface BagCreatedProps {
+  bagData: CreateBagResponse;
+  onCreateAnother: () => void;
+}
+
+export interface RequestMagicLinkModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  conversationId?: string;
+}
+
+export interface CharacterLimitTextAreaProps {
+  value: string;
+  onChange: (value: string) => void;
+  maxLength: number;
+  placeholder?: string;
+  className?: string;
+  disabled?: boolean;
+  required?: boolean;
+  rows?: number;
+  name?: string;
+  variant?: 'light' | 'dark';
+}
+
+export interface CharacterLimitInputProps {
+  value: string;
+  onChange: (value: string) => void;
+  maxLength: number;
+  placeholder?: string;
+  className?: string;
+  disabled?: boolean;
+  required?: boolean;
+  type?: 'text' | 'email';
+  name?: string;
+}
+
+export interface ContactInputProps {
+  contact: ContactWithId;
+  onUpdate: (contact: ContactWithId) => void;
+  onRemove?: () => void;
+  availableTypes: Array<
+    'sms' | 'whatsapp' | 'email' | 'instagram' | 'telegram' | 'signal' | 'other'
+  >;
+  showRemoveButton?: boolean;
+}
+
+export interface PrivacyWarningProps {
+  message: string;
+  storageKey: string;
+  variant?: 'light' | 'dark';
+  className?: string;
+}
+
+export interface PhoneInputErrorBoundaryProps {
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}
+
+export interface PhoneInputErrorBoundaryState {
+  hasError: boolean;
+  error?: Error;
+}
+
+export interface StepIndicatorProps {
+  currentStep: number;
+  totalSteps: number;
+  stepNames: string[];
+}
+
+export interface ContactModalProps {
+  shortId: string;
+  ownerName?: string;
+  bagName?: string;
+  onClose: () => void;
+}
+
+export interface ConfirmModalProps {
+  isOpen: boolean;
+  title: string;
+  message: string;
+  confirmText?: string;
+  cancelText?: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+  variant?: 'danger' | 'warning' | 'primary';
+}
+
+export interface BagManagementModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  bag: {
+    id: string;
+    short_id: string;
+    owner_name?: string;
+    bag_name?: string;
+    status: 'active' | 'disabled';
+    owner_email?: string;
+    conversation_count?: number;
+  };
+  onBagUpdated: () => void;
+}
+
+export interface CreateBagFormProps {
+  onSuccess: (bagData: CreateBagResponse) => void;
+}
+
+export interface FormData {
+  owner_name: string;
+  bag_name: string;
+  owner_message: string;
+  owner_email: string;
+  contacts: ContactWithId[];
+  secure_messaging_enabled: boolean;
+}
+
+export interface ContactDetailsProps {
+  formData: {
+    owner_email: string;
+    contacts: ContactWithId[];
+    secure_messaging_enabled: boolean;
+  };
+  onChange: (updates: Partial<ContactDetailsProps['formData']>) => void;
+  onNext: () => void;
+  onBack: () => void;
+  addContact: () => void;
+  removeContact: (index: number) => void;
+  updateContact: (index: number, contact: ContactWithId) => void;
+  getAvailableContactTypes: (
+    currentIndex: number
+  ) => Array<
+    'sms' | 'whatsapp' | 'email' | 'instagram' | 'telegram' | 'signal' | 'other'
+  >;
+  error?: string | null;
+}
+
+export interface ContactPreferenceProps {
+  formData: {
+    secure_messaging_enabled: boolean;
+  };
+  onChange: (updates: Partial<ContactPreferenceProps['formData']>) => void;
+  onNext: () => void;
+  onBack: () => void;
+  onContactPreferenceChange: (useSecureMessaging: boolean) => void;
+}
+
+export interface ReviewSubmitProps {
+  formData: {
+    owner_name: string;
+    bag_name: string;
+    owner_message: string;
+    owner_email: string;
+    contacts: ContactWithId[];
+    secure_messaging_enabled: boolean;
+  };
+  onBack: () => void;
+  onSubmit: (e: React.FormEvent) => void;
+  onContactsReorder?: (contacts: ContactWithId[]) => void;
+  loading: boolean;
+  error: string | null;
+}
+
+export interface SortableContactItemProps {
+  contact: ContactWithId;
+  index: number;
+  isDragDisabled: boolean;
+}
+
+export interface BasicInfoProps {
+  formData: {
+    owner_name: string;
+    bag_name: string;
+    owner_message: string;
+  };
+  onChange: (updates: Partial<BasicInfoProps['formData']>) => void;
+  onNext: () => void;
+}

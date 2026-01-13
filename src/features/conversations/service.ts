@@ -1,23 +1,14 @@
 import crypto from 'crypto';
-import type { Request } from 'express';
+import { Request } from 'express';
 import { logger } from '../../infrastructure/logger/index.js';
-import type {
+import {
   StartConversationRequest,
   SendReplyRequest,
   Conversation,
   ConversationMessage,
   ConversationThread,
 } from '../../client/types/index.js';
-
-export type MessageContext = 'initial' | 'follow-up' | 'response';
-
-export interface MessageContextInfo {
-  context: MessageContext;
-  isFirstFromSender: boolean;
-  hasRecipientReplied: boolean;
-  lastSenderType: 'finder' | 'owner' | null;
-}
-
+import { MessageContext, MessageContextInfo } from '../types/index.js';
 import { getBagByShortId } from '../bags/repository.js';
 import { verifyTurnstile } from '../messaging/service.js';
 import {
@@ -35,9 +26,11 @@ import * as conversationRepository from './repository.js';
 import {
   getContextualSubject,
   getContextualSenderName,
-  type PersonalizationContext,
-  type NameInfo,
 } from '../../infrastructure/utils/personalization.js';
+import {
+  PersonalizationContext,
+  NameInfo,
+} from '../../infrastructure/types/index.js';
 
 export function analyzeMessageContext(
   messages: ConversationMessage[],

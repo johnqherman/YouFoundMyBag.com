@@ -1,5 +1,4 @@
-import { Router } from 'express';
-import type { Request, Response } from 'express';
+import { Router, Request, Response } from 'express';
 import { logger } from '../../infrastructure/logger/index.js';
 import * as conversationService from './service.js';
 import { verifyOwnerSession } from '../auth/service.js';
@@ -8,7 +7,7 @@ import {
   sendReplySchema,
   shortIdSchema,
 } from '../../infrastructure/utils/validation.js';
-import type {
+import {
   StartConversationRequest,
   SendReplyRequest,
 } from '../../client/types/index.js';

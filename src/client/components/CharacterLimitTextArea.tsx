@@ -1,17 +1,5 @@
 import React from 'react';
-
-interface CharacterLimitTextAreaProps {
-  value: string;
-  onChange: (value: string) => void;
-  maxLength: number;
-  placeholder?: string;
-  className?: string;
-  disabled?: boolean;
-  required?: boolean;
-  rows?: number;
-  name?: string;
-  variant?: 'light' | 'dark';
-}
+import type { CharacterLimitTextAreaProps } from '../types';
 
 const CharacterLimitTextArea = React.forwardRef<
   HTMLTextAreaElement,

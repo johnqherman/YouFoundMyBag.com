@@ -1,22 +1,19 @@
-import React, { Component, ReactNode } from 'react';
+import React, { Component } from 'react';
+import type {
+  PhoneInputErrorBoundaryProps,
+  PhoneInputErrorBoundaryState,
+} from '../types';
 
-interface Props {
-  children: ReactNode;
-  fallback?: ReactNode;
-}
-
-interface State {
-  hasError: boolean;
-  error?: Error;
-}
-
-export class PhoneInputErrorBoundary extends Component<Props, State> {
-  constructor(props: Props) {
+export class PhoneInputErrorBoundary extends Component<
+  PhoneInputErrorBoundaryProps,
+  PhoneInputErrorBoundaryState
+> {
+  constructor(props: PhoneInputErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(error: Error): State {
+  static getDerivedStateFromError(error: Error): PhoneInputErrorBoundaryState {
     return { hasError: true, error };
   }
 

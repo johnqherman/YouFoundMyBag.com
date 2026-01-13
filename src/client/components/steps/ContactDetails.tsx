@@ -1,28 +1,8 @@
 import { useRef, useEffect } from 'react';
-import { ContactWithId } from '../../types';
+import type { ContactDetailsProps } from '../../types';
 import ContactInput from '../ContactInput';
 import PhoneInputErrorBoundary from '../PhoneInputErrorBoundary';
 import { AlertIcon } from '../icons/AppIcons';
-
-interface ContactDetailsProps {
-  formData: {
-    owner_email: string;
-    contacts: ContactWithId[];
-    secure_messaging_enabled: boolean;
-  };
-  onChange: (updates: Partial<ContactDetailsProps['formData']>) => void;
-  onNext: () => void;
-  onBack: () => void;
-  addContact: () => void;
-  removeContact: (index: number) => void;
-  updateContact: (index: number, contact: ContactWithId) => void;
-  getAvailableContactTypes: (
-    currentIndex: number
-  ) => Array<
-    'sms' | 'whatsapp' | 'email' | 'instagram' | 'telegram' | 'signal' | 'other'
-  >;
-  error?: string | null;
-}
 
 export default function ContactDetails({
   formData,

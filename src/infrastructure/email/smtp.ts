@@ -1,23 +1,7 @@
 import nodemailer from 'nodemailer';
 import { config } from '../config/index.js';
 import { logger } from '../logger/index.js';
-
-interface SMTPTLSConfig {
-  rejectUnauthorized?: boolean;
-  minVersion?: string;
-}
-
-interface SMTPTransportConfig {
-  host?: string;
-  port?: number;
-  secure?: boolean;
-  auth?: {
-    user?: string;
-    pass?: string;
-  };
-  requireTLS?: boolean;
-  tls?: SMTPTLSConfig;
-}
+import { SMTPTransportConfig } from '../types/index.js';
 
 let transporter: nodemailer.Transporter | null = null;
 

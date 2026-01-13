@@ -1,4 +1,11 @@
 import { secureEmailContent } from '../security/sanitization.js';
+import {
+  MagicLinkEmailParams,
+  NotificationEmailParams,
+  ResolvedEmailParams,
+  BagCreatedEmailParams,
+  ReissueEmailParams,
+} from '../types/index.js';
 
 export const EmailStyles = {
   container:
@@ -157,15 +164,6 @@ export function emailDivider(): string {
 `;
 }
 
-export interface MagicLinkEmailParams {
-  magicLinkUrl: string;
-  greeting: string;
-  description: string;
-  buttonText: string;
-  footerText?: string;
-  preferencesUrl: string;
-}
-
 export function buildMagicLinkEmail(params: MagicLinkEmailParams): string {
   return emailContainer(
     emailHeader(params.greeting) +
@@ -175,16 +173,6 @@ export function buildMagicLinkEmail(params: MagicLinkEmailParams): string {
       (params.footerText ? emailParagraph(params.footerText, 'muted') : '') +
       emailFooter(params.preferencesUrl)
   );
-}
-
-export interface NotificationEmailParams {
-  greeting: string;
-  description?: string;
-  senderName: string;
-  message: string;
-  continueUrl: string;
-  buttonText: string;
-  preferencesUrl: string;
 }
 
 export function buildNotificationEmail(
@@ -198,13 +186,6 @@ export function buildNotificationEmail(
       emailSecurityNotice('24h') +
       emailFooter(params.preferencesUrl)
   );
-}
-
-export interface ResolvedEmailParams {
-  bagDisplayName: string;
-  htmlBagDisplayName: string;
-  continueUrl: string;
-  preferencesUrl: string;
 }
 
 export function buildConversationResolvedEmail(
@@ -226,15 +207,6 @@ export function buildConversationResolvedEmail(
       ) +
       emailFooter(params.preferencesUrl)
   );
-}
-
-export interface BagCreatedEmailParams {
-  bagType: string;
-  shortId: string;
-  bagUrl: string;
-  yourBag: string;
-  magicLinkUrl: string;
-  preferencesUrl: string;
 }
 
 export function buildBagCreatedEmail(params: BagCreatedEmailParams): string {
@@ -263,15 +235,6 @@ export function buildBagCreatedEmail(params: BagCreatedEmailParams): string {
       emailSecurityNotice('24h') +
       emailFooter(params.preferencesUrl)
   );
-}
-
-export interface ReissueEmailParams {
-  title: string;
-  description: string;
-  magicLinkUrl: string;
-  buttonText: string;
-  expiryDays: '7d';
-  preferencesUrl: string;
 }
 
 export function buildReissueEmail(params: ReissueEmailParams): string {

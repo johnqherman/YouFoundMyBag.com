@@ -1,7 +1,11 @@
 import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import 'intl-tel-input/styles';
 import IntlTelInput from 'intl-tel-input/reactWithUtils';
-import type { ContactWithId, IntlTelInputRef } from '../types/index';
+import type {
+  ContactWithId,
+  IntlTelInputRef,
+  ContactInputProps,
+} from '../types/index';
 import { emailSchema } from '../../infrastructure/utils/validation';
 import { capitalizeWords } from '../../infrastructure/utils/formatting';
 import {
@@ -12,16 +16,6 @@ import {
   brandColors,
 } from './icons/BrandIcons';
 import { MailIcon, PhoneContactIcon } from './icons/AppIcons';
-
-interface ContactInputProps {
-  contact: ContactWithId;
-  onUpdate: (contact: ContactWithId) => void;
-  onRemove?: () => void;
-  availableTypes: Array<
-    'sms' | 'whatsapp' | 'email' | 'instagram' | 'telegram' | 'signal' | 'other'
-  >;
-  showRemoveButton?: boolean;
-}
 
 export default function ContactInput({
   contact,

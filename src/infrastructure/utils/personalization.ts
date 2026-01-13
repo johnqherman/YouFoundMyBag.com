@@ -1,17 +1,6 @@
-import type { MessageContext } from '../../features/conversations/service.js';
+import { MessageContext } from '../../features/types/index.js';
 import { lowercaseBagName } from './formatting';
-
-export interface PersonalizationContext {
-  context: MessageContext;
-  senderType: 'finder' | 'owner';
-  recipientType: 'finder' | 'owner';
-}
-
-export interface NameInfo {
-  ownerName?: string;
-  bagName?: string;
-  finderName?: string;
-}
+import { PersonalizationContext, NameInfo } from '../types/index.js';
 
 export function shouldPersonalize(context: MessageContext): boolean {
   return context !== 'initial';

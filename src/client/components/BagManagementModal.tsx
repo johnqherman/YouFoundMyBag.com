@@ -14,43 +14,12 @@ import {
   DeleteIcon,
 } from './icons/AppIcons';
 import { TIME_MS as t } from '../constants/timeConstants';
-
-interface BagManagementModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  bag: {
-    id: string;
-    short_id: string;
-    owner_name?: string;
-    bag_name?: string;
-    status: 'active' | 'disabled';
-    owner_email?: string;
-    conversation_count?: number;
-  };
-  onBagUpdated: () => void;
-}
-
-interface QRCodeData {
-  qr_code: string;
-  url: string;
-  short_id: string;
-}
-
-type SectionId =
-  | 'qr'
-  | 'name'
-  | 'rotate'
-  | 'status'
-  | 'email'
-  | 'resolve'
-  | 'delete';
-
-interface NavigationItem {
-  id: SectionId;
-  label: string;
-  icon: React.ReactNode;
-  group: 'primary' | 'settings' | 'advanced';
-}
+import type {
+  QRCodeData,
+  SectionId,
+  NavigationItem,
+  BagManagementModalProps,
+} from '../types';
 
 const navigationItems: NavigationItem[] = [
   {

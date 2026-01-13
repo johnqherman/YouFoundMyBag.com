@@ -1,5 +1,4 @@
-import express from 'express';
-import type { Request, Response, NextFunction } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import { logger } from '../../infrastructure/logger/index.js';
 import {
   createBagSchema,
@@ -11,7 +10,7 @@ import * as conversationRepository from '../conversations/repository.js';
 import { emailValidationMiddleware } from '../../infrastructure/utils/email-validation.js';
 import { verifyOwnerSession } from '../auth/service.js';
 import { qrScanRateLimit } from '../security/middleware.js';
-import type { Bag } from './repository.js';
+import { Bag } from '../types/index.js';
 
 const router = express.Router();
 
