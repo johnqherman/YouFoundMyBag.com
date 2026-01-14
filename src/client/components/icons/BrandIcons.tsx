@@ -11,7 +11,7 @@ export const SignalIcon = ({
     width={size}
     height={size}
     className={className}
-    style={{ display: 'block', ...style }}
+    style={style}
     fill="currentColor"
     xmlns="http://www.w3.org/2000/svg"
   >
@@ -31,7 +31,7 @@ export const WhatsAppIcon = ({
     width={size}
     height={size}
     className={className}
-    style={{ display: 'block', ...style }}
+    style={style}
     fill="currentColor"
     xmlns="http://www.w3.org/2000/svg"
   >
@@ -50,7 +50,7 @@ export const TelegramIcon = ({
     width={size}
     height={size}
     className={className}
-    style={{ display: 'block', ...style }}
+    style={style}
     fill="currentColor"
     xmlns="http://www.w3.org/2000/svg"
   >
@@ -69,7 +69,7 @@ export const InstagramIcon = ({
     width={size}
     height={size}
     className={className}
-    style={{ display: 'block', ...style }}
+    style={style}
     fill="currentColor"
     xmlns="http://www.w3.org/2000/svg"
   >
@@ -103,7 +103,7 @@ export const GripVerticalIcon = ({
     width={size}
     height={size}
     className={className}
-    style={{ display: 'block', ...style }}
+    style={style}
     fill="currentColor"
     xmlns="http://www.w3.org/2000/svg"
   >

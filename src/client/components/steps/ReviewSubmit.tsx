@@ -17,7 +17,6 @@ import {
   TelegramIcon,
   InstagramIcon,
   GripVerticalIcon,
-  brandColors,
 } from '../icons/BrandIcons';
 import {
   DndContext,
@@ -60,19 +59,13 @@ function SortableContactItem({
   const getBrandIconForType = (type: string) => {
     switch (type) {
       case 'signal':
-        return <SignalIcon size={18} style={{ color: brandColors.signal }} />;
+        return <SignalIcon size={18} className="brand-icon-signal" />;
       case 'whatsapp':
-        return (
-          <WhatsAppIcon size={18} style={{ color: brandColors.whatsapp }} />
-        );
+        return <WhatsAppIcon size={18} className="brand-icon-whatsapp" />;
       case 'telegram':
-        return (
-          <TelegramIcon size={18} style={{ color: brandColors.telegram }} />
-        );
+        return <TelegramIcon size={18} className="brand-icon-telegram" />;
       case 'instagram':
-        return (
-          <InstagramIcon size={18} style={{ color: brandColors.instagram }} />
-        );
+        return <InstagramIcon size={18} className="brand-icon-instagram" />;
       default: {
         const ContactIcon = getContactMethodIcon(type);
         return <ContactIcon color="currentColor" />;

@@ -13,7 +13,6 @@ import {
   WhatsAppIcon,
   TelegramIcon,
   InstagramIcon,
-  brandColors,
 } from './icons/BrandIcons';
 import { MailIcon, PhoneContactIcon } from './icons/AppIcons';
 
@@ -161,36 +160,21 @@ export default function ContactInput({
   };
 
   const getContactTypeIcon = (type: string) => {
-    const iconProps = { size: 18, className: '' };
+    const iconProps = { size: 18 };
     switch (type) {
       case 'sms':
         return <PhoneContactIcon color="currentColor" />;
       case 'email':
         return <MailIcon color="currentColor" />;
       case 'signal':
-        return (
-          <SignalIcon {...iconProps} style={{ color: brandColors.signal }} />
-        );
+        return <SignalIcon {...iconProps} className="brand-icon-signal" />;
       case 'whatsapp':
-        return (
-          <WhatsAppIcon
-            {...iconProps}
-            style={{ color: brandColors.whatsapp }}
-          />
-        );
+        return <WhatsAppIcon {...iconProps} className="brand-icon-whatsapp" />;
       case 'telegram':
-        return (
-          <TelegramIcon
-            {...iconProps}
-            style={{ color: brandColors.telegram }}
-          />
-        );
+        return <TelegramIcon {...iconProps} className="brand-icon-telegram" />;
       case 'instagram':
         return (
-          <InstagramIcon
-            {...iconProps}
-            style={{ color: brandColors.instagram }}
-          />
+          <InstagramIcon {...iconProps} className="brand-icon-instagram" />
         );
       default:
         return null;
@@ -242,18 +226,16 @@ export default function ContactInput({
           <select
             value={contact.type}
             onChange={(e) => handleTypeChange(e.target.value)}
-            className="contact-type-dropdown input-field w-auto appearance-none pr-8"
-            style={{
-              paddingLeft:
-                contact.type === 'sms' ||
-                contact.type === 'email' ||
-                contact.type === 'signal' ||
-                contact.type === 'whatsapp' ||
-                contact.type === 'telegram' ||
-                contact.type === 'instagram'
-                  ? '2.5rem'
-                  : '0.75rem',
-            }}
+            className={`contact-type-dropdown input-field w-auto appearance-none pr-8 ${
+              contact.type === 'sms' ||
+              contact.type === 'email' ||
+              contact.type === 'signal' ||
+              contact.type === 'whatsapp' ||
+              contact.type === 'telegram' ||
+              contact.type === 'instagram'
+                ? 'input-icon-padding'
+                : ''
+            }`}
           >
             {availableTypes.map((type) => (
               <option key={type} value={type}>
@@ -340,8 +322,7 @@ export default function ContactInput({
               placeholder={getPlaceholder()}
               value={contact.value}
               onChange={(e) => handleNonPhoneValueChange(e.target.value)}
-              className={`contact-input-with-icon input-field transition-all duration-200 ${errors.length > 0 ? 'border-cinnabar-500' : ''}`}
-              style={{ paddingLeft: '2.5rem' }}
+              className={`contact-input-with-icon input-field transition-all duration-200 input-icon-padding ${errors.length > 0 ? 'border-cinnabar-500' : ''}`}
               required
             />
           </div>
@@ -360,8 +341,7 @@ export default function ContactInput({
               placeholder={getPlaceholder()}
               value={contact.value}
               onChange={(e) => handleNonPhoneValueChange(e.target.value)}
-              className={`contact-input-with-icon input-field transition-all duration-200 ${errors.length > 0 ? 'border-cinnabar-500' : ''}`}
-              style={{ paddingLeft: '3.5rem' }}
+              className={`contact-input-with-icon input-field transition-all duration-200 input-social-padding ${errors.length > 0 ? 'border-cinnabar-500' : ''}`}
               required
             />
           </div>

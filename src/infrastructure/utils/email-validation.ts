@@ -101,21 +101,23 @@ export const emailValidationMiddleware = (
           emailValidationResults[field] = result;
 
           if (!result.valid) {
-            const userFriendlyMessage =
-              result.warnings.length > 0
-                ? result.warnings.join('. ')
-                : 'Please enter a valid email address';
+            if (result.warnings.length > 0) {
+              logger.warn(
+                `Email validation failed for ${field}:`,
+                result.warnings
+              );
+            }
 
             res.status(400).json({
               error: 'validation_error',
-              message: userFriendlyMessage,
+              message: 'Please enter a valid email address',
             });
             return;
           }
 
           if (result.warnings.length > 0) {
             logger.warn(
-              `Email validation warnings for ${field} (${email}):`,
+              `Email validation warnings for ${field}:`,
               result.warnings
             );
           }

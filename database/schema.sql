@@ -194,6 +194,69 @@ CREATE TRIGGER email_preferences_updated_at BEFORE
 UPDATE ON public.email_preferences FOR EACH ROW
 EXECUTE FUNCTION update_email_preferences_updated_at ();
 
+CREATE OR REPLACE FUNCTION update_email_preferences (
+  p_token VARCHAR(128),
+  p_all_emails_enabled BOOLEAN,
+  p_bag_created_enabled BOOLEAN,
+  p_conversation_notifications_enabled BOOLEAN,
+  p_reply_notifications_enabled BOOLEAN,
+  p_update_all_emails BOOLEAN,
+  p_update_bag_created BOOLEAN,
+  p_update_conversation BOOLEAN,
+  p_update_reply BOOLEAN
+) RETURNS TABLE (
+  id UUID,
+  email VARCHAR(254),
+  unsubscribe_token VARCHAR(64),
+  all_emails_enabled BOOLEAN,
+  bag_created_enabled BOOLEAN,
+  conversation_notifications_enabled BOOLEAN,
+  reply_notifications_enabled BOOLEAN,
+  unsubscribed_at TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE,
+  updated_at TIMESTAMP WITH TIME ZONE
+) AS $$
+BEGIN
+  RETURN QUERY
+  UPDATE email_preferences ep
+  SET
+    all_emails_enabled = CASE
+      WHEN p_update_all_emails THEN p_all_emails_enabled
+      ELSE ep.all_emails_enabled
+    END,
+    bag_created_enabled = CASE
+      WHEN p_update_bag_created THEN p_bag_created_enabled
+      ELSE ep.bag_created_enabled
+    END,
+    conversation_notifications_enabled = CASE
+      WHEN p_update_conversation THEN p_conversation_notifications_enabled
+      ELSE ep.conversation_notifications_enabled
+    END,
+    reply_notifications_enabled = CASE
+      WHEN p_update_reply THEN p_reply_notifications_enabled
+      ELSE ep.reply_notifications_enabled
+    END,
+    unsubscribed_at = CASE
+      WHEN p_update_all_emails AND NOT p_all_emails_enabled THEN NOW()
+      WHEN p_update_all_emails AND p_all_emails_enabled THEN NULL
+      ELSE ep.unsubscribed_at
+    END,
+    updated_at = NOW()
+  WHERE ep.unsubscribe_token = p_token
+  RETURNING
+    ep.id,
+    ep.email,
+    ep.unsubscribe_token,
+    ep.all_emails_enabled,
+    ep.bag_created_enabled,
+    ep.conversation_notifications_enabled,
+    ep.reply_notifications_enabled,
+    ep.unsubscribed_at,
+    ep.created_at,
+    ep.updated_at;
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION get_bag_by_any_short_id (p_short_id VARCHAR(6)) RETURNS TABLE (
   id UUID,
   short_id VARCHAR(6),

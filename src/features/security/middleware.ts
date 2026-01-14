@@ -8,6 +8,8 @@ import {
   TIME_MS as tm,
   TIME_SECONDS as ts,
 } from '../../client/constants/timeConstants.js';
+import { config } from '../../infrastructure/config/index.js';
+import { getClientIdentifier } from '../../infrastructure/utils/ip-extraction.js';
 
 export const basicRateLimit = rateLimit({
   windowMs: tm.FIFTEEN_MINUTES,
@@ -19,7 +21,7 @@ export const basicRateLimit = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  skip: () => process.env.NODE_ENV === 'development',
+  skip: () => config.NODE_ENV === 'development',
 });
 
 export const createBagRateLimit = rateLimit({
@@ -30,7 +32,7 @@ export const createBagRateLimit = rateLimit({
     message: 'Too many bags created, please try again later',
     retry_after: ts.ONE_HOUR,
   },
-  skip: () => process.env.NODE_ENV === 'development',
+  skip: () => config.NODE_ENV === 'development',
 });
 
 export const sendMessageRateLimit = rateLimit({
@@ -41,12 +43,38 @@ export const sendMessageRateLimit = rateLimit({
     message: 'Too many messages sent, please try again later',
     retry_after: ts.ONE_MINUTE,
   },
-  skip: () => process.env.NODE_ENV === 'development',
+  skip: () => config.NODE_ENV === 'development',
+});
+
+export const authMagicLinkRateLimit = rateLimit({
+  windowMs: tm.ONE_HOUR,
+  max: 5,
+  message: {
+    error: 'rate_limit_exceeded',
+    message: 'Too many authentication requests. Please try again later.',
+    retry_after: ts.ONE_HOUR,
+  },
+  skip: () => config.NODE_ENV === 'development',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+export const authVerifyRateLimit = rateLimit({
+  windowMs: tm.FIFTEEN_MINUTES,
+  max: 10,
+  message: {
+    error: 'rate_limit_exceeded',
+    message: 'Too many verification attempts. Please check your email.',
+    retry_after: ts.FIFTEEN_MINUTES,
+  },
+  skip: () => config.NODE_ENV === 'development',
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
 export function qrScanRateLimit() {
   return async (req: Request, res: Response, next: NextFunction) => {
-    if (process.env.NODE_ENV === 'development') {
+    if (config.NODE_ENV === 'development') {
       return next();
     }
 
@@ -85,8 +113,8 @@ export const securityHeaders = helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
-      fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+      styleSrc: ["'self'"],
+      fontSrc: ["'self'"],
       imgSrc: ["'self'", 'data:', 'https:'],
       scriptSrc: ["'self'", 'https://challenges.cloudflare.com'],
       frameSrc: ["'self'", 'https://challenges.cloudflare.com'],
@@ -94,10 +122,15 @@ export const securityHeaders = helmet({
       objectSrc: ["'none'"],
       baseUri: ["'self'"],
       formAction: ["'self'"],
-      ...(process.env.NODE_ENV === 'production' && {
+      ...(config.NODE_ENV === 'production' && {
         upgradeInsecureRequests: [],
       }),
     },
+  },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true,
   },
   crossOriginEmbedderPolicy: false,
   noSniff: true,
@@ -107,18 +140,14 @@ export const securityHeaders = helmet({
 
 export function dbRateLimit(maxRequests: number, windowMinutes: number) {
   return async (req: Request, res: Response, next: NextFunction) => {
-    if (process.env.NODE_ENV === 'development') {
+    if (config.NODE_ENV === 'development') {
       return next();
     }
 
-    const clientIp =
-      req.ip ||
-      (req as Request & { connection?: { remoteAddress?: string } }).connection
-        ?.remoteAddress ||
-      'unknown';
+    const clientId = getClientIdentifier(req);
     const ipHash = crypto
       .createHash('sha256')
-      .update(clientIp)
+      .update(clientId)
       .digest('hex')
       .substring(0, 16);
     const key = `${req.route?.path || req.path}:${ipHash}`;

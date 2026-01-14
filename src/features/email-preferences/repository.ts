@@ -47,45 +47,29 @@ export async function updatePreferences(
     reply_notifications_enabled?: boolean;
   }
 ): Promise<EmailPreferences | null> {
-  const fields: string[] = [];
-  const values: (boolean | string)[] = [];
-  let paramIndex = 1;
+  const hasUpdates =
+    updates.all_emails_enabled !== undefined ||
+    updates.bag_created_enabled !== undefined ||
+    updates.conversation_notifications_enabled !== undefined ||
+    updates.reply_notifications_enabled !== undefined;
 
-  if (updates.all_emails_enabled !== undefined) {
-    fields.push(`all_emails_enabled = $${paramIndex++}`);
-    values.push(updates.all_emails_enabled);
-  }
-  if (updates.bag_created_enabled !== undefined) {
-    fields.push(`bag_created_enabled = $${paramIndex++}`);
-    values.push(updates.bag_created_enabled);
-  }
-  if (updates.conversation_notifications_enabled !== undefined) {
-    fields.push(`conversation_notifications_enabled = $${paramIndex++}`);
-    values.push(updates.conversation_notifications_enabled);
-  }
-  if (updates.reply_notifications_enabled !== undefined) {
-    fields.push(`reply_notifications_enabled = $${paramIndex++}`);
-    values.push(updates.reply_notifications_enabled);
-  }
-
-  if (fields.length === 0) {
+  if (!hasUpdates) {
     return getPreferencesByToken(token);
   }
 
-  if (updates.all_emails_enabled === false) {
-    fields.push(`unsubscribed_at = NOW()`);
-  } else if (updates.all_emails_enabled === true) {
-    fields.push(`unsubscribed_at = NULL`);
-  }
-
-  values.push(token);
-
   const result = await pool.query(
-    `UPDATE email_preferences
-     SET ${fields.join(', ')}
-     WHERE unsubscribe_token = $${paramIndex}
-     RETURNING *`,
-    values
+    'SELECT * FROM update_email_preferences($1, $2, $3, $4, $5, $6, $7, $8, $9)',
+    [
+      token,
+      updates.all_emails_enabled ?? false,
+      updates.bag_created_enabled ?? false,
+      updates.conversation_notifications_enabled ?? false,
+      updates.reply_notifications_enabled ?? false,
+      updates.all_emails_enabled !== undefined,
+      updates.bag_created_enabled !== undefined,
+      updates.conversation_notifications_enabled !== undefined,
+      updates.reply_notifications_enabled !== undefined,
+    ]
   );
 
   const preferences = result.rows[0] || null;

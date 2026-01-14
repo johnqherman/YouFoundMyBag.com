@@ -61,3 +61,17 @@ export interface EmailPreferences {
   created_at: Date;
   updated_at: Date;
 }
+
+export interface LogMetadata {
+  email?: string;
+  token?: string;
+  magic_token?: string;
+  session_token?: string;
+  owner_email?: string;
+  finder_email?: string;
+  [key: string]: unknown;
+}
+
+export interface ConnectionInfo {
+  remoteAddress?: string;
+}

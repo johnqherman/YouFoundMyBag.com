@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { logger } from '../../infrastructure/logger/index.js';
+import { extractBearerToken } from '../auth/utils.js';
 import * as conversationService from './service.js';
 import { verifyOwnerSession } from '../auth/service.js';
 import {
@@ -115,8 +116,8 @@ router.post(
       }
 
       if (sender_type === 'owner') {
-        const authHeader = req.headers.authorization;
-        if (!authHeader?.startsWith('Bearer ')) {
+        const token = extractBearerToken(req.headers.authorization);
+        if (!token) {
           res.status(401).json({
             success: false,
             error: 'unauthorized',
@@ -125,7 +126,6 @@ router.post(
           return;
         }
 
-        const token = authHeader.substring(7);
         const session = await verifyOwnerSession(token);
         if (!session) {
           res.status(401).json({
@@ -171,8 +171,8 @@ router.get(
   '/conversations/archived',
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const authHeader = req.headers.authorization;
-      if (!authHeader?.startsWith('Bearer ')) {
+      const token = extractBearerToken(req.headers.authorization);
+      if (!token) {
         res.status(401).json({
           success: false,
           error: 'unauthorized',
@@ -181,7 +181,6 @@ router.get(
         return;
       }
 
-      const token = authHeader.substring(7);
       const session = await verifyOwnerSession(token);
       if (!session) {
         res.status(401).json({
@@ -246,8 +245,8 @@ router.get(
       let sessionEmail = viewerEmail;
 
       if (viewerType === 'owner') {
-        const authHeader = req.headers.authorization;
-        if (!authHeader?.startsWith('Bearer ')) {
+        const token = extractBearerToken(req.headers.authorization);
+        if (!token) {
           res.status(401).json({
             success: false,
             error: 'unauthorized',
@@ -256,7 +255,6 @@ router.get(
           return;
         }
 
-        const token = authHeader.substring(7);
         const session = await verifyOwnerSession(token);
         if (!session) {
           res.status(401).json({
@@ -319,8 +317,8 @@ router.post(
         return;
       }
 
-      const authHeader = req.headers.authorization;
-      if (!authHeader?.startsWith('Bearer ')) {
+      const token = extractBearerToken(req.headers.authorization);
+      if (!token) {
         res.status(401).json({
           success: false,
           error: 'unauthorized',
@@ -329,7 +327,6 @@ router.post(
         return;
       }
 
-      const token = authHeader.substring(7);
       const session = await verifyOwnerSession(token);
       if (!session) {
         res.status(401).json({
@@ -380,8 +377,8 @@ router.post(
         return;
       }
 
-      const authHeader = req.headers.authorization;
-      if (!authHeader?.startsWith('Bearer ')) {
+      const token = extractBearerToken(req.headers.authorization);
+      if (!token) {
         res.status(401).json({
           success: false,
           error: 'unauthorized',
@@ -390,7 +387,6 @@ router.post(
         return;
       }
 
-      const token = authHeader.substring(7);
       const session = await verifyOwnerSession(token);
       if (!session) {
         res.status(401).json({
@@ -441,8 +437,8 @@ router.post(
         return;
       }
 
-      const authHeader = req.headers.authorization;
-      if (!authHeader?.startsWith('Bearer ')) {
+      const token = extractBearerToken(req.headers.authorization);
+      if (!token) {
         res.status(401).json({
           success: false,
           error: 'unauthorized',
@@ -451,7 +447,6 @@ router.post(
         return;
       }
 
-      const token = authHeader.substring(7);
       const session = await verifyOwnerSession(token);
       if (!session) {
         res.status(401).json({

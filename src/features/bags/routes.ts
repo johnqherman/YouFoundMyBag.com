@@ -4,6 +4,7 @@ import {
   createBagSchema,
   shortIdSchema,
 } from '../../infrastructure/utils/validation.js';
+import { extractBearerToken } from '../auth/utils.js';
 import * as bagService from './service.js';
 import * as bagRepository from './repository.js';
 import * as conversationRepository from '../conversations/repository.js';
@@ -24,13 +25,12 @@ async function verifyBagOwnership(
   res: Response,
   next: NextFunction
 ): Promise<void> {
-  const authHeader = req.headers.authorization;
-  if (!authHeader?.startsWith('Bearer ')) {
+  const token = extractBearerToken(req.headers.authorization);
+  if (!token) {
     res.status(401).json({ error: 'Authentication required' });
     return;
   }
 
-  const token = authHeader.substring(7);
   const session = await verifyOwnerSession(token);
   if (!session) {
     res.status(401).json({ error: 'Invalid or expired session' });

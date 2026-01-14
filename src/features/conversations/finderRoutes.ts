@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { logger } from '../../infrastructure/logger/index.js';
+import { extractBearerToken } from '../auth/utils.js';
 import { verifyFinderMagicLink, verifyFinderSession } from '../auth/service.js';
 import * as conversationService from './service.js';
 import { verifyMagicLinkSchema } from '../../infrastructure/utils/validation.js';
@@ -73,8 +74,8 @@ router.get(
     try {
       const { conversationId } = req.params;
 
-      const authHeader = req.headers.authorization;
-      if (!authHeader?.startsWith('Bearer ')) {
+      const token = extractBearerToken(req.headers.authorization);
+      if (!token) {
         res.status(401).json({
           success: false,
           error: 'unauthorized',
@@ -83,7 +84,6 @@ router.get(
         return;
       }
 
-      const token = authHeader.substring(7);
       const session = await verifyFinderSession(token);
       if (!session) {
         res.status(401).json({
@@ -149,8 +149,8 @@ router.post(
         return;
       }
 
-      const authHeader = req.headers.authorization;
-      if (!authHeader?.startsWith('Bearer ')) {
+      const token = extractBearerToken(req.headers.authorization);
+      if (!token) {
         res.status(401).json({
           success: false,
           error: 'unauthorized',
@@ -159,7 +159,6 @@ router.post(
         return;
       }
 
-      const token = authHeader.substring(7);
       const session = await verifyFinderSession(token);
       if (!session) {
         res.status(401).json({

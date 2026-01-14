@@ -8,6 +8,10 @@ const configSchema = z.object({
     .default('development'),
   PORT: z.coerce.number().default(3001),
   FRONTEND_URL: z.string().default('http://localhost:3000'),
+  ALLOWED_ORIGINS: z
+    .string()
+    .default('http://localhost:3000')
+    .transform((s) => s.split(',')),
   DATABASE_URL: z.string().default('postgresql://localhost:5432/youfoundmybag'),
 
   DATABASE_SSL_MODE: z

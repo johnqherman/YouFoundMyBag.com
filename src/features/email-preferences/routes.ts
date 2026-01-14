@@ -1,5 +1,6 @@
 import express from 'express';
 import { logger } from '../../infrastructure/logger/index.js';
+import { extractBearerToken } from '../auth/utils.js';
 import * as emailPreferencesService from './service.js';
 import { verifyOwnerSession } from '../auth/service.js';
 
@@ -7,13 +8,12 @@ const router = express.Router();
 
 router.get('/token', async (req, res): Promise<void> => {
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader?.startsWith('Bearer ')) {
+    const authToken = extractBearerToken(req.headers.authorization);
+    if (!authToken) {
       res.status(401).json({ error: 'Authentication required' });
       return;
     }
 
-    const authToken = authHeader.substring(7);
     const session = await verifyOwnerSession(authToken);
     if (!session) {
       res.status(401).json({ error: 'Invalid or expired session' });

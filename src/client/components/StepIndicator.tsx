@@ -11,10 +11,9 @@ export default function StepIndicator({
         <div className="absolute top-1.5 left-1.5 right-1.5 h-0.5 bg-regal-navy-200" />
 
         <div
-          className="absolute top-1.5 left-1.5 h-0.5 bg-regal-navy-600 transition-all duration-300 ease-in-out"
+          className="absolute top-1.5 left-1.5 h-0.5 bg-regal-navy-600 transition-all duration-300 ease-in-out progress-bar"
           style={{
-            width: `${Math.max(0, ((currentStep - 1) / (totalSteps - 1)) * 100)}%`,
-            maxWidth: 'calc(100% - 0.75rem)',
+            ['--progress-width' as string]: `${Math.max(0, ((currentStep - 1) / (totalSteps - 1)) * 100)}%`,
           }}
         />
 

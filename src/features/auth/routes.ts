@@ -9,11 +9,17 @@ import {
   verifyMagicLinkSchema,
   emailSchema,
 } from '../../infrastructure/utils/validation.js';
+import { extractBearerToken } from './utils.js';
+import {
+  authMagicLinkRateLimit,
+  authVerifyRateLimit,
+} from '../security/middleware.js';
 
 const router = Router();
 
 router.post(
   '/auth/magic-link',
+  authMagicLinkRateLimit,
   async (req: Request, res: Response): Promise<void> => {
     try {
       const bodyResult = magicLinkSchema.safeParse(req.body);
@@ -51,15 +57,11 @@ router.post(
 
 router.post(
   '/auth/verify',
+  authVerifyRateLimit,
   async (req: Request, res: Response): Promise<void> => {
     try {
-      logger.debug('DEBUG: Auth verify request received');
-      logger.debug('DEBUG: Request body keys:', Object.keys(req.body));
-
       const bodyResult = verifyMagicLinkSchema.safeParse(req.body);
       if (!bodyResult.success) {
-        logger.debug('DEBUG: Validation failed for magic link token');
-        logger.debug('DEBUG: Validation errors:', bodyResult.error.issues);
         res.status(400).json({
           success: false,
           error: 'validation_error',
@@ -70,16 +72,10 @@ router.post(
       }
 
       const { magic_token } = bodyResult.data;
-      logger.debug(
-        `DEBUG: Processing magic token: ${magic_token.substring(0, 8)}...`
-      );
 
       const { sessionToken, session } =
         await authService.verifyMagicLink(magic_token);
 
-      logger.debug(
-        `DEBUG: Magic link verification successful for email: ${session.email}`
-      );
       res.json({
         success: true,
         data: {
@@ -114,8 +110,8 @@ router.get(
   '/auth/dashboard',
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const authHeader = req.headers.authorization;
-      if (!authHeader?.startsWith('Bearer ')) {
+      const token = extractBearerToken(req.headers.authorization);
+      if (!token) {
         res.status(401).json({
           success: false,
           error: 'unauthorized',
@@ -124,7 +120,6 @@ router.get(
         return;
       }
 
-      const token = authHeader.substring(7);
       const session = await authService.verifyOwnerSession(token);
       if (!session) {
         res.status(401).json({
@@ -229,8 +224,8 @@ router.post(
   '/auth/logout',
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const authHeader = req.headers.authorization;
-      if (!authHeader?.startsWith('Bearer ')) {
+      const token = extractBearerToken(req.headers.authorization);
+      if (!token) {
         res.status(401).json({
           success: false,
           error: 'unauthorized',
@@ -239,7 +234,6 @@ router.post(
         return;
       }
 
-      const token = authHeader.substring(7);
       await authService.logout(token);
 
       res.json({
@@ -259,6 +253,7 @@ router.post(
 
 router.post(
   '/auth/request-magic-link',
+  authMagicLinkRateLimit,
   async (req: Request, res: Response): Promise<void> => {
     try {
       const bodyResult = emailSchema.safeParse(req.body.email);

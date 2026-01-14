@@ -20,7 +20,6 @@ import {
   sendMessageRateLimit,
   dbRateLimit,
 } from './features/security/middleware.js';
-
 import { default as bagRoutes } from './features/bags/routes.js';
 import { default as messagingRoutes } from './features/messaging/routes.js';
 import { conversationRoutes } from './features/conversations/routes.js';
@@ -37,10 +36,7 @@ if (config.NODE_ENV === 'production') {
 app.use(securityHeaders);
 app.use(
   cors({
-    origin:
-      config.NODE_ENV === 'production'
-        ? ['https://youfoundmybag.com', 'https://www.youfoundmybag.com']
-        : ['http://localhost:3000'],
+    origin: config.ALLOWED_ORIGINS,
     credentials: true,
   })
 );

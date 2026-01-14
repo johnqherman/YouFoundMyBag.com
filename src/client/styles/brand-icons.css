@@ -1,3 +1,10 @@
+:root {
+  --brand-color-signal: #3a76f0;
+  --brand-color-whatsapp: #25d366;
+  --brand-color-telegram: #26a5e4;
+  --brand-color-instagram: #e4405f;
+}
+
 .brand-icon {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   display: inline-flex;
@@ -10,8 +17,24 @@
 .brand-icon svg,
 .brand-icon span {
   max-height: 18px;
-  display: flex;
+  display: block;
   align-items: center;
+}
+
+.brand-icon-signal {
+  color: var(--brand-color-signal);
+}
+
+.brand-icon-whatsapp {
+  color: var(--brand-color-whatsapp);
+}
+
+.brand-icon-telegram {
+  color: var(--brand-color-telegram);
+}
+
+.brand-icon-instagram {
+  color: var(--brand-color-instagram);
 }
 
 .brand-icon-interactive {
@@ -159,4 +182,12 @@
 
 .brand-icon-loading {
   animation: icon-loading 1.5s ease-in-out infinite;
+}
+
+.input-icon-padding {
+  padding-left: 2.5rem;
+}
+
+.input-social-padding {
+  padding-left: 3.5rem;
 }
