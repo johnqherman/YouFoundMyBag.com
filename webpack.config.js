@@ -16,6 +16,9 @@ export default {
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js', '.jsx'],
+    extensionAlias: {
+      '.js': ['.tsx', '.ts', '.js'],
+    },
   },
   module: {
     rules: [
