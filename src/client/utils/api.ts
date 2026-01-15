@@ -45,7 +45,7 @@ class ApiClient {
           };
         }
       }
-    } catch (parseError) {
+    } catch {
       data = {
         error: 'Response parsing failed',
         message: 'Unable to parse server response',

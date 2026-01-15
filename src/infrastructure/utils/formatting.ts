@@ -41,7 +41,7 @@ export function formatPhoneNumber(phoneNumber: string): string {
     if (parsed && parsed.isValid()) {
       return parsed.formatInternational();
     }
-  } catch (error) {
+  } catch {
     // fail silently
   }
 
