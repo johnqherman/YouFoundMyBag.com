@@ -2,7 +2,7 @@ import { getUnsubscribeToken } from '../../features/email-preferences/service.js
 import { emailFooter } from './templates.js';
 
 export function getDashboardUrl(): string {
-  return process.env.APP_URL || 'http://localhost:3000';
+  return process.env.FRONTEND_URL || 'http://localhost:3000';
 }
 
 export async function getEmailFooter(email: string): Promise<{
