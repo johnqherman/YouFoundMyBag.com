@@ -1,4 +1,4 @@
-import type { ContactPreferenceProps } from '../../types';
+import type { ContactPreferenceProps } from '../../types/index.js';
 
 export default function ContactPreference({
   formData,

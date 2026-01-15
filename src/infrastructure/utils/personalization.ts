@@ -1,5 +1,5 @@
 import { MessageContext } from '../../features/types/index.js';
-import { lowercaseBagName } from './formatting';
+import { lowercaseBagName } from './formatting.js';
 import { PersonalizationContext, NameInfo } from '../types/index.js';
 
 export function shouldPersonalize(context: MessageContext): boolean {

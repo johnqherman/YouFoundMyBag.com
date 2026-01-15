@@ -1,17 +1,17 @@
 import { useState, useCallback } from 'react';
-import { api } from '../utils/api';
+import { api } from '../utils/api.js';
 import type {
   CreateBagRequest,
   ContactWithId,
   CreateBagFormProps,
   FormData,
-} from '../types/index';
-import StepIndicator from './StepIndicator';
-import BasicInfo from './steps/BasicInfo';
-import { emailSchema } from '../../infrastructure/utils/validation';
-import ContactPreference from './steps/ContactPreference';
-import ContactDetails from './steps/ContactDetails';
-import ReviewSubmit from './steps/ReviewSubmit';
+} from '../types/index.js';
+import StepIndicator from './StepIndicator.js';
+import BasicInfo from './steps/BasicInfo.js';
+import { emailSchema } from '../../infrastructure/utils/validation.js';
+import ContactPreference from './steps/ContactPreference.js';
+import ContactDetails from './steps/ContactDetails.js';
+import ReviewSubmit from './steps/ReviewSubmit.js';
 
 export default function CreateBagForm({ onSuccess }: CreateBagFormProps) {
   const [currentStep, setCurrentStep] = useState(1);

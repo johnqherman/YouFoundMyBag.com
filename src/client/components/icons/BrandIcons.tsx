@@ -1,4 +1,4 @@
-import type { BrandIconProps } from '../../types';
+import type { BrandIconProps } from '../../types/index.js';
 
 export const SignalIcon = ({
   size = 20,

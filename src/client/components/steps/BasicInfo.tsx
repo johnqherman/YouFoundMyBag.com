@@ -1,7 +1,7 @@
-import CharacterLimitInput from '../CharacterLimitInput';
-import CharacterLimitTextArea from '../CharacterLimitTextArea';
-import PrivacyWarning from '../PrivacyWarning';
-import type { BasicInfoProps } from '../../types';
+import CharacterLimitInput from '../CharacterLimitInput.js';
+import CharacterLimitTextArea from '../CharacterLimitTextArea.js';
+import PrivacyWarning from '../PrivacyWarning.js';
+import type { BasicInfoProps } from '../../types/index.js';
 
 export default function BasicInfo({
   formData,

@@ -1,5 +1,5 @@
 import React from 'react';
-import type { CharacterLimitTextAreaProps } from '../types';
+import type { CharacterLimitTextAreaProps } from '../types/index.js';
 
 const CharacterLimitTextArea = React.forwardRef<
   HTMLTextAreaElement,

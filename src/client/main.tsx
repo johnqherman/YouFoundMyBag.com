@@ -3,13 +3,13 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import './index.css';
-import HomePage from './pages/HomePage';
-import FinderPage from './pages/FinderPage';
-import NotFoundPage from './pages/NotFoundPage';
-import DashboardPage from './pages/DashboardPage';
-import AuthVerifyPage from './pages/AuthVerifyPage';
-import ConversationPage from './pages/ConversationPage';
-import EmailPreferencesPage from './pages/EmailPreferencesPage';
+import HomePage from './pages/HomePage.js';
+import FinderPage from './pages/FinderPage.js';
+import NotFoundPage from './pages/NotFoundPage.js';
+import DashboardPage from './pages/DashboardPage.js';
+import AuthVerifyPage from './pages/AuthVerifyPage.js';
+import ConversationPage from './pages/ConversationPage.js';
+import EmailPreferencesPage from './pages/EmailPreferencesPage.js';
 
 function App() {
   return (

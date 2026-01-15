@@ -7,24 +7,27 @@ import {
   useLocation,
 } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import LoadingSpinner from '../components/LoadingSpinner';
-import CharacterLimitTextArea from '../components/CharacterLimitTextArea';
-import ConfirmModal from '../components/ConfirmModal';
-import RequestMagicLinkModal from '../components/RequestMagicLinkModal';
-import Twemoji from '../components/Twemoji';
-import type { ConversationThread, ConversationMessage } from '../types/index';
-import { api } from '../utils/api';
-import { formatRelativeTimestamp } from '../utils/dateTime';
+import LoadingSpinner from '../components/LoadingSpinner.js';
+import CharacterLimitTextArea from '../components/CharacterLimitTextArea.js';
+import ConfirmModal from '../components/ConfirmModal.js';
+import RequestMagicLinkModal from '../components/RequestMagicLinkModal.js';
+import Twemoji from '../components/Twemoji.js';
+import type {
+  ConversationThread,
+  ConversationMessage,
+} from '../types/index.js';
+import { api } from '../utils/api.js';
+import { formatRelativeTimestamp } from '../utils/dateTime.js';
 import {
   formatConversationParticipant,
   getContextualReplyPlaceholder,
-} from '../../infrastructure/utils/personalization';
+} from '../../infrastructure/utils/personalization.js';
 import {
   ErrorIcon,
   QuestionIcon,
   CheckIcon,
   ArchiveIcon,
-} from '../components/icons/AppIcons';
+} from '../components/icons/AppIcons.js';
 
 function formatBagDisplayName(
   ownerName?: string,

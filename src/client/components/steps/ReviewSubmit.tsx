@@ -3,21 +3,21 @@ import type {
   ContactWithId,
   ReviewSubmitProps,
   SortableContactItemProps,
-} from '../../types';
+} from '../../types/index.js';
 import {
   formatContactValue,
   formatPhoneNumber,
   formatContactTypeName,
-} from '../../../infrastructure/utils/formatting';
-import { getContactMethodIcon } from '../icons/AppIcons';
-import Twemoji from '../Twemoji';
+} from '../../../infrastructure/utils/formatting.js';
+import { getContactMethodIcon } from '../icons/AppIcons.js';
+import Twemoji from '../Twemoji.js';
 import {
   SignalIcon,
   WhatsAppIcon,
   TelegramIcon,
   InstagramIcon,
   GripVerticalIcon,
-} from '../icons/BrandIcons';
+} from '../icons/BrandIcons.js';
 import {
   DndContext,
   closestCenter,

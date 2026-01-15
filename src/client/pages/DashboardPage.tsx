@@ -7,19 +7,19 @@ import type {
   MessageContext,
   MessageContextInfo,
   DashboardData,
-} from '../types';
-import LoadingSpinner from '../components/LoadingSpinner';
-import ConfirmModal from '../components/ConfirmModal';
-import BagManagementModal from '../components/BagManagementModal';
-import RequestMagicLinkModal from '../components/RequestMagicLinkModal';
-import Twemoji from '../components/Twemoji';
+} from '../types/index.js';
+import LoadingSpinner from '../components/LoadingSpinner.js';
+import ConfirmModal from '../components/ConfirmModal.js';
+import BagManagementModal from '../components/BagManagementModal.js';
+import RequestMagicLinkModal from '../components/RequestMagicLinkModal.js';
+import Twemoji from '../components/Twemoji.js';
 import {
   MessageIcon,
   MailIcon,
   ArchiveIcon,
   BagSettingsIcon,
-} from '../components/icons/AppIcons';
-import { formatRelativeTimestamp } from '../utils/dateTime';
+} from '../components/icons/AppIcons.js';
+import { formatRelativeTimestamp } from '../utils/dateTime.js';
 
 function formatBagDisplayName(
   ownerName?: string,

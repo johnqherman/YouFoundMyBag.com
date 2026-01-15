@@ -1,6 +1,6 @@
 import { createElement, useEffect, useRef, useCallback } from 'react';
 import twemoji from 'twemoji';
-import type { TwemojiProps } from '../types';
+import type { TwemojiProps } from '../types/index.js';
 
 export default function Twemoji({
   children,

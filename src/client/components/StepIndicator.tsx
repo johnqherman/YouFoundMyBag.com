@@ -1,4 +1,4 @@
-import type { StepIndicatorProps } from '../types';
+import type { StepIndicatorProps } from '../types/index.js';
 
 export default function StepIndicator({
   currentStep,

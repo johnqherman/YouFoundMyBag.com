@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { CharacterLimitInputProps } from '../types';
+import type { CharacterLimitInputProps } from '../types/index.js';
 
 export default function CharacterLimitInput({
   value,

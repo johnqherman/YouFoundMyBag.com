@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import ConfirmModal from './ConfirmModal';
+import ConfirmModal from './ConfirmModal.js';
 import {
   PrintIcon,
   DownloadActionIcon,
@@ -12,14 +12,14 @@ import {
   MailIcon,
   CheckIcon,
   DeleteIcon,
-} from './icons/AppIcons';
-import { TIME_MS as t } from '../constants/timeConstants';
+} from './icons/AppIcons.js';
+import { TIME_MS as t } from '../constants/timeConstants.js';
 import type {
   QRCodeData,
   SectionId,
   NavigationItem,
   BagManagementModalProps,
-} from '../types';
+} from '../types/index.js';
 
 const navigationItems: NavigationItem[] = [
   {

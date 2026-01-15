@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import LoadingSpinner from '../components/LoadingSpinner';
-import { TIME_MS as t } from '../constants/timeConstants';
-import { SuccessIcon, ErrorIcon } from '../components/icons/AppIcons';
-import RequestMagicLinkModal from '../components/RequestMagicLinkModal';
+import LoadingSpinner from '../components/LoadingSpinner.js';
+import { TIME_MS as t } from '../constants/timeConstants.js';
+import { SuccessIcon, ErrorIcon } from '../components/icons/AppIcons.js';
+import RequestMagicLinkModal from '../components/RequestMagicLinkModal.js';
 
 export default function AuthVerifyPage() {
   const [searchParams] = useSearchParams();

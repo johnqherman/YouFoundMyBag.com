@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import CreateBagForm from '../components/CreateBagForm';
-import BagCreated from '../components/BagCreated';
-import type { CreateBagResponse } from '../types';
+import CreateBagForm from '../components/CreateBagForm.js';
+import BagCreated from '../components/BagCreated.js';
+import type { CreateBagResponse } from '../types/index.js';
 
 export default function HomePage() {
   const [createdBag, setCreatedBag] = useState<CreateBagResponse | null>(null);

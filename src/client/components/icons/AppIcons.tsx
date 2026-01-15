@@ -22,7 +22,7 @@ import RefreshIcon from '@atlaskit/icon/core/refresh';
 import LightbulbIcon from '@atlaskit/icon/core/lightbulb';
 import GridIcon from '@atlaskit/icon/core/grid';
 import DeleteIconAtlas from '@atlaskit/icon/core/delete';
-import type { IconSize, IconColor } from '../../types';
+import type { IconSize, IconColor } from '../../types/index.js';
 
 import {
   SignalIcon,
@@ -30,7 +30,7 @@ import {
   TelegramIcon,
   InstagramIcon,
   brandColors as brandIconColors,
-} from './BrandIcons';
+} from './BrandIcons.js';
 
 export { SignalIcon, WhatsAppIcon, TelegramIcon, InstagramIcon };
 

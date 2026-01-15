@@ -1,4 +1,4 @@
-import type { ConfirmModalProps } from '../types';
+import type { ConfirmModalProps } from '../types/index.js';
 
 export default function ConfirmModal({
   isOpen,

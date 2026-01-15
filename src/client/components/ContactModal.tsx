@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { api } from '../utils/api';
-import CharacterLimitTextArea from './CharacterLimitTextArea';
-import PrivacyWarning from './PrivacyWarning';
-import Twemoji from './Twemoji';
-import { emailSchema } from '../../infrastructure/utils/validation';
-import { lowercaseBagName } from '../../infrastructure/utils/formatting';
-import { SuccessIcon } from './icons/AppIcons';
-import type { ContactModalProps } from '../types';
+import { api } from '../utils/api.js';
+import CharacterLimitTextArea from './CharacterLimitTextArea.js';
+import PrivacyWarning from './PrivacyWarning.js';
+import Twemoji from './Twemoji.js';
+import { emailSchema } from '../../infrastructure/utils/validation.js';
+import { lowercaseBagName } from '../../infrastructure/utils/formatting.js';
+import { SuccessIcon } from './icons/AppIcons.js';
+import type { ContactModalProps } from '../types/index.js';
 
 declare global {
   interface Window {

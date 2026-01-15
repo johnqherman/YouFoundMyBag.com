@@ -1,8 +1,8 @@
 import { useRef, useEffect } from 'react';
-import type { ContactDetailsProps } from '../../types';
-import ContactInput from '../ContactInput';
-import PhoneInputErrorBoundary from '../PhoneInputErrorBoundary';
-import { AlertIcon } from '../icons/AppIcons';
+import type { ContactDetailsProps } from '../../types/index.js';
+import ContactInput from '../ContactInput.js';
+import PhoneInputErrorBoundary from '../PhoneInputErrorBoundary.js';
+import { AlertIcon } from '../icons/AppIcons.js';
 
 export default function ContactDetails({
   formData,

@@ -1,4 +1,4 @@
-import { TIME_MS as t } from '../constants/timeConstants';
+import { TIME_MS as t } from '../constants/timeConstants.js';
 
 export function formatRelativeTimestamp(timestamp: string | Date): string {
   const date = new Date(timestamp);

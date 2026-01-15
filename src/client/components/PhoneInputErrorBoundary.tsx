@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import type {
   PhoneInputErrorBoundaryProps,
   PhoneInputErrorBoundaryState,
-} from '../types';
+} from '../types/index.js';
 
 export class PhoneInputErrorBoundary extends Component<
   PhoneInputErrorBoundaryProps,

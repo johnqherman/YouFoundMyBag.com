@@ -1,11 +1,11 @@
-import { pool, withTransaction } from '../../infrastructure/database/index';
+import { pool, withTransaction } from '../../infrastructure/database/index.js';
 import {
   CreateBagRequest,
   CachedBag,
   CachedFinderPageData,
   CachedContact,
-} from '../../client/types/index';
-import { formatContactValue } from '../../infrastructure/utils/formatting';
+} from '../../client/types/index.js';
+import { formatContactValue } from '../../infrastructure/utils/formatting.js';
 import {
   encryptField,
   decryptField,

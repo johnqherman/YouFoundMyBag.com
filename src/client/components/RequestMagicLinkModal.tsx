@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { emailSchema } from '../../infrastructure/utils/validation';
-import { SuccessIcon, ErrorIcon } from './icons/AppIcons';
-import type { RequestMagicLinkModalProps } from '../types';
+import { emailSchema } from '../../infrastructure/utils/validation.js';
+import { SuccessIcon, ErrorIcon } from './icons/AppIcons.js';
+import type { RequestMagicLinkModalProps } from '../types/index.js';
 
 export default function RequestMagicLinkModal({
   isOpen,

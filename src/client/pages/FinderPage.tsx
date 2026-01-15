@@ -1,19 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { api } from '../utils/api';
-import type { FinderPageData } from '../types';
-import ContactModal from '../components/ContactModal';
-import LoadingSpinner from '../components/LoadingSpinner';
-import Twemoji from '../components/Twemoji';
+import { api } from '../utils/api.js';
+import type { FinderPageData } from '../types/index.js';
+import ContactModal from '../components/ContactModal.js';
+import LoadingSpinner from '../components/LoadingSpinner.js';
+import Twemoji from '../components/Twemoji.js';
 import {
   BagIcon,
   PrivacyIcon,
   PhoneContactIcon,
   MessageIcon,
   getContactMethodIcon,
-} from '../components/icons/AppIcons';
-import { formatPhoneNumber } from '../../infrastructure/utils/formatting';
+} from '../components/icons/AppIcons.js';
+import { formatPhoneNumber } from '../../infrastructure/utils/formatting.js';
 
 function formatOwnerReference(ownerName?: string): string {
   return ownerName ? `${ownerName}'s` : 'my';

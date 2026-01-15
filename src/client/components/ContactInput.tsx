@@ -5,16 +5,16 @@ import type {
   ContactWithId,
   IntlTelInputRef,
   ContactInputProps,
-} from '../types/index';
-import { emailSchema } from '../../infrastructure/utils/validation';
-import { capitalizeWords } from '../../infrastructure/utils/formatting';
+} from '../types/index.js';
+import { emailSchema } from '../../infrastructure/utils/validation.js';
+import { capitalizeWords } from '../../infrastructure/utils/formatting.js';
 import {
   SignalIcon,
   WhatsAppIcon,
   TelegramIcon,
   InstagramIcon,
-} from './icons/BrandIcons';
-import { MailIcon, PhoneContactIcon } from './icons/AppIcons';
+} from './icons/BrandIcons.js';
+import { MailIcon, PhoneContactIcon } from './icons/AppIcons.js';
 
 export default function ContactInput({
   contact,

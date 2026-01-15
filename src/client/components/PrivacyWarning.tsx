@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { PrivacyWarningProps } from '../types';
+import type { PrivacyWarningProps } from '../types/index.js';
 
 export default function PrivacyWarning({
   message,

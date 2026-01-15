@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import type { BagCreatedProps } from '../types/index.js';
-import { TIME_MS as t } from '../constants/timeConstants';
+import { TIME_MS as t } from '../constants/timeConstants.js';
 import {
   SuccessIcon,
   AlertIcon,
   PrintIcon,
   DownloadActionIcon,
   PlusIcon,
-} from './icons/AppIcons';
+} from './icons/AppIcons.js';
 
 export default function BagCreated({
   bagData,
