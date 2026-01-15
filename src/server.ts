@@ -57,7 +57,14 @@ app.use(
 );
 
 if (config.NODE_ENV === 'production') {
-  app.use(express.static('dist/frontend'));
+  app.use(
+    express.static('dist/frontend', {
+      setHeaders: (res) => {
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+        res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+      },
+    })
+  );
   app.get('*', (req, res) => {
     res.sendFile('index.html', { root: 'dist/frontend' });
   });

@@ -9,7 +9,7 @@ const __dirname = path.dirname(__filename);
 export default {
   entry: './src/client/main.tsx',
   output: {
-    path: path.resolve(__dirname, 'dist/client'),
+    path: path.resolve(__dirname, 'dist/public'),
     filename: 'bundle.[contenthash].js',
     clean: true,
     publicPath: '/',
@@ -57,7 +57,7 @@ export default {
   ],
   devServer: {
     static: {
-      directory: path.join(__dirname, 'dist/client'),
+      directory: path.join(__dirname, 'dist/public'),
     },
     compress: true,
     port: 3000,
