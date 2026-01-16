@@ -47,8 +47,8 @@ app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use('/api/bags', createBagRateLimit, dbRateLimit(5, 60), bagRoutes);
 app.use('/api/bags', sendMessageRateLimit, dbRateLimit(3, 5), messagingRoutes);
 app.use('/api', sendMessageRateLimit, dbRateLimit(5, 60), conversationRoutes);
-app.use('/api', basicRateLimit, dbRateLimit(3, 60), finderRoutes);
-app.use('/api', basicRateLimit, dbRateLimit(3, 60), authRoutes);
+app.use('/api', basicRateLimit, dbRateLimit(60, 60), finderRoutes);
+app.use('/api', basicRateLimit, dbRateLimit(60, 60), authRoutes);
 app.use(
   '/api/email-preferences',
   basicRateLimit,
