@@ -19,7 +19,7 @@
   <a href="https://github.com/johnqherman/YouFoundMyBag.com/blob/master/LICENSE">
     <img src="https://img.shields.io/badge/license-AGPL--3.0-blue.svg" alt="License" />
   </a>
-  <a href="https://github.com/johnqherman/YouFoundMyBag/actions">
+  <a href="https://github.com/johnqherman/YouFoundMyBag.com/actions">
     <img src="https://img.shields.io/github/actions/workflow/status/johnqherman/YouFoundMyBag.com/deploy.yml?branch=master" alt="Build Status" />
   </a>
   <img src="https://img.shields.io/badge/version-1.0.0-green.svg" alt="Version" />
