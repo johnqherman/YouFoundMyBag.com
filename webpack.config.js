@@ -1,5 +1,6 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
+import webpack from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 
@@ -45,6 +46,9 @@ export default {
     ],
   },
   plugins: [
+    new webpack.EnvironmentPlugin({
+      CLOUDFLARE_TURNSTILE_SITE_KEY: null,
+    }),
     new HtmlWebpackPlugin({
       template: './src/client/index.html',
       filename: 'index.html',

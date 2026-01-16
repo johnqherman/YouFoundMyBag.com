@@ -38,7 +38,9 @@ const configSchema = z.object({
   SMTP_PORT: z.coerce.number().default(587),
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
-  SMTP_FROM: z.string().default('noreply@youfoundmybag.com'),
+  SMTP_FROM: z
+    .string()
+    .default('YouFoundMyBag.com <noreply@youfoundmybag.com>'),
   SMTP_SECURE: z
     .string()
     .optional()

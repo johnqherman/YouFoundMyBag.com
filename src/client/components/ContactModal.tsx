@@ -41,8 +41,8 @@ export default function ContactModal({
 
       const id = window.turnstile.render('#turnstile-widget', {
         sitekey:
-          (import.meta as { env?: Record<string, unknown> }).env
-            ?.VITE_CLOUDFLARE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA',
+          process.env.CLOUDFLARE_TURNSTILE_SITE_KEY ||
+          '1x00000000000000000000AA',
         callback: (token: string) => setTurnstileToken(token),
         theme: 'light',
       });
