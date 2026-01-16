@@ -30,7 +30,7 @@ import { default as emailPreferencesRoutes } from './features/email-preferences/
 const app = express();
 
 if (config.NODE_ENV === 'production') {
-  app.set('trust proxy', true);
+  app.set('trust proxy', 1);
 }
 
 app.use(securityHeaders);
