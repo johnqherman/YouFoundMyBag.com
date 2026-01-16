@@ -124,6 +124,14 @@ export default function CreateBagForm({ onSuccess }: CreateBagFormProps) {
             setError('Please enter a valid email address');
             return false;
           }
+
+          const blankContacts = formData.contacts.filter(
+            (contact) => !contact.value.trim()
+          );
+          if (blankContacts.length > 0) {
+            setError('Please fill in or remove empty contact methods');
+            return false;
+          }
         } else {
           const validContacts = formData.contacts.filter((contact) =>
             contact.value.trim()
@@ -196,6 +204,14 @@ export default function CreateBagForm({ onSuccess }: CreateBagFormProps) {
         const result = emailSchema.safeParse(formData.owner_email.trim());
         if (!result.success) {
           setError('Please enter a valid email address');
+          return;
+        }
+
+        const blankContacts = formData.contacts.filter(
+          (contact) => !contact.value.trim()
+        );
+        if (blankContacts.length > 0) {
+          setError('Please fill in or remove empty contact methods');
           return;
         }
       } else {
