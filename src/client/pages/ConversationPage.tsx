@@ -464,16 +464,19 @@ export default function ConversationPage() {
       <Helmet>
         <title>{conversationTitle}</title>
       </Helmet>
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="sticky top-0 z-10 bg-regal-navy-50 pb-4 mb-6 -mx-6 px-6 pt-6 shadow-sm">
+      <div className="max-w-4xl mx-auto p-4 sm:p-6">
+        <div className="sticky top-0 z-10 bg-regal-navy-50 pb-3 sm:pb-4 mb-4 sm:mb-6 -mx-4 sm:-mx-6 px-4 sm:px-6 pt-4 sm:pt-6 shadow-sm">
           {!isFinderView ? (
-            <Link to="/dashboard" className="link mb-4 inline-block">
+            <Link
+              to="/dashboard"
+              className="link mb-3 sm:mb-4 inline-block text-sm sm:text-base"
+            >
               ← Back to Dashboard
             </Link>
           ) : (
-            <div className="mb-4" />
+            <div className="mb-3 sm:mb-4" />
           )}
-          <h1 className="text-3xl font-semibold mb-2">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold mb-2">
             Conversation about{' '}
             <Twemoji>
               {formatBagDisplayName(
@@ -483,38 +486,40 @@ export default function ConversationPage() {
               )}
             </Twemoji>
           </h1>
-          <p className="text-regal-navy-600">
-            Status:{' '}
-            <span
-              className={`badge ${
-                conversation.conversation.status === 'active'
-                  ? 'badge-success'
-                  : conversation.conversation.status === 'resolved'
-                    ? 'bg-regal-navy-100 text-regal-navy-700'
-                    : 'badge-neutral'
-              }`}
-            >
-              {conversation.conversation.status === 'resolved'
-                ? 'Resolved'
-                : 'Active'}
+          <div className="flex flex-wrap items-center gap-2 text-sm sm:text-base text-regal-navy-600">
+            <span className="flex items-center gap-1.5">
+              Status:{' '}
+              <span
+                className={`badge ${
+                  conversation.conversation.status === 'active'
+                    ? 'badge-success'
+                    : conversation.conversation.status === 'resolved'
+                      ? 'bg-regal-navy-100 text-regal-navy-700'
+                      : 'badge-neutral'
+                }`}
+              >
+                {conversation.conversation.status === 'resolved'
+                  ? 'Resolved'
+                  : 'Active'}
+              </span>
             </span>
             {isFinderView && conversation.bag.owner_name && (
-              <span className="ml-4">
+              <span className="hidden sm:inline">
                 • Owner: <Twemoji>{conversation.bag.owner_name}</Twemoji>
               </span>
             )}
             {!isFinderView && conversation.conversation.finder_display_name && (
-              <span className="ml-4">
+              <span className="hidden sm:inline">
                 • Finder:{' '}
                 <Twemoji>
                   {conversation.conversation.finder_display_name}
                 </Twemoji>
               </span>
             )}
-          </p>
+          </div>
         </div>
 
-        <div className="space-y-3 mb-6">
+        <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
           {conversation.messages.map((message: ConversationMessage) => {
             const isCurrentUserMessage = isFinderView
               ? message.sender_type === 'finder'
@@ -523,10 +528,10 @@ export default function ConversationPage() {
             return (
               <div
                 key={message.id}
-                className={`p-4 rounded-lg ${
+                className={`p-3 sm:p-4 rounded-lg ${
                   isCurrentUserMessage
-                    ? 'bg-regal-navy-600 text-white ml-12 shadow-soft'
-                    : 'bg-white border border-regal-navy-200 text-regal-navy-900 mr-12 shadow-soft'
+                    ? 'bg-regal-navy-600 text-white ml-4 sm:ml-8 md:ml-12 shadow-soft'
+                    : 'bg-white border border-regal-navy-200 text-regal-navy-900 mr-4 sm:mr-8 md:mr-12 shadow-soft'
                 }`}
               >
                 <div className="flex justify-between items-start mb-2">
@@ -566,7 +571,7 @@ export default function ConversationPage() {
 
         {conversation.conversation.status === 'active' && (
           <form onSubmit={sendReply} className="card">
-            <h3 className="text-lg font-semibold mb-4 text-regal-navy-900">
+            <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-regal-navy-900">
               Send a Reply
             </h3>
             <div onKeyDown={handleKeyDown}>
@@ -588,18 +593,18 @@ export default function ConversationPage() {
                 disabled={sending}
               />
             </div>
-            <div className="mt-4 flex justify-between gap-3">
+            <div className="mt-3 sm:mt-4 flex flex-col-reverse sm:flex-row justify-between gap-2 sm:gap-3">
               {!isFinderView ? (
                 <button
                   type="button"
                   onClick={handleResolveConversation}
-                  className="bg-regal-navy-100 hover:bg-regal-navy-200 text-regal-navy-800 border border-regal-navy-300 px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-regal-navy-100 hover:bg-regal-navy-200 text-regal-navy-800 border border-regal-navy-300 px-4 py-2.5 sm:py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                   disabled={sending || resolving}
                 >
                   {resolving ? 'Resolving...' : 'Mark as Resolved'}
                 </button>
               ) : (
-                <div />
+                <div className="hidden sm:block" />
               )}
               <button
                 type="submit"

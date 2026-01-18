@@ -116,27 +116,27 @@ export default function RequestMagicLinkModal({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-lg p-6 w-full max-w-md shadow-soft-lg"
+        className="bg-white rounded-lg p-5 sm:p-6 w-full max-w-md shadow-soft-lg"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold text-regal-navy-900">
+        <div className="flex justify-between items-start gap-4 mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-xl font-semibold text-regal-navy-900">
             Lost your secure chat link?
           </h2>
           <button
             onClick={onClose}
-            className="text-regal-navy-500 hover:text-regal-navy-700 text-2xl leading-none transition-colors"
+            className="text-regal-navy-500 hover:text-regal-navy-700 text-2xl leading-none transition-colors shrink-0 -mt-1"
           >
             ×
           </button>
         </div>
 
-        <p className="text-regal-navy-700 mb-6 leading-relaxed">
+        <p className="text-sm sm:text-base text-regal-navy-700 mb-4 sm:mb-6 leading-relaxed">
           Enter your email address and we&apos;ll send you a new secure link to
           access your {conversationId ? 'conversation' : 'dashboard'}.
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
           <div>
             <label
               htmlFor="email"

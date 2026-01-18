@@ -337,16 +337,18 @@ export default function DashboardPage() {
       <Helmet>
         <title>Your Dashboard | YouFoundMyBag.com</title>
       </Helmet>
-      <div className="max-w-6xl mx-auto p-6">
-        <header className="mb-8">
-          <h1 className="text-3xl font-semibold mb-2">Your Dashboard</h1>
-          <p className="text-regal-navy-600">
+      <div className="max-w-6xl mx-auto p-4 sm:p-6">
+        <header className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-semibold mb-2">
+            Your Dashboard
+          </h1>
+          <p className="text-sm sm:text-base text-regal-navy-600">
             Manage your bags and respond to messages from people who find them.
           </p>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div className="md:col-span-1">
             <div className="card">
               <h2 className="text-xl font-semibold mb-4">Your Bags</h2>
 
@@ -429,16 +431,16 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="lg:col-span-2">
+          <div className="md:col-span-1 lg:col-span-2">
             <div className="card">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0 mb-4">
+                <h2 className="text-lg sm:text-xl font-semibold">
                   {activeTab === 'active' ? 'Recent Messages' : 'Archived'}
                 </h2>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setActiveTab('active')}
-                    className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                    className={`flex-1 sm:flex-initial px-4 py-2 sm:px-3 sm:py-1 rounded-md text-sm font-medium transition-colors min-h-[40px] sm:min-h-0 ${
                       activeTab === 'active'
                         ? 'bg-regal-navy-600 text-white'
                         : 'bg-regal-navy-100 text-regal-navy-700 hover:bg-regal-navy-200'
@@ -448,7 +450,7 @@ export default function DashboardPage() {
                   </button>
                   <button
                     onClick={() => setActiveTab('archived')}
-                    className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                    className={`flex-1 sm:flex-initial px-4 py-2 sm:px-3 sm:py-1 rounded-md text-sm font-medium transition-colors min-h-[40px] sm:min-h-0 ${
                       activeTab === 'archived'
                         ? 'bg-regal-navy-600 text-white'
                         : 'bg-regal-navy-100 text-regal-navy-700 hover:bg-regal-navy-200'
@@ -717,20 +719,22 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <footer className="text-center mt-12 text-regal-navy-600 text-sm">
-          <a href="/" className="link mr-4">
-            Create another bag
-          </a>
-          <span className="text-regal-navy-300">|</span>
-          <button
-            onClick={() => {
-              localStorage.removeItem('owner_session_token');
-              window.location.href = '/';
-            }}
-            className="link ml-4"
-          >
-            Log out
-          </button>
+        <footer className="text-center mt-8 sm:mt-12 py-4 text-regal-navy-600 text-sm">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-0">
+            <a href="/" className="link sm:mr-4">
+              Create another bag
+            </a>
+            <span className="hidden sm:inline text-regal-navy-300">|</span>
+            <button
+              onClick={() => {
+                localStorage.removeItem('owner_session_token');
+                window.location.href = '/';
+              }}
+              className="link sm:ml-4"
+            >
+              Log out
+            </button>
+          </div>
         </footer>
       </div>
 

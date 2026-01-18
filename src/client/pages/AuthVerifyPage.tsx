@@ -102,27 +102,27 @@ export default function AuthVerifyPage() {
       <Helmet>
         <title>Verification Failed | YouFoundMyBag.com</title>
       </Helmet>
-      <div className="max-w-md mx-auto p-6 lg:max-w-2xl">
+      <div className="max-w-md mx-auto p-4 sm:p-6 lg:max-w-2xl">
         <div className="text-center">
-          <div className="mb-4 flex justify-center text-red-400">
+          <div className="mb-3 sm:mb-4 flex justify-center text-red-400">
             <ErrorIcon color="currentColor" size="large" />
           </div>
-          <h1 className="text-2xl font-bold text-red-400 mb-4">
+          <h1 className="text-xl sm:text-2xl font-bold text-red-400 mb-3 sm:mb-4">
             Verification Failed
           </h1>
-          <p className="text-neutral-400 mb-6">
+          <p className="text-sm sm:text-base text-neutral-400 mb-4 sm:mb-6">
             {error || 'The verification link is invalid or has expired.'}
           </p>
           <button
             onClick={() => setShowReissueModal(true)}
-            className="text-blue-400 hover:text-blue-300 underline mb-4 transition-colors"
+            className="text-sm sm:text-base text-blue-400 hover:text-blue-300 underline mb-4 transition-colors"
           >
             Lost your secure chat link?
           </button>
           <br />
           <a
             href="/"
-            className="text-neutral-500 hover:text-neutral-400 underline transition-colors"
+            className="text-sm sm:text-base text-neutral-500 hover:text-neutral-400 underline transition-colors"
           >
             Return to homepage
           </a>

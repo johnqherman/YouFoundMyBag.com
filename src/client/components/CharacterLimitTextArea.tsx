@@ -72,15 +72,16 @@ const CharacterLimitTextArea = React.forwardRef<
           onChange={handleChange}
           onPaste={handlePaste}
           placeholder={placeholder}
-          className={baseClasses}
+          className={`${baseClasses} pb-7 sm:pb-2.5`}
           disabled={disabled}
           required={required}
           rows={rows}
           maxLength={maxLength}
         />
 
+        {/* Character counter - positioned inside on desktop, below on mobile */}
         <div
-          className={`absolute bottom-2.5 right-3 text-xs font-medium ${getCounterColor()}`}
+          className={`absolute bottom-2 right-3 text-xs font-medium pointer-events-none ${getCounterColor()}`}
         >
           {value.length}/{maxLength}
         </div>
@@ -92,12 +93,6 @@ const CharacterLimitTextArea = React.forwardRef<
               : `${remaining} characters remaining`}
           </div>
         )}
-
-        <div
-          className={`md:hidden mt-1 text-xs text-right font-medium ${getCounterColor()}`}
-        >
-          {value.length}/{maxLength}
-        </div>
       </div>
     );
   }

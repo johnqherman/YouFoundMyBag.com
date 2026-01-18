@@ -151,20 +151,20 @@ export default function ContactModal({
 
   return (
     <div className="fixed inset-0 bg-regal-navy-900 bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-soft-lg">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold text-regal-navy-900">
+      <div className="bg-white rounded-lg p-5 sm:p-6 w-full max-w-md shadow-soft-lg max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-start gap-4 mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-xl font-semibold text-regal-navy-900">
             Contact {ownerName || 'Owner'}
           </h2>
           <button
             onClick={onClose}
-            className="text-regal-navy-500 hover:text-regal-navy-700 text-2xl leading-none transition-colors"
+            className="text-regal-navy-500 hover:text-regal-navy-700 text-2xl leading-none transition-colors shrink-0 -mt-1"
           >
             ×
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
           <div>
             <label
               htmlFor="message"
@@ -234,8 +234,8 @@ export default function ContactModal({
             </p>
           </div>
 
-          <div className="h-[65px] flex items-center justify-left">
-            <div id="turnstile-widget"></div>
+          <div className="min-h-[65px] flex items-center">
+            <div id="turnstile-widget" className="w-full"></div>
           </div>
 
           {error && <div className="alert-error">{error}</div>}

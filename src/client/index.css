@@ -27,64 +27,68 @@ img.emoji {
 }
 
 @layer components {
+  /* Buttons - Mobile-optimized with min-height for touch targets */
   .btn-primary {
     @apply bg-regal-navy-600 hover:bg-regal-navy-700 active:bg-regal-navy-800
-           text-white font-medium py-2.5 px-5 rounded-lg shadow-soft
-           transition-all duration-150
+           text-white font-medium py-3 px-4 sm:py-2.5 sm:px-5 rounded-lg shadow-soft
+           transition-all duration-150 min-h-[44px]
            focus:outline-none focus:ring-2 focus:ring-regal-navy-500 focus:ring-offset-2;
   }
 
   .btn-secondary {
     @apply bg-regal-navy-50 hover:bg-regal-navy-100 active:bg-regal-navy-200
-           text-regal-navy-800 font-medium py-2.5 px-5 rounded-lg shadow-soft
-           transition-all duration-150
+           text-regal-navy-800 font-medium py-3 px-4 sm:py-2.5 sm:px-5 rounded-lg shadow-soft
+           transition-all duration-150 min-h-[44px]
            focus:outline-none focus:ring-2 focus:ring-regal-navy-300 focus:ring-offset-2;
   }
 
   .btn-danger {
     @apply bg-cinnabar-500 hover:bg-cinnabar-600 active:bg-cinnabar-700
-           text-white font-medium py-2.5 px-5 rounded-lg shadow-soft
-           transition-all duration-150
+           text-white font-medium py-3 px-4 sm:py-2.5 sm:px-5 rounded-lg shadow-soft
+           transition-all duration-150 min-h-[44px]
            focus:outline-none focus:ring-2 focus:ring-cinnabar-400 focus:ring-offset-2;
   }
 
   .btn-ghost {
     @apply bg-transparent hover:bg-regal-navy-50 active:bg-regal-navy-100
-           text-regal-navy-700 font-medium py-2.5 px-5 rounded-lg
-           transition-all duration-150
+           text-regal-navy-700 font-medium py-3 px-4 sm:py-2.5 sm:px-5 rounded-lg
+           transition-all duration-150 min-h-[44px]
            focus:outline-none focus:ring-2 focus:ring-regal-navy-300 focus:ring-offset-2;
   }
 
+  /* Input fields - Larger touch targets on mobile */
   .input-field {
-    @apply w-full px-3 py-2.5 bg-white border border-regal-navy-200 rounded-lg
-           text-regal-navy-900 placeholder-regal-navy-400
-           transition-all duration-150
+    @apply w-full px-3 py-3 sm:py-2.5 bg-white border border-regal-navy-200 rounded-lg
+           text-base sm:text-sm text-regal-navy-900 placeholder-regal-navy-400
+           transition-all duration-150 min-h-[44px]
            focus:outline-none focus:ring-2 focus:ring-regal-navy-500 focus:border-regal-navy-500
            disabled:bg-regal-navy-50 disabled:text-regal-navy-500 disabled:cursor-not-allowed;
   }
 
   .input-field-dark {
-    @apply w-full px-3 py-2.5 bg-regal-navy-950 border border-regal-navy-800 rounded-lg
-           text-regal-navy-50 placeholder-regal-navy-500
-           transition-all duration-150
+    @apply w-full px-3 py-3 sm:py-2.5 bg-regal-navy-950 border border-regal-navy-800 rounded-lg
+           text-base sm:text-sm text-regal-navy-50 placeholder-regal-navy-500
+           transition-all duration-150 min-h-[44px]
            focus:outline-none focus:ring-2 focus:ring-regal-navy-600 focus:border-regal-navy-600
            disabled:bg-regal-navy-900 disabled:text-regal-navy-600 disabled:cursor-not-allowed;
   }
 
+  /* Cards - Responsive padding */
   .card {
-    @apply bg-white border border-regal-navy-100 rounded-lg shadow-soft p-6;
+    @apply bg-white border border-regal-navy-100 rounded-lg shadow-soft p-4 sm:p-6;
   }
 
   .card-dark {
-    @apply bg-regal-navy-950 border border-regal-navy-900 rounded-lg shadow-soft p-6;
+    @apply bg-regal-navy-950 border border-regal-navy-900 rounded-lg shadow-soft p-4 sm:p-6;
   }
 
+  /* Page containers - Responsive padding */
   .page-container {
-    @apply min-h-screen bg-regal-navy-50 px-4 py-8;
+    @apply min-h-screen bg-regal-navy-50 px-4 py-6 sm:py-8;
   }
 
   .page-container-dark {
-    @apply min-h-screen bg-regal-navy-950 px-4 py-8;
+    @apply min-h-screen bg-regal-navy-950 px-4 py-6 sm:py-8;
   }
 
   .alert-info {
@@ -104,7 +108,7 @@ img.emoji {
   }
 
   .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    @apply inline-flex items-center px-2 py-0.5 sm:px-2.5 rounded-full text-xs font-medium whitespace-nowrap;
   }
 
   .badge-neutral {
@@ -143,6 +147,11 @@ img.emoji {
   .progress-bar {
     width: var(--progress-width, 0%);
     max-width: calc(100% - 0.75rem);
+  }
+
+  /* Safe area for iOS notch/home indicator */
+  .safe-area-bottom {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
   }
 }
 

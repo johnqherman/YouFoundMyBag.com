@@ -99,6 +99,8 @@ export default function BagManagementModal({
 
   const [confirmDelete, setConfirmDelete] = useState(false);
 
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
   const handleClose = useCallback(() => {
     setError(null);
     setSuccess(null);
@@ -452,62 +454,62 @@ export default function BagManagementModal({
       case 'qr':
         return (
           <div className="animate-fadeIn">
-            <div className="mb-10">
-              <h2 className="text-4xl font-bold text-slate-900 mb-3 tracking-tight">
+            <div className="mb-6 sm:mb-10">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-2 sm:mb-3 tracking-tight">
                 QR Code & Short Link
               </h2>
-              <p className="text-lg text-slate-600 leading-relaxed">
+              <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
                 Print and attach this QR code to your bag so finders can reach
                 you if it gets lost.
               </p>
             </div>
 
             {qrLoading ? (
-              <div className="flex flex-col items-center justify-center py-16 text-slate-500">
-                <div className="w-12 h-12 border-4 border-slate-200 border-t-regal-navy-600 rounded-full animate-spin mb-4" />
+              <div className="flex flex-col items-center justify-center py-12 sm:py-16 text-slate-500">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 border-4 border-slate-200 border-t-regal-navy-600 rounded-full animate-spin mb-4" />
                 <p>Loading QR code...</p>
               </div>
             ) : qrData ? (
-              <div className="space-y-6">
-                <div className="flex justify-center p-8 bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl border-2 border-slate-200">
+              <div className="space-y-4 sm:space-y-6">
+                <div className="flex justify-center p-4 sm:p-8 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl sm:rounded-2xl border-2 border-slate-200">
                   <img
                     src={qrData.qr_code}
                     alt="QR Code"
-                    className="w-80 h-80 bg-white rounded-xl p-4 shadow-lg"
+                    className="w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 bg-white rounded-lg sm:rounded-xl p-2 sm:p-4 shadow-lg"
                   />
                 </div>
 
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-5">
-                  <label className="block text-sm font-semibold text-slate-700 uppercase tracking-wider mb-3">
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 sm:p-5">
+                  <label className="block text-xs sm:text-sm font-semibold text-slate-700 uppercase tracking-wider mb-2 sm:mb-3">
                     Short Link
                   </label>
-                  <div className="flex gap-3">
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                     <input
                       type="text"
                       value={qrData.url}
                       readOnly
-                      className="flex-1 px-4 py-3 border border-slate-300 rounded-lg bg-white text-slate-900 font-mono text-sm"
+                      className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 border border-slate-300 rounded-lg bg-white text-slate-900 font-mono text-xs sm:text-sm"
                     />
                     <button
                       onClick={copyShortLink}
-                      className="px-6 py-3 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 font-semibold rounded-lg transition-all"
+                      className="px-4 sm:px-6 py-2.5 sm:py-3 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 font-semibold rounded-lg transition-all"
                     >
                       Copy
                     </button>
                   </div>
                 </div>
 
-                <div className="flex gap-3 mt-6">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-4 sm:mt-6">
                   <button
                     onClick={downloadQR}
-                    className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-regal-navy-600 hover:bg-regal-navy-700 text-white font-semibold rounded-xl transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
+                    className="flex-1 flex items-center justify-center gap-2 px-4 sm:px-6 py-3 sm:py-4 bg-regal-navy-600 hover:bg-regal-navy-700 text-white font-semibold rounded-xl transition-all shadow-sm hover:shadow-md sm:hover:-translate-y-0.5"
                   >
                     <DownloadActionIcon color="currentColor" />
                     Download QR
                   </button>
                   <button
                     onClick={() => window.print()}
-                    className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 font-semibold rounded-xl transition-all"
+                    className="flex-1 flex items-center justify-center gap-2 px-4 sm:px-6 py-3 sm:py-4 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 font-semibold rounded-xl transition-all"
                   >
                     <PrintIcon color="currentColor" />
                     Print
@@ -521,17 +523,17 @@ export default function BagManagementModal({
       case 'name':
         return (
           <div className="animate-fadeIn">
-            <div className="mb-10">
-              <h2 className="text-4xl font-bold text-slate-900 mb-3 tracking-tight">
+            <div className="mb-6 sm:mb-10">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-2 sm:mb-3 tracking-tight">
                 Edit Bag Name
               </h2>
-              <p className="text-lg text-slate-600 leading-relaxed">
+              <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
                 Customize the name of your bag. Names can be updated once per
                 week.
               </p>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {cooldownInfo && !cooldownInfo.canUpdate && (
                 <div className="flex items-start gap-4 p-5 bg-amber-50 border border-amber-200 rounded-xl text-amber-900">
                   <AlertIcon
@@ -578,11 +580,11 @@ export default function BagManagementModal({
                 </p>
               </div>
 
-              <div className="flex gap-3 mt-8">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-6 sm:mt-8">
                 <button
                   onClick={() => setNewName(bag.bag_name || '')}
                   disabled={loading || newName === bag.bag_name}
-                  className="flex-1 px-6 py-4 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 sm:px-6 py-3 sm:py-4 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Reset
                 </button>
@@ -594,7 +596,7 @@ export default function BagManagementModal({
                     !newName.trim() ||
                     newName === bag.bag_name
                   }
-                  className="flex-1 px-6 py-4 bg-regal-navy-600 hover:bg-regal-navy-700 text-white font-semibold rounded-xl transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-sm"
+                  className="flex-1 px-4 sm:px-6 py-3 sm:py-4 bg-regal-navy-600 hover:bg-regal-navy-700 text-white font-semibold rounded-xl transition-all shadow-sm hover:shadow-md sm:hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-sm"
                 >
                   {loading ? 'Saving...' : 'Save Changes'}
                 </button>
@@ -606,16 +608,16 @@ export default function BagManagementModal({
       case 'rotate':
         return (
           <div className="animate-fadeIn">
-            <div className="mb-10">
-              <h2 className="text-4xl font-bold text-slate-900 mb-3 tracking-tight">
+            <div className="mb-6 sm:mb-10">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-2 sm:mb-3 tracking-tight">
                 Rotate Short Link
               </h2>
-              <p className="text-lg text-slate-600 leading-relaxed">
+              <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
                 Generate a new QR code and short link.
               </p>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {rotationCooldownInfo && !rotationCooldownInfo.canRotate && (
                 <div className="flex items-start gap-4 p-5 bg-amber-50 border border-amber-200 rounded-xl text-amber-900">
                   <AlertIcon
@@ -676,16 +678,16 @@ export default function BagManagementModal({
       case 'status':
         return (
           <div className="animate-fadeIn">
-            <div className="mb-10">
-              <h2 className="text-4xl font-bold text-slate-900 mb-3 tracking-tight">
+            <div className="mb-6 sm:mb-10">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-2 sm:mb-3 tracking-tight">
                 Bag Status
               </h2>
-              <p className="text-lg text-slate-600 leading-relaxed">
+              <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
                 Control whether finders can start new conversations with you.
               </p>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               <div className="bg-gradient-to-br from-slate-50 to-slate-100 border-2 border-slate-200 rounded-2xl p-8">
                 <div className="flex items-center gap-4">
                   <span
@@ -748,16 +750,16 @@ export default function BagManagementModal({
       case 'email':
         return (
           <div className="animate-fadeIn">
-            <div className="mb-10">
-              <h2 className="text-4xl font-bold text-slate-900 mb-3 tracking-tight">
+            <div className="mb-6 sm:mb-10">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-2 sm:mb-3 tracking-tight">
                 Email Preferences
               </h2>
-              <p className="text-lg text-slate-600 leading-relaxed">
+              <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
                 Manage your notification preferences and email settings.
               </p>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-6">
                 <h3 className="text-base font-semibold text-slate-900 mb-2">
                   Notification Settings
@@ -782,16 +784,16 @@ export default function BagManagementModal({
       case 'resolve':
         return (
           <div className="animate-fadeIn">
-            <div className="mb-10">
-              <h2 className="text-4xl font-bold text-slate-900 mb-3 tracking-tight">
+            <div className="mb-6 sm:mb-10">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-2 sm:mb-3 tracking-tight">
                 Resolve All Conversations
               </h2>
-              <p className="text-lg text-slate-600 leading-relaxed">
+              <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
                 Mark all active conversations as resolved and archive them.
               </p>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {!hasActiveConversations && (
                 <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center">
                   <p className="text-base text-slate-600">
@@ -831,16 +833,16 @@ export default function BagManagementModal({
       case 'delete':
         return (
           <div className="animate-fadeIn">
-            <div className="mb-10">
-              <h2 className="text-4xl font-bold text-red-600 mb-3 tracking-tight">
+            <div className="mb-6 sm:mb-10">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-red-600 mb-2 sm:mb-3 tracking-tight">
                 Delete Bag
               </h2>
-              <p className="text-lg text-slate-600 leading-relaxed">
+              <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
                 Permanently delete this bag and all associated data.
               </p>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               <div className="flex items-start gap-4 p-5 bg-red-50 border border-red-200 rounded-xl text-red-900">
                 <AlertIcon
                   color="currentColor"
@@ -885,17 +887,102 @@ export default function BagManagementModal({
     }
   };
 
+  const MobileNavItem = ({ item }: { item: NavigationItem }) => (
+    <button
+      onClick={() => {
+        setActiveSection(item.id);
+        setMobileNavOpen(false);
+      }}
+      className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all w-full ${
+        activeSection === item.id
+          ? item.id === 'delete'
+            ? 'bg-red-50 text-red-700 border border-red-200'
+            : 'bg-regal-navy-100 text-regal-navy-800 border border-regal-navy-200'
+          : item.id === 'delete'
+            ? 'text-red-600 hover:bg-red-50'
+            : 'text-slate-600 hover:bg-slate-50'
+      }`}
+    >
+      <span className="text-lg">{item.icon}</span>
+      <span>{item.label}</span>
+    </button>
+  );
+
   return (
     <>
       <div
-        className="fixed inset-0 bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn"
+        className="fixed inset-0 bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-0 sm:p-4 z-50 animate-fadeIn"
         onClick={handleClose}
       >
         <div
-          className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] grid grid-cols-[280px_1fr] overflow-hidden animate-slideUp"
+          className="bg-white sm:rounded-2xl shadow-2xl w-full h-full sm:h-auto sm:max-h-[90vh] sm:max-w-6xl flex flex-col md:grid md:grid-cols-[280px_1fr] overflow-hidden animate-slideUp"
           onClick={(e) => e.stopPropagation()}
         >
-          <nav className="bg-gradient-to-b from-slate-800 to-slate-900 border-r border-white/10 py-8 flex flex-col overflow-y-auto">
+          {/* Mobile Header */}
+          <div className="md:hidden bg-gradient-to-r from-slate-800 to-slate-900 px-4 py-4 flex items-center justify-between shrink-0">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-lg font-bold text-white truncate">
+                {bag.bag_name || 'Bag Settings'}
+              </h1>
+              <p className="text-xs text-slate-400 font-medium">
+                {bag.short_id}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setMobileNavOpen(!mobileNavOpen)}
+                className="p-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition-all"
+                aria-label="Menu"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                </svg>
+              </button>
+              <button
+                onClick={handleClose}
+                className="p-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition-all"
+                aria-label="Close"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {/* Mobile Navigation Dropdown */}
+          {mobileNavOpen && (
+            <div className="md:hidden bg-white border-b border-slate-200 px-4 py-4 space-y-2 max-h-[50vh] overflow-y-auto shrink-0">
+              <div className="grid grid-cols-2 gap-2">
+                {navigationItems.map((item) => (
+                  <MobileNavItem key={item.id} item={item} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Desktop Sidebar - Hidden on mobile */}
+          <nav className="hidden md:flex bg-gradient-to-b from-slate-800 to-slate-900 border-r border-white/10 py-8 flex-col overflow-y-auto">
             <div className="px-6 pb-8 border-b border-white/10 mb-6">
               <h1 className="text-2xl font-bold text-white mb-2 tracking-tight">
                 Bag Settings
@@ -983,10 +1070,10 @@ export default function BagManagementModal({
             </div>
           </nav>
 
-          <main className="bg-white overflow-y-auto relative p-12">
+          <main className="bg-white overflow-y-auto relative p-5 sm:p-8 md:p-12 flex-1">
             <button
               onClick={handleClose}
-              className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all"
+              className="hidden md:block absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all"
               aria-label="Close"
             >
               <svg

@@ -126,18 +126,18 @@ export default function EmailPreferencesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 py-12 px-4">
+    <div className="min-h-screen bg-neutral-50 py-6 sm:py-12 px-4">
       <Helmet>
         <title>Email Preferences | YouFoundMyBag.com</title>
       </Helmet>
       <div className="max-w-2xl mx-auto">
-        <div className="bg-white rounded-lg shadow-md p-6 md:p-8">
-          <h1 className="text-3xl font-bold text-regal-navy-900 mb-2">
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 md:p-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-regal-navy-900 mb-2">
             Email Preferences
           </h1>
-          <p className="text-regal-navy-600 mb-6">
+          <p className="text-sm sm:text-base text-regal-navy-600 mb-4 sm:mb-6 break-words">
             Manage your email notifications for{' '}
-            <strong>{preferences?.email}</strong>
+            <strong className="break-all">{preferences?.email}</strong>
           </p>
 
           {success && (

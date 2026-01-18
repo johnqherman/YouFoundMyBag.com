@@ -64,14 +64,14 @@ export default function CharacterLimitInput({
         onChange={handleChange}
         onPaste={handlePaste}
         placeholder={placeholder}
-        className={baseClasses}
+        className={`${baseClasses} pr-16 sm:pr-20`}
         disabled={disabled}
         required={required}
         maxLength={maxLength}
       />
 
       <div
-        className={`absolute bottom-2.5 right-3 text-xs font-medium ${getCounterColor()}`}
+        className={`absolute top-1/2 -translate-y-1/2 right-3 text-xs font-medium pointer-events-none ${getCounterColor()}`}
       >
         {value.length}/{maxLength}
       </div>

@@ -125,13 +125,13 @@ export default function FinderPage() {
       <Helmet>
         <title>You Found My Bag!</title>
       </Helmet>
-      <div className="max-w-readable mx-auto p-6">
+      <div className="max-w-readable mx-auto p-4 sm:p-6">
         <div className="card">
-          <div className="text-center mb-8">
-            <div className="mb-4 flex justify-center text-regal-navy-700">
+          <div className="text-center mb-6 sm:mb-8">
+            <div className="mb-3 sm:mb-4 flex justify-center text-regal-navy-700">
               <BagIcon color="currentColor" size="large" />
             </div>
-            <h1 className="text-3xl font-semibold mb-3 text-regal-navy-900">
+            <h1 className="text-2xl sm:text-3xl font-semibold mb-2 sm:mb-3 text-regal-navy-900">
               You found{' '}
               <Twemoji>
                 {formatOwnerReference(activeBagData.owner_name)}{' '}
@@ -142,27 +142,27 @@ export default function FinderPage() {
               </Twemoji>
               !
             </h1>
-            <p className="text-lg text-regal-navy-700">
+            <p className="text-base sm:text-lg text-regal-navy-700">
               Thank you for taking the time to help.
             </p>
           </div>
 
           {activeBagData.owner_message && (
-            <div className="alert-info mb-8">
-              <p className="font-medium text-regal-navy-900 mb-2">
+            <div className="alert-info mb-6 sm:mb-8">
+              <p className="font-medium text-sm sm:text-base text-regal-navy-900 mb-2">
                 Message from{' '}
                 <Twemoji>{activeBagData.owner_name || 'owner'}</Twemoji>:
               </p>
               <Twemoji
                 tag="p"
-                className="text-regal-navy-800 italic text-wrap-aggressive"
+                className="text-sm sm:text-base text-regal-navy-800 italic text-wrap-aggressive"
               >
                 &quot;{activeBagData.owner_message}&quot;
               </Twemoji>
             </div>
           )}
 
-          <div className="space-y-5">
+          <div className="space-y-4 sm:space-y-5">
             {(() => {
               const totalContactMethods =
                 (activeBagData.secure_messaging_enabled ? 1 : 0) +
@@ -290,8 +290,8 @@ export default function FinderPage() {
           </div>
         </div>
 
-        <div className="text-center mt-8">
-          <a href="/" className="link text-sm">
+        <div className="text-center mt-6 sm:mt-8 pb-4">
+          <a href="/" className="link text-xs sm:text-sm">
             Create your own bag QR code →
           </a>
         </div>
