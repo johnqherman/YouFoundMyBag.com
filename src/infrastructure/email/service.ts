@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 import { logger } from '../logger/index.js';
 import { config } from '../config/index.js';
-import { getTransporter } from './smtp.js';
+import { sendMail, getMailgunClient } from './mailgun.js';
 import { getDashboardUrl, getEmailFooter } from './utils.js';
 import {
   buildMagicLinkEmail,
@@ -47,22 +47,15 @@ async function sendDirectEmail(
   html: string,
   description: string
 ): Promise<void> {
-  const emailer = getTransporter();
-  if (!emailer) {
+  if (!getMailgunClient()) {
     logger.info(`Email not configured - ${description} not sent`);
     return;
   }
 
   try {
-    await emailer.sendMail({
-      from: config.SMTP_FROM,
-      to,
-      subject,
-      html,
-    });
-    logger.info(`${description} sent to ${to}`);
+    await sendMail({ to, subject, html });
   } catch (error) {
-    logger.error(`${description} failed to ${to}:`, error);
+    logger.error(`${description} failed:`, error);
     throw error;
   }
 }
@@ -399,19 +392,13 @@ export async function sendMagicLinkReissue(
     preferencesUrl,
   });
 
-  const transporter = getTransporter();
-  if (!transporter) {
-    logger.error('Email transporter not available');
+  if (!getMailgunClient()) {
+    logger.error('Mailgun client not available');
     throw new Error('Email service not configured');
   }
 
   try {
-    await transporter.sendMail({
-      from: config.SMTP_FROM,
-      to: email,
-      subject,
-      html,
-    });
+    await sendMail({ to: email, subject, html });
 
     const contextInfo =
       userType === 'owner'

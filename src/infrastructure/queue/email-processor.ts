@@ -1,8 +1,7 @@
 import { Job } from 'bullmq';
-import { config } from '../config/index.js';
 import { logger } from '../logger/index.js';
 import { TIME_MS as t } from '../../client/constants/timeConstants.js';
-import { getTransporter } from '../email/smtp.js';
+import { sendMail, getMailgunClient } from '../email/mailgun.js';
 import { EmailJobData } from '../types/index.js';
 import {
   recordEmailSuccess,
@@ -30,9 +29,8 @@ export async function processEmailJob(job: Job<EmailJobData>): Promise<void> {
     throw new Error('Circuit breaker is open - email service unavailable');
   }
 
-  const emailer = getTransporter();
-  if (!emailer) {
-    logger.warn('Email not configured - skipping email job', {
+  if (!getMailgunClient()) {
+    logger.warn('Mailgun not configured - skipping email job', {
       jobId: job.id,
       idempotencyKey,
     });
@@ -40,12 +38,7 @@ export async function processEmailJob(job: Job<EmailJobData>): Promise<void> {
   }
 
   try {
-    const sendPromise = emailer.sendMail({
-      from: config.SMTP_FROM,
-      to,
-      subject,
-      html,
-    });
+    const sendPromise = sendMail({ to, subject, html });
 
     const timeoutPromise = new Promise<never>((_, reject) => {
       setTimeout(

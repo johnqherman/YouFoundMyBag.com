@@ -34,28 +34,12 @@ const configSchema = z.object({
   REDIS_COMMAND_TIMEOUT: z.coerce.number().default(t.FIVE_SECONDS),
 
   CLOUDFLARE_TURNSTILE_SECRET_KEY: z.string().optional(),
-  SMTP_HOST: z.string().optional(),
-  SMTP_PORT: z.coerce.number().default(587),
-  SMTP_USER: z.string().optional(),
-  SMTP_PASS: z.string().optional(),
-  SMTP_FROM: z
+  MAILGUN_API_KEY: z.string().optional(),
+  MAILGUN_DOMAIN: z.string().optional(),
+  MAILGUN_URL: z.string().default('https://api.mailgun.net'),
+  EMAIL_FROM: z
     .string()
     .default('YouFoundMyBag.com <noreply@youfoundmybag.com>'),
-  SMTP_SECURE: z
-    .string()
-    .optional()
-    .default('false')
-    .transform((val) => val === 'true'),
-  SMTP_REQUIRE_TLS: z
-    .string()
-    .optional()
-    .default('true')
-    .transform((val) => val === 'true'),
-  SMTP_REJECT_UNAUTHORIZED: z
-    .string()
-    .optional()
-    .default('true')
-    .transform((val) => val === 'true'),
   APP_ENCRYPTION_KEY: z.string().optional(),
 });
 

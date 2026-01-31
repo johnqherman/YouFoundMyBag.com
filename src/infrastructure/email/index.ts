@@ -1,7 +1,6 @@
-import { config } from '../config/index.js';
 import { logger } from '../logger/index.js';
 import { secureEmailContent } from '../security/sanitization.js';
-import { getTransporter } from './smtp.js';
+import { sendMail, getMailgunClient } from './mailgun.js';
 import { getDashboardUrl, getEmailFooter } from './utils.js';
 
 export async function sendReplyEmail({
@@ -19,8 +18,7 @@ export async function sendReplyEmail({
   conversationId: string;
   bagShortId: string;
 }): Promise<void> {
-  const emailer = getTransporter();
-  if (!emailer) {
+  if (!getMailgunClient()) {
     logger.info('Email not configured - reply email not sent');
     return;
   }
@@ -82,8 +80,7 @@ ${htmlFooter}
   `;
 
   try {
-    await emailer.sendMail({
-      from: config.SMTP_FROM,
+    await sendMail({
       to: recipientEmail,
       subject,
       text: textBody,
