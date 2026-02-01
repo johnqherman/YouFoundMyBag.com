@@ -14,7 +14,7 @@ import EmailPreferencesPage from './pages/EmailPreferencesPage.js';
 function App() {
   return (
     <HelmetProvider>
-      <Router future={{ v7_relativeSplatPath: true }}>
+      <Router>
         <div className="min-h-screen">
           <Routes>
             <Route path="/" element={<HomePage />} />
