@@ -57,7 +57,7 @@ npm run db:init
 npm run dev
 ```
 
-The app will be available at http://localhost:3000 (frontend), http://localhost:3001 (API), and http://localhost:8025 (Mailhog).
+The app will be available at http://localhost:3000 (frontend) and http://localhost:3001 (API).
 
 **Scripts:** `npm run dev` (development), `npm run build` (production build), `npm start` (production server)
 
@@ -110,6 +110,7 @@ The core functionality is free and open source under the AGPL-3.0 license. Self-
 
 - [Tailwind CSS](https://tailwindcss.com/) for the utility-first styling
 - [BullMQ](https://docs.bullmq.io/) for reliable background job processing
+- [Mailgun](https://www.mailgun.com/) for transactional email delivery
 - [Cloudflare Turnstile](https://www.cloudflare.com/products/turnstile/) for privacy-friendly CAPTCHA
 - All the open-source contributors who make projects like this possible
 
