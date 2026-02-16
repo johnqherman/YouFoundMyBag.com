@@ -34,7 +34,7 @@
     "helmet": "^8.1.0",
     "intl-tel-input": "^25.14.0",
     "ioredis": "^5.9.1",
-    "jsdom": "^27.4.0",
+    "jsdom": "^28.1.0",
     "libphonenumber-js": "^1.12.36",
     "mailgun.js": "^12.7.0",
     "nanoid": "^5.0.4",
