@@ -39,7 +39,7 @@
     "mailgun.js": "^12.7.0",
     "nanoid": "^5.0.4",
     "node-cron": "^4.2.1",
-    "nodemailer": "^7.0.12",
+    "nodemailer": "^8.0.1",
     "pg": "^8.18.0",
     "qrcode": "^1.5.3",
     "react": "^18.2.0",
