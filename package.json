@@ -23,7 +23,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@types/jsdom": "^27.0.0",
-    "bullmq": "^5.66.5",
+    "bullmq": "^5.70.1",
     "cors": "^2.8.6",
     "deep-email-validator": "^0.1.21",
     "dompurify": "^3.3.1",
