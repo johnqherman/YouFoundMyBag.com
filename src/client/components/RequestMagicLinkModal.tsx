@@ -85,7 +85,7 @@ export default function RequestMagicLinkModal({
   if (success) {
     return (
       <div
-        className="fixed inset-0 bg-regal-navy-900 bg-opacity-50 dark:bg-black/60 flex items-center justify-center p-4 z-50"
+        className="fixed inset-0 request-modal-overlay bg-regal-navy-900 bg-opacity-50 flex items-center justify-center p-4 z-50"
         onClick={onClose}
       >
         <div
@@ -117,7 +117,7 @@ export default function RequestMagicLinkModal({
 
   return (
     <div
-      className="fixed inset-0 bg-regal-navy-900 bg-opacity-50 dark:bg-black/60 flex items-center justify-center p-4 z-50"
+      className="fixed inset-0 request-modal-overlay bg-regal-navy-900 bg-opacity-50 flex items-center justify-center p-4 z-50"
       {...backdropProps}
     >
       <div
@@ -142,7 +142,7 @@ export default function RequestMagicLinkModal({
           {initialEmail ? (
             <>
               You already have a tag registered to{' '}
-              <strong>({initialEmail})</strong>. Enter your email below and
+              <strong>{initialEmail}</strong>. Enter your email below and
               we&apos;ll send you a link to access your dashboard.
             </>
           ) : (
