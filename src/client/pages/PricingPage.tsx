@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { Link, useSearchParams } from 'react-router-dom';
 
@@ -150,24 +151,38 @@ export default function PricingPage() {
             <div className="mt-10 inline-flex items-center gap-3 bg-white border border-regal-navy-200 rounded-full px-1.5 py-1.5 shadow-soft billing-toggle">
               <button
                 onClick={() => setIsAnnual(false)}
-                className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                className={`relative px-5 py-2 rounded-full text-sm font-medium transition-colors duration-200 ${
                   !isAnnual
-                    ? 'bg-regal-navy-800 text-white shadow-soft-md'
+                    ? 'text-white'
                     : 'text-regal-navy-600 hover:text-regal-navy-800'
                 }`}
               >
-                Monthly
+                {!isAnnual && (
+                  <motion.div
+                    layoutId="billing-pill"
+                    className="absolute inset-0 bg-regal-navy-800 rounded-full shadow-soft-md"
+                    transition={{ duration: 0.2, ease: 'easeOut' }}
+                  />
+                )}
+                <span className="relative">Monthly</span>
               </button>
               <div className="relative">
                 <button
                   onClick={() => setIsAnnual(true)}
-                  className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                  className={`relative px-5 py-2 rounded-full text-sm font-medium transition-colors duration-200 ${
                     isAnnual
-                      ? 'bg-regal-navy-800 text-white shadow-soft-md'
+                      ? 'text-white'
                       : 'text-regal-navy-600 hover:text-regal-navy-800'
                   }`}
                 >
-                  Annual
+                  {isAnnual && (
+                    <motion.div
+                      layoutId="billing-pill"
+                      className="absolute inset-0 bg-regal-navy-800 rounded-full shadow-soft-md"
+                      transition={{ duration: 0.2, ease: 'easeOut' }}
+                    />
+                  )}
+                  <span className="relative">Annual</span>
                 </button>
                 <span
                   className={`recommended-badge absolute -top-2.5 -right-2 text-xs px-1.5 py-0.5 rounded-full font-semibold pointer-events-none transition-colors duration-200 ${
