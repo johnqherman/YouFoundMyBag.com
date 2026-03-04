@@ -139,7 +139,8 @@ export default function ContactDetails({
           ← Back
         </button>
         <button type="button" onClick={onNext} className="btn-primary">
-          Next: Review & Submit
+          <span className="sm:hidden">Next: Review/Submit</span>
+          <span className="hidden sm:inline">Next: Review & Submit</span>
         </button>
       </div>
     </div>

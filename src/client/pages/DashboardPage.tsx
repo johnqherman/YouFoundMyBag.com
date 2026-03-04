@@ -640,7 +640,7 @@ export default function DashboardPage() {
               transition={{ duration: 0.3, ease: 'easeInOut' }}
             >
               <div ref={tabContentRef} className="p-6 sm:p-8">
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0 mb-6">
+                <div className="flex flex-row justify-between items-center mb-6">
                   <h2 className="font-display text-xl text-regal-navy-700">
                     <AnimatePresence
                       custom={activeTab === 'archived' ? 1 : -1}
@@ -660,9 +660,16 @@ export default function DashboardPage() {
                         transition={{ duration: 0.18, ease: 'easeOut' }}
                         className="inline-block whitespace-nowrap"
                       >
-                        {activeTab === 'active'
-                          ? 'Recent Messages'
-                          : 'Archived'}
+                        {activeTab === 'active' ? (
+                          <>
+                            <span className="sm:hidden">Messages</span>
+                            <span className="hidden sm:inline">
+                              Recent Messages
+                            </span>
+                          </>
+                        ) : (
+                          'Archived'
+                        )}
                       </motion.span>
                     </AnimatePresence>
                   </h2>
@@ -1014,11 +1021,11 @@ export default function DashboardPage() {
 
       {showCreateBagModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+          className="modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4 bg-regal-navy-900 bg-opacity-50"
           onClick={() => setShowCreateBagModal(false)}
         >
           <div
-            className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6"
+            className="modal-container bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-4">

@@ -61,7 +61,6 @@ export default function BasicInfo({
         </label>
         <PrivacyWarning
           message="Avoid sharing personal contact details here."
-          storageKey="create-bag-message-privacy-tip"
           variant="light"
           className="mb-3"
         />

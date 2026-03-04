@@ -102,7 +102,6 @@ function ColorPickerSwatch({
 
 const GRADIENT_PRESETS = [
   { label: 'Ocean', start: '#1e3a5f', end: '#4a90e2' },
-  { label: 'Sunset', start: '#ff6b35', end: '#f7c59f' },
   { label: 'Forest', start: '#1a3c2b', end: '#52b788' },
   { label: 'Lavender', start: '#4a3f6b', end: '#c3b1e1' },
   { label: 'Rose', start: '#8b2252', end: '#f4a5c0' },
@@ -133,12 +132,14 @@ const navigationItems: NavigationItem[] = [
   {
     id: 'rotate',
     label: 'Rotate Short Link',
+    mobileLabel: 'Rotate Link',
     icon: <RefreshRotateIcon color="currentColor" />,
     group: 'settings',
   },
   {
     id: 'email',
     label: 'Email Preferences',
+    mobileLabel: 'Email Prefs',
     icon: <MailIcon color="currentColor" />,
     group: 'settings',
   },
@@ -2373,7 +2374,7 @@ export default function BagManagementModal({
       }`}
     >
       <span className="text-lg">{item.icon}</span>
-      <span>{item.label}</span>
+      <span>{item.mobileLabel ?? item.label}</span>
     </button>
   );
 

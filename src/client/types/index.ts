@@ -301,6 +301,7 @@ export type SectionId =
 export interface NavigationItem {
   id: SectionId;
   label: string;
+  mobileLabel?: string;
   icon: React.ReactNode;
   group: 'primary' | 'settings' | 'advanced';
 }
@@ -363,7 +364,6 @@ export interface ContactInputProps {
 
 export interface PrivacyWarningProps {
   message: string;
-  storageKey: string;
   variant?: 'light' | 'dark';
   className?: string;
 }

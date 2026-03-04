@@ -197,7 +197,6 @@ export default function ContactModal({
             </label>
             <PrivacyWarning
               message="Avoid sharing personal contact details here."
-              storageKey="contact-modal-privacy-tip"
               variant="light"
               className="mb-3"
             />

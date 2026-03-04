@@ -143,18 +143,18 @@ function ToastCard({ toast, removeToast }: ToastCardProps) {
       }}
       onMouseEnter={pauseTimer}
       onMouseLeave={startTimer}
-      className="pointer-events-auto w-[480px] bg-white rounded-xl shadow-soft-lg border border-regal-navy-100 overflow-hidden flex relative"
+      className="pointer-events-auto w-full sm:w-[480px] bg-white rounded-xl shadow-soft-lg border border-regal-navy-100 overflow-hidden flex relative"
       role="alert"
     >
       <div
         className="w-1.5 shrink-0"
         style={{ backgroundColor: stripeColor }}
       />
-      <div className="flex items-start gap-4 px-5 py-4 flex-1 min-w-0">
+      <div className="flex items-start gap-3 sm:gap-4 px-3 py-3 sm:px-5 sm:py-4 flex-1 min-w-0">
         <div className="shrink-0 mt-0.5">
           <Icon />
         </div>
-        <p className="text-[1.05rem] leading-snug text-regal-navy-800 break-words min-w-0 flex-1">
+        <p className="text-sm sm:text-[1.05rem] leading-snug text-regal-navy-800 break-words min-w-0 flex-1">
           {toast.message}
         </p>
         <button
@@ -188,7 +188,7 @@ export interface ToastContainerProps {
 
 export function ToastContainer({ toasts, removeToast }: ToastContainerProps) {
   return (
-    <div className="fixed top-4 right-4 z-[9999] flex flex-col gap-2 pointer-events-none">
+    <div className="fixed top-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-[480px] z-[9999] flex flex-col gap-2 pointer-events-none">
       <AnimatePresence>
         {toasts.map((t) => (
           <ToastCard key={t.id} toast={t} removeToast={removeToast} />

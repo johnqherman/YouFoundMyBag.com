@@ -496,7 +496,7 @@ export default function LandingPage() {
                 <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
                   <Link
                     to={isOwner ? '/dashboard' : '/new'}
-                    className="group btn-primary text-base px-8 inline-flex items-center gap-2 hover:shadow-soft-lg"
+                    className="group btn-primary text-base px-8 inline-flex items-center justify-center gap-2 hover:shadow-soft-lg"
                   >
                     {isOwner ? 'Go to Dashboard' : 'Create your first tag'}
                     <span className="inline-flex items-center transition-transform duration-200 group-hover:translate-x-1">
@@ -539,7 +539,7 @@ export default function LandingPage() {
           <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               to={isOwner ? '/dashboard' : '/new'}
-              className="btn-primary text-base px-8"
+              className="btn-primary text-base px-8 text-center"
             >
               {isOwner ? 'Go to Dashboard' : 'Get started for free'}
             </Link>
