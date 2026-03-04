@@ -41,7 +41,8 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
     await Promise.all([
       sendMail({
         to: contactEmail,
-        from: config.EMAIL_CONTACT,
+        from: config.EMAIL_FROM,
+        replyTo: email,
         subject: `[YouFoundMyBag Contact] ${subjectLabel}: from ${name}`,
         html: `
           <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1e293b;">

@@ -769,16 +769,15 @@ export default function BagManagementModal({
               </div>
             ) : qrData ? (
               <div className="space-y-4 sm:space-y-6">
-                <div className="flex justify-center p-4 sm:p-8 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl sm:rounded-2xl border-2 border-slate-200">
-                  <div className="qr-code-container bg-white rounded-lg sm:rounded-xl p-2 sm:p-4 shadow-lg">
-                    <BrandedQRCode
-                      url={qrData.url}
-                      size={320}
-                      colorStart={tagColorStart || undefined}
-                      colorEnd={tagColorEnd || undefined}
-                      onInstanceReady={handleQRInstanceReady}
-                    />
-                  </div>
+                <div className="qr-code-container flex justify-center p-4 sm:p-8 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl sm:rounded-2xl border-2 border-slate-200">
+                  <BrandedQRCode
+                    url={qrData.url}
+                    size={320}
+                    colorStart={tagColorStart || undefined}
+                    colorEnd={tagColorEnd || undefined}
+                    onInstanceReady={handleQRInstanceReady}
+                    className="rounded-[9px] sm:rounded-[11px] shadow-lg"
+                  />
                 </div>
 
                 <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 sm:p-5">

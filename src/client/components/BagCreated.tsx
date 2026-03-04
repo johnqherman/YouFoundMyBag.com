@@ -56,11 +56,12 @@ export default function BagCreated({
             <SuccessIcon color="currentColor" /> Your QR code is ready!
           </h1>
 
-          <div className="qr-code-container bg-white p-2 rounded-lg mb-6 inline-block border border-regal-navy-100">
+          <div className="qr-code-container mb-6 inline-block">
             <BrandedQRCode
               url={bagData.data.url}
               size={256}
               onInstanceReady={handleQRInstanceReady}
+              className="rounded-[9px] shadow-lg"
             />
           </div>
 

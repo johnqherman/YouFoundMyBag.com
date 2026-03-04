@@ -36,6 +36,7 @@ export interface SendMailOptions {
   html: string;
   text?: string;
   from?: string;
+  replyTo?: string;
 }
 
 export async function sendMail(options: SendMailOptions): Promise<void> {
@@ -60,5 +61,6 @@ export async function sendMail(options: SendMailOptions): Promise<void> {
     subject: options.subject,
     html: options.html,
     text: options.text,
+    'h:Reply-To': options.replyTo,
   });
 }

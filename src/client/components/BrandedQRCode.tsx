@@ -3,8 +3,60 @@ import QRCodeStyling, { Options } from 'qr-code-styling';
 
 const DOWNLOAD_SIZE = 1024;
 const DOWNLOAD_PADDING = 48;
-const DOWNLOAD_BORDER_WIDTH = 4;
-const DOWNLOAD_BORDER_COLOR = '#cbd5e1'; // slate-300
+const DOWNLOAD_BORDER_RADIUS = 36;
+const DOWNLOAD_BORDER_COLOR = '#e2e8f0'; // slate-200
+
+async function buildBorderedBlob(
+  qrInstance: QRCodeStyling
+): Promise<Blob | null> {
+  const rawData = await qrInstance.getRawData('png');
+  if (!rawData) return null;
+
+  const srcBlob =
+    rawData instanceof Blob
+      ? rawData
+      : new Blob([rawData as BlobPart], { type: 'image/png' });
+  const objectUrl = URL.createObjectURL(srcBlob);
+
+  const img = new Image();
+  await new Promise<void>((resolve, reject) => {
+    img.onload = () => resolve();
+    img.onerror = reject;
+    img.src = objectUrl;
+  });
+  URL.revokeObjectURL(objectUrl);
+
+  const totalSize = DOWNLOAD_SIZE + DOWNLOAD_PADDING * 2;
+  const canvas = document.createElement('canvas');
+  canvas.width = totalSize;
+  canvas.height = totalSize;
+  const ctx = canvas.getContext('2d')!;
+
+  // Rounded white card
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.roundRect(0, 0, totalSize, totalSize, DOWNLOAD_BORDER_RADIUS);
+  ctx.fill();
+
+  // Subtle border
+  ctx.strokeStyle = DOWNLOAD_BORDER_COLOR;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.roundRect(1.5, 1.5, totalSize - 3, totalSize - 3, DOWNLOAD_BORDER_RADIUS);
+  ctx.stroke();
+
+  ctx.drawImage(
+    img,
+    DOWNLOAD_PADDING,
+    DOWNLOAD_PADDING,
+    DOWNLOAD_SIZE,
+    DOWNLOAD_SIZE
+  );
+
+  return new Promise((resolve) =>
+    canvas.toBlob((b) => resolve(b), 'image/png')
+  );
+}
 
 const processedLogoCache = new Map<string, string>();
 
@@ -178,55 +230,14 @@ export async function downloadQRWithBorder(
   qrInstance: QRCodeStyling,
   filename: string
 ) {
-  const rawData = await qrInstance.getRawData('png');
-  if (!rawData) return;
-
-  const blob =
-    rawData instanceof Blob
-      ? rawData
-      : new Blob([rawData as BlobPart], { type: 'image/png' });
-  const img = new Image();
-  const objectUrl = URL.createObjectURL(blob);
-
-  await new Promise<void>((resolve, reject) => {
-    img.onload = () => resolve();
-    img.onerror = reject;
-    img.src = objectUrl;
-  });
-
-  const totalSize = DOWNLOAD_SIZE + DOWNLOAD_PADDING * 2;
-  const canvas = document.createElement('canvas');
-  canvas.width = totalSize;
-  canvas.height = totalSize;
-  const ctx = canvas.getContext('2d')!;
-
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, totalSize, totalSize);
-
-  ctx.strokeStyle = DOWNLOAD_BORDER_COLOR;
-  ctx.lineWidth = DOWNLOAD_BORDER_WIDTH;
-  const offset = DOWNLOAD_BORDER_WIDTH / 2;
-  ctx.strokeRect(
-    offset,
-    offset,
-    totalSize - DOWNLOAD_BORDER_WIDTH,
-    totalSize - DOWNLOAD_BORDER_WIDTH
-  );
-
-  ctx.drawImage(
-    img,
-    DOWNLOAD_PADDING,
-    DOWNLOAD_PADDING,
-    DOWNLOAD_SIZE,
-    DOWNLOAD_SIZE
-  );
-
-  URL.revokeObjectURL(objectUrl);
+  const blob = await buildBorderedBlob(qrInstance);
+  if (!blob) return;
 
   const link = document.createElement('a');
   link.download = `${filename}.png`;
-  link.href = canvas.toDataURL('image/png');
+  link.href = URL.createObjectURL(blob);
   link.click();
+  setTimeout(() => URL.revokeObjectURL(link.href), 10000);
 }
 
 interface BrandedQRCodeProps {
@@ -284,15 +295,10 @@ export default function BrandedQRCode({
         )
       );
 
-      const rawData = await downloadQr.getRawData('png');
-      if (cancelled || !rawData) return;
+      const blob = await buildBorderedBlob(downloadQr);
+      if (cancelled || !blob) return;
 
-      const blob =
-        rawData instanceof Blob
-          ? rawData
-          : new Blob([rawData as BlobPart], { type: 'image/png' });
       const newBlobUrl = URL.createObjectURL(blob);
-
       if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
       blobUrlRef.current = newBlobUrl;
 

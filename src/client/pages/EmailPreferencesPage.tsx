@@ -279,12 +279,9 @@ export default function EmailPreferencesPage() {
 
           <div className="mt-8 pt-6 border-t border-regal-navy-200">
             <p className="text-sm text-regal-navy-600">
-              Need help? Contact us at{' '}
-              <a
-                href="mailto:support@youfoundmybag.com"
-                className="text-blue-600 hover:underline"
-              >
-                support@youfoundmybag.com
+              Need help? Contact us via{' '}
+              <a href="/contact" className="text-blue-600 hover:underline">
+                our contact page
               </a>
             </p>
           </div>
