@@ -269,7 +269,7 @@ export default function PricingPage() {
             <div className="relative bg-regal-navy-900 text-white rounded-2xl p-6 sm:p-8 flex flex-col shadow-soft-lg">
               <div className="mb-6">
                 <h2 className="text-lg font-semibold text-regal-navy-200 mb-1">
-                  Pro
+                  ✦ Pro
                 </h2>
                 <p className="text-regal-navy-400 text-sm">
                   For frequent travelers & multiple items
@@ -383,7 +383,7 @@ export default function PricingPage() {
                     Free
                   </th>
                   <th className="text-center font-semibold text-regal-navy-900 py-4 px-4 pl-4 sm:pr-0 w-[30%]">
-                    Pro
+                    ✦ Pro
                   </th>
                 </tr>
               </thead>

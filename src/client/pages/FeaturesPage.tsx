@@ -155,7 +155,7 @@ function QrFeatureCard({
             {feature.title}
             {feature.pro && (
               <span className="bg-medium-jungle-100 text-medium-jungle-700 text-xs font-medium px-2 py-0.5 rounded-full">
-                Pro
+                ✦ Pro
               </span>
             )}
           </h3>
@@ -279,7 +279,7 @@ function DashboardFeatureItem({
         {feature.text}
         {feature.pro && (
           <span className="bg-medium-jungle-100 text-medium-jungle-700 text-xs font-medium px-2 py-0.5 rounded-full">
-            Pro
+            ✦ Pro
           </span>
         )}
       </span>
@@ -732,7 +732,7 @@ export default function FeaturesPage() {
                     Free
                   </th>
                   <th className="text-center font-semibold text-regal-navy-900 py-4 px-4 pl-4 sm:pr-0 w-[30%]">
-                    Pro
+                    ✦ Pro
                   </th>
                 </tr>
               </thead>

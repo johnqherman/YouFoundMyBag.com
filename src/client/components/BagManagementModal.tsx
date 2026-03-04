@@ -810,7 +810,7 @@ export default function BagManagementModal({
                     QR Style{' '}
                     {isFree && (
                       <span className="ml-1 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-saffron-100 text-saffron-800 border border-saffron-300 normal-case tracking-normal">
-                        Pro
+                        ✦ Pro
                       </span>
                     )}
                   </label>
