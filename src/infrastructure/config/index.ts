@@ -49,6 +49,8 @@ const configSchema = z.object({
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
   STRIPE_PRO_MONTHLY_PRICE_ID: z.string().optional(),
   STRIPE_PRO_ANNUAL_PRICE_ID: z.string().optional(),
+
+  DISCORD_WEBHOOK_URL: z.string().optional(),
 });
 
 function loadConfig() {

@@ -219,6 +219,22 @@ export async function createPortalSession(
   return { url: session.url };
 }
 
+async function notifyDiscord(content: string): Promise<void> {
+  const url = config.DISCORD_WEBHOOK_URL;
+  if (!url) return;
+  try {
+    await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content }),
+    });
+  } catch (err) {
+    logger.warn('Failed to send Discord notification', {
+      error: err instanceof Error ? err.message : 'Unknown',
+    });
+  }
+}
+
 export async function handleWebhookEvent(event: Stripe.Event): Promise<void> {
   switch (event.type) {
     case 'checkout.session.completed': {
@@ -252,6 +268,9 @@ export async function handleWebhookEvent(event: Stripe.Event): Promise<void> {
 
       await invalidateCachesForEmail(emailHash);
       logger.info('Checkout completed, plan set to pro', { emailHash });
+      await notifyDiscord(
+        `**New Pro subscription!** Customer \`${customerId}\` completed checkout.`
+      );
       break;
     }
 
@@ -288,6 +307,9 @@ export async function handleWebhookEvent(event: Stripe.Event): Promise<void> {
           subscriptionId: subscription.id,
           status,
         });
+        await notifyDiscord(
+          `**Subscription updated** \`${subscription.id}\` → status: \`${status}\``
+        );
       }
       break;
     }
@@ -309,6 +331,9 @@ export async function handleWebhookEvent(event: Stripe.Event): Promise<void> {
         logger.info('Subscription deleted, reverted to free', {
           subscriptionId: subscription.id,
         });
+        await notifyDiscord(
+          `**Subscription canceled** \`${subscription.id}\` — reverted to free plan.`
+        );
       }
       break;
     }
@@ -333,6 +358,9 @@ export async function handleWebhookEvent(event: Stripe.Event): Promise<void> {
           logger.warn('Payment failed, subscription past_due', {
             subscriptionId,
           });
+          await notifyDiscord(
+            `**Payment failed** for subscription \`${subscriptionId}\` — marked past_due.`
+          );
         }
       }
       break;
