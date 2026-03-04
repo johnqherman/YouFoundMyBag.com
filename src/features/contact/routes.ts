@@ -8,7 +8,6 @@ import {
   emailContainer,
   emailHeader,
   emailParagraph,
-  emailMessageQuote,
   emailInfoBox,
   emailDivider,
   EmailStyles,
@@ -29,8 +28,8 @@ const subjectLabels: Record<string, string> = {
   general: 'General Inquiry',
   bug: 'Bug Report',
   feature: 'Feature Request',
-  billing: 'Billing',
-  other: 'Other',
+  billing: 'Billing Question',
+  other: 'Other Inquiry',
 };
 
 router.post('/', async (req: Request, res: Response): Promise<void> => {
@@ -53,15 +52,17 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
   const { content: safeSubjectLabel } = secureEmailContent(subjectLabel);
 
   const senderInfoBox = `
-    <p style="${EmailStyles.box.infoTitle}">From</p>
-    <p style="${EmailStyles.text.body}; margin: 4px 0 0;"><strong>${safeName}</strong> &lt;<a href="mailto:${safeEmail}" style="color: #356197;">${safeEmail}</a>&gt;</p>
-    <p style="${EmailStyles.text.muted}; margin: 8px 0 0;">Subject: ${safeSubjectLabel}</p>
+    <p style="${EmailStyles.text.body}; margin: 0;"><a href="mailto:${safeEmail}" style="color: #356197;">${safeEmail}</a></p>
   `;
 
+  const { content: safeMessage } = secureEmailContent(message);
+
   const internalHtml = emailContainer(
-    emailHeader('Contact Form Submission') +
+    emailHeader(`${safeSubjectLabel} from ${safeName}`) +
       emailInfoBox(senderInfoBox) +
-      emailMessageQuote(name, message) +
+      emailInfoBox(
+        `<p style="${EmailStyles.box.messageText}">${safeMessage}</p>`
+      ) +
       emailDivider() +
       emailParagraph(EmailText.brandMessage, 'mutedSmall')
   );
@@ -71,7 +72,9 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       emailParagraph(
         "We've received your message and will get back to you within 1–2 business days."
       ) +
-      emailMessageQuote('Your message', message) +
+      emailInfoBox(
+        `<p style="${EmailStyles.box.messageText}">${safeMessage}</p>`
+      ) +
       emailDivider() +
       emailParagraph(EmailText.brandMessage, 'mutedSmall')
   );
