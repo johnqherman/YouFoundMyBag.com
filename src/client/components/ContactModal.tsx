@@ -132,11 +132,11 @@ export default function ContactModal({
   if (success) {
     return (
       <div
-        className="fixed inset-0 bg-regal-navy-900 bg-opacity-50 flex items-center justify-center p-4 z-50"
+        className="modal-backdrop fixed inset-0 bg-regal-navy-900 bg-opacity-50 flex items-center justify-center p-4 z-50"
         {...backdropProps}
       >
         <div
-          className="bg-white rounded-lg p-8 w-full max-w-md shadow-soft-lg"
+          className="modal-container bg-white rounded-lg p-8 w-full max-w-md shadow-soft-lg"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="text-center">
@@ -168,11 +168,11 @@ export default function ContactModal({
 
   return (
     <div
-      className="fixed inset-0 bg-regal-navy-900 bg-opacity-50 flex items-center justify-center p-4 z-50"
+      className="modal-backdrop fixed inset-0 bg-regal-navy-900 bg-opacity-50 flex items-center justify-center p-4 z-50"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-lg p-5 sm:p-6 w-full max-w-md shadow-soft-lg max-h-[90vh] overflow-y-auto"
+        className="modal-container bg-white rounded-lg p-5 sm:p-6 w-full max-w-md shadow-soft-lg max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-start gap-4 mb-4 sm:mb-6">
