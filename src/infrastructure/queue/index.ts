@@ -81,7 +81,7 @@ export async function initializeQueues(): Promise<void> {
     host: config.REDIS_HOST,
     port: config.REDIS_PORT,
     password: config.REDIS_PASSWORD || undefined,
-    tls: config.REDIS_TLS_ENABLED === 'true' ? {} : undefined,
+    tls: config.REDIS_TLS_ENABLED ? {} : undefined,
   };
 
   emailQueue = new Queue<EmailJobData>('emails', {
@@ -132,7 +132,7 @@ export async function initializeWorkers(
     host: config.REDIS_HOST,
     port: config.REDIS_PORT,
     password: config.REDIS_PASSWORD || undefined,
-    tls: config.REDIS_TLS_ENABLED === 'true' ? {} : undefined,
+    tls: config.REDIS_TLS_ENABLED ? {} : undefined,
   };
 
   emailWorker = new Worker<EmailJobData>('emails', emailProcessor, {
