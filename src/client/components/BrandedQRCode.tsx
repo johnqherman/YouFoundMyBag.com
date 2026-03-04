@@ -274,17 +274,17 @@ export default function BrandedQRCode({
 
       if (cancelled) return;
 
-      const qr = new QRCodeStyling(
+      const downloadQr = new QRCodeStyling(
         getQrOptions(
           url,
-          size,
+          DOWNLOAD_SIZE,
           debouncedColorStart,
           debouncedColorEnd,
           imageUrl
         )
       );
 
-      const rawData = await qr.getRawData('png');
+      const rawData = await downloadQr.getRawData('png');
       if (cancelled || !rawData) return;
 
       const blob =
@@ -298,15 +298,6 @@ export default function BrandedQRCode({
 
       if (imgRef.current) imgRef.current.src = newBlobUrl;
 
-      const downloadQr = new QRCodeStyling(
-        getQrOptions(
-          url,
-          DOWNLOAD_SIZE,
-          debouncedColorStart,
-          debouncedColorEnd,
-          imageUrl
-        )
-      );
       if (onInstanceReady) onInstanceReady(downloadQr);
     }
 
