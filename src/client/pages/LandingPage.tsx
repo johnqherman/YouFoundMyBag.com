@@ -107,7 +107,7 @@ function LuggageTagVisual() {
         <div className="w-px h-48 bg-gradient-to-b from-transparent via-regal-navy-300 to-regal-navy-400" />
         <div className="w-5 h-5 rounded-full border-2 border-regal-navy-300 bg-regal-navy-50 -mb-1 relative z-10" />
         <div className="relative w-56 sm:w-64">
-          <div className="bg-white border border-regal-navy-200 rounded-2xl p-6 pb-8 shadow-soft-lg">
+          <div className="landing-tag-card bg-white border border-regal-navy-200 rounded-2xl p-6 pb-8 shadow-soft-lg">
             <div className="bg-regal-navy-50 rounded-lg p-3 mb-4">
               <div className="grid grid-cols-5 gap-1">
                 {Array.from({ length: 25 }).map((_, i) => (
@@ -131,7 +131,7 @@ function LuggageTagVisual() {
             </div>
           </div>
 
-          <div className="absolute -inset-4 bg-regal-navy-200/40 rounded-3xl blur-2xl -z-10" />
+          <div className="landing-tag-glow absolute -inset-4 bg-regal-navy-200/40 rounded-3xl blur-2xl -z-10" />
         </div>
       </div>
     </div>

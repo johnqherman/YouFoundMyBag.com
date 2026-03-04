@@ -241,6 +241,14 @@ html.dark .modal-container {
   box-shadow: 0 25px 50px -12px rgba(255, 255, 255, 0.25);
 }
 
+html.dark .landing-tag-glow {
+  display: none;
+}
+
+html.dark .landing-tag-card {
+  box-shadow: none;
+}
+
 html.dark {
   --tw-shadow-color: rgba(0, 0, 0, 0.5);
 }
