@@ -69,7 +69,8 @@ export default function ConversationPage() {
   const [showReissueModal, setShowReissueModal] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const replyInputRef = useRef<HTMLTextAreaElement>(null);
-  const scrollAfterLoad = useRef(false);
+  const scrollAfterLoad = useRef(true);
+  const isInitialScroll = useRef(true);
 
   const tokenKey = isFinderView
     ? 'finder_session_token'
@@ -344,13 +345,10 @@ export default function ConversationPage() {
     if (!scrollAfterLoad.current) return;
     scrollAfterLoad.current = false;
 
+    const behavior = isInitialScroll.current ? 'instant' : 'smooth';
+    isInitialScroll.current = false;
     const timeout = setTimeout(() => {
-      const el = messagesEndRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      if (rect.top > window.innerHeight) {
-        el.scrollIntoView({ behavior: 'smooth' });
-      }
+      messagesEndRef.current?.scrollIntoView({ behavior });
     }, 0);
 
     return () => clearTimeout(timeout);
@@ -492,7 +490,7 @@ export default function ConversationPage() {
     : conversation.bag.owner_name || 'Owner';
 
   return (
-    <div className="relative min-h-screen bg-regal-navy-50 text-regal-navy-900">
+    <div className="flex-1 flex flex-col min-h-0 bg-regal-navy-50 text-regal-navy-900 overflow-hidden">
       <Helmet>
         <title>{conversationTitle}</title>
       </Helmet>
@@ -502,12 +500,12 @@ export default function ConversationPage() {
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tl from-regal-navy-100/50 to-transparent rounded-full translate-x-1/3 translate-y-1/3" />
       </div>
 
-      <div className="relative max-w-4xl mx-auto p-4 sm:p-6">
-        <div className="sticky top-0 z-10 bg-regal-navy-50/95 backdrop-blur-sm border-b border-regal-navy-200/70 pb-3 sm:pb-4 mb-4 sm:mb-6 -mx-4 sm:-mx-6 px-4 sm:px-6 pt-4 sm:pt-6">
+      <div className="relative max-w-4xl mx-auto w-full flex flex-col flex-1 min-h-0">
+        <div className="shrink-0 bg-regal-navy-50/95 backdrop-blur-sm border-b border-regal-navy-200/70 pb-3 sm:pb-4 px-4 sm:px-6 pt-4 sm:pt-6">
           {!isFinderView ? (
             <Link
               to="/dashboard"
-              className="group inline-flex items-center gap-1.5 text-sm text-regal-navy-500 hover:text-regal-navy-800 transition-colors mb-3 sm:mb-4"
+              className="group inline-flex items-center gap-1.5 text-sm text-regal-navy-500 hover:text-regal-navy-800 transition-colors mb-2 sm:mb-4"
             >
               <svg
                 className="w-4 h-4 transition-transform group-hover:-translate-x-0.5"
@@ -524,13 +522,13 @@ export default function ConversationPage() {
               Dashboard
             </Link>
           ) : (
-            <div className="mb-3 sm:mb-4" />
+            <div className="mb-2 sm:mb-4" />
           )}
 
-          <p className="text-xs font-medium tracking-widest uppercase text-regal-navy-400 mb-1">
+          <p className="hidden sm:block text-xs font-medium tracking-widest uppercase text-regal-navy-400 mb-1">
             Conversation
           </p>
-          <h1 className="font-display text-2xl sm:text-3xl md:text-4xl tracking-tight mb-2">
+          <h1 className="font-display text-xl sm:text-3xl md:text-4xl tracking-tight mb-2">
             <Twemoji>
               {formatBagDisplayName(
                 conversation.bag.owner_name,
@@ -590,7 +588,7 @@ export default function ConversationPage() {
           </div>
         </div>
 
-        <div className="space-y-4 sm:space-y-5 mb-4 sm:mb-6">
+        <div className="flex-1 overflow-y-auto min-h-0 px-4 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-5">
           {(() => {
             const currentUserSenderType = isFinderView ? 'finder' : 'owner';
             const lastReadMessage = [...conversation.messages]
@@ -684,110 +682,115 @@ export default function ConversationPage() {
               }
             });
           })()}
+          {conversation.conversation.status === 'resolved' && (
+            <div className="pt-2 sm:pt-4">
+              <div className="bg-white border border-regal-navy-200/80 rounded-2xl shadow-soft-md p-6 sm:p-8">
+                <div className="text-center">
+                  <div className="mb-4 flex justify-center">
+                    <div className="w-14 h-14 rounded-full bg-medium-jungle-100 flex items-center justify-center text-medium-jungle-700">
+                      <CheckIcon color="currentColor" />
+                    </div>
+                  </div>
+                  <h2 className="font-display text-2xl sm:text-3xl tracking-tight text-regal-navy-900 mb-2">
+                    All sorted!
+                  </h2>
+                  <p className="text-regal-navy-600 text-sm">
+                    This conversation has been resolved. No further replies can
+                    be sent.
+                  </p>
+                </div>
+
+                {!isFinderView && (
+                  <>
+                    <div className="border-t border-regal-navy-100 my-6" />
+                    <div className="flex flex-col items-center gap-3">
+                      <button
+                        onClick={handleArchiveClick}
+                        disabled={archiving}
+                        className="inline-flex items-center gap-2 bg-saffron-50 hover:bg-saffron-100 text-saffron-800 border border-saffron-200 px-5 py-2.5 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <ArchiveIcon color="currentColor" />
+                        {archiving ? 'Archiving...' : 'Archive Conversation'}
+                      </button>
+                      <p className="text-xs text-regal-navy-500 text-center max-w-sm">
+                        Resolved conversations are automatically archived after
+                        30 days. Archived conversations are permanently deleted
+                        after 6 months.
+                      </p>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
           <div ref={messagesEndRef} />
         </div>
 
         {conversation.conversation.status === 'active' && (
-          <form
-            onSubmit={sendReply}
-            className="bg-white border border-regal-navy-200/80 rounded-2xl shadow-soft-md p-4 sm:p-6"
-          >
-            <h3 className="font-display text-lg sm:text-xl tracking-tight text-regal-navy-900 mb-1">
-              Send a Reply
-            </h3>
-            <p className="text-sm text-regal-navy-500 mb-3 sm:mb-4">
-              Replying as{' '}
-              <Twemoji className="font-medium text-regal-navy-700">
-                {replyingAsName}
-              </Twemoji>
-            </p>
-            <div onKeyDown={handleKeyDown}>
-              <CharacterLimitTextArea
-                ref={replyInputRef}
-                value={replyMessage}
-                onChange={setReplyMessage}
-                maxLength={300}
-                placeholder={getContextualReplyPlaceholder(
-                  isFinderView ? 'owner' : 'finder',
-                  {
-                    ownerName: conversation.bag.owner_name,
-                    bagName: conversation.bag.bag_name,
-                    finderName: conversation.conversation.finder_display_name,
-                  },
-                  'response'
-                )}
-                rows={4}
-                disabled={sending}
-              />
-            </div>
-            <div className="mt-3 sm:mt-4 flex flex-col-reverse sm:flex-row justify-between gap-2 sm:gap-3">
-              {!isFinderView ? (
-                <button
-                  type="button"
-                  onClick={() => setShowResolveConfirm(true)}
-                  className="bg-medium-jungle-50 hover:bg-medium-jungle-100 text-medium-jungle-800 border border-medium-jungle-200 px-4 py-2.5 sm:py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base flex items-center justify-center gap-2"
-                  disabled={sending || resolving}
-                >
-                  <span className="w-2 h-2 rounded-full bg-medium-jungle-500" />
-                  {resolving ? 'Resolving...' : 'Mark as Resolved'}
-                </button>
-              ) : (
-                <div className="hidden sm:block" />
-              )}
-              <button
-                type="submit"
-                disabled={!replyMessage.trim() || sending}
-                className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {sending ? 'Sending...' : 'Send Reply'}
-              </button>
-            </div>
-          </form>
-        )}
-
-        {conversation.conversation.status === 'resolved' && (
-          <div className="bg-white border border-regal-navy-200/80 rounded-2xl shadow-soft-md p-6 sm:p-8">
-            <div className="text-center">
-              <div className="mb-4 flex justify-center">
-                <div className="w-14 h-14 rounded-full bg-medium-jungle-100 flex items-center justify-center text-medium-jungle-700">
-                  <CheckIcon color="currentColor" />
-                </div>
-              </div>
-              <h2 className="font-display text-2xl sm:text-3xl tracking-tight text-regal-navy-900 mb-2">
-                All sorted!
-              </h2>
-              <p className="text-regal-navy-600 text-sm">
-                This conversation has been resolved. No further replies can be
-                sent.
+          <div className="shrink-0 px-4 sm:px-6 pb-4 sm:pb-6 pt-4">
+            <form
+              onSubmit={sendReply}
+              className="bg-white border border-regal-navy-200/80 rounded-2xl shadow-soft-md p-4 sm:p-6"
+            >
+              <h3 className="font-display text-lg sm:text-xl tracking-tight text-regal-navy-900 mb-1">
+                Send a Reply
+              </h3>
+              <p className="text-sm text-regal-navy-500 mb-3 sm:mb-4">
+                Replying as{' '}
+                <Twemoji className="font-medium text-regal-navy-700">
+                  {replyingAsName}
+                </Twemoji>
               </p>
-            </div>
-
-            {!isFinderView && (
-              <>
-                <div className="border-t border-regal-navy-100 my-6" />
-                <div className="flex flex-col items-center gap-3">
+              <div onKeyDown={handleKeyDown}>
+                <CharacterLimitTextArea
+                  ref={replyInputRef}
+                  value={replyMessage}
+                  onChange={setReplyMessage}
+                  maxLength={300}
+                  placeholder={getContextualReplyPlaceholder(
+                    isFinderView ? 'owner' : 'finder',
+                    {
+                      ownerName: conversation.bag.owner_name,
+                      bagName: conversation.bag.bag_name,
+                      finderName: conversation.conversation.finder_display_name,
+                    },
+                    'response'
+                  )}
+                  rows={4}
+                  disabled={sending}
+                />
+              </div>
+              <div className="mt-3 sm:mt-4 flex flex-col-reverse sm:flex-row justify-between gap-2 sm:gap-3">
+                {!isFinderView ? (
                   <button
-                    onClick={handleArchiveClick}
-                    disabled={archiving}
-                    className="inline-flex items-center gap-2 bg-saffron-50 hover:bg-saffron-100 text-saffron-800 border border-saffron-200 px-5 py-2.5 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    type="button"
+                    onClick={() => setShowResolveConfirm(true)}
+                    className="bg-medium-jungle-50 hover:bg-medium-jungle-100 text-medium-jungle-800 border border-medium-jungle-200 px-4 py-2.5 sm:py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base flex items-center justify-center gap-2"
+                    disabled={sending || resolving}
                   >
-                    <ArchiveIcon color="currentColor" />
-                    {archiving ? 'Archiving...' : 'Archive Conversation'}
+                    <span className="w-2 h-2 rounded-full bg-medium-jungle-500" />
+                    {resolving ? 'Resolving...' : 'Mark as Resolved'}
                   </button>
-                  <p className="text-xs text-regal-navy-500 text-center max-w-sm">
-                    Resolved conversations are automatically archived after 30
-                    days. Archived conversations are permanently deleted after 6
-                    months.
-                  </p>
-                </div>
-              </>
-            )}
+                ) : (
+                  <div className="hidden sm:block" />
+                )}
+                <button
+                  type="submit"
+                  disabled={!replyMessage.trim() || sending}
+                  className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {sending ? 'Sending...' : 'Send Reply'}
+                </button>
+              </div>
+            </form>
           </div>
         )}
 
         {conversation.conversation.status === 'archived' && (
-          <div className="bg-regal-navy-100/60 border border-regal-navy-200/60 rounded-xl px-6 py-4 text-center text-regal-navy-600">
-            <p>This conversation has been archived.</p>
+          <div className="shrink-0 px-4 sm:px-6 pb-4 sm:pb-6">
+            <div className="bg-regal-navy-100/60 border border-regal-navy-200/60 rounded-xl px-6 py-4 text-center text-regal-navy-600">
+              <p>This conversation has been archived.</p>
+            </div>
           </div>
         )}
       </div>

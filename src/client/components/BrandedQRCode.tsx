@@ -255,8 +255,8 @@ export default function BrandedQRCode({
   colorEnd,
   onInstanceReady,
 }: BrandedQRCodeProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const qrRef = useRef<QRCodeStyling | null>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+  const blobUrlRef = useRef<string | null>(null);
 
   const debouncedColorStart = useDebounce(colorStart, 300);
   const debouncedColorEnd = useDebounce(colorEnd, 300);
@@ -283,11 +283,20 @@ export default function BrandedQRCode({
           imageUrl
         )
       );
-      qrRef.current = qr;
-      if (containerRef.current) {
-        containerRef.current.innerHTML = '';
-        qr.append(containerRef.current);
-      }
+
+      const rawData = await qr.getRawData('png');
+      if (cancelled || !rawData) return;
+
+      const blob =
+        rawData instanceof Blob
+          ? rawData
+          : new Blob([rawData as BlobPart], { type: 'image/png' });
+      const newBlobUrl = URL.createObjectURL(blob);
+
+      if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
+      blobUrlRef.current = newBlobUrl;
+
+      if (imgRef.current) imgRef.current.src = newBlobUrl;
 
       const downloadQr = new QRCodeStyling(
         getQrOptions(
@@ -305,11 +314,14 @@ export default function BrandedQRCode({
 
     return () => {
       cancelled = true;
-      if (containerRef.current) {
-        containerRef.current.innerHTML = '';
-      }
     };
   }, [url, size, debouncedColorStart, debouncedColorEnd]);
+
+  useEffect(() => {
+    return () => {
+      if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     if (!onInstanceReady) return;
@@ -338,9 +350,13 @@ export default function BrandedQRCode({
   }, [onInstanceReady]);
 
   return (
-    <div
-      ref={containerRef}
-      className={`qr-code-container ${className ?? ''}`}
+    <img
+      ref={imgRef}
+      width={size}
+      height={size}
+      alt="QR code"
+      className={className}
+      draggable
     />
   );
 }

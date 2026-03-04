@@ -38,12 +38,22 @@ function AppShell() {
   const { pathname } = useLocation();
   const isFinderPage =
     pathname.startsWith('/b/') || pathname.startsWith('/finder/');
+  const isConversationPage =
+    pathname.startsWith('/dashboard/conversation/') ||
+    pathname.startsWith('/finder/conversation/');
+  const isFullscreen = isFinderPage || isConversationPage;
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {!isFinderPage && <ThemeToggle />}
-      {!isFinderPage && <Header />}
-      <div className="flex-1 flex flex-col bg-regal-navy-50">
+    <div
+      className={
+        isFullscreen
+          ? 'h-dvh flex flex-col overflow-hidden'
+          : 'min-h-screen flex flex-col'
+      }
+    >
+      {!isFullscreen && <ThemeToggle />}
+      {!isFullscreen && <Header />}
+      <div className="flex-1 flex flex-col min-h-0 bg-regal-navy-50">
         <Suspense fallback={<div />}>
           <Routes>
             <Route path="/" element={<LandingPage />} />
@@ -70,7 +80,7 @@ function AppShell() {
           </Routes>
         </Suspense>
       </div>
-      {!isFinderPage && <Footer />}
+      {!isFullscreen && <Footer />}
     </div>
   );
 }

@@ -771,18 +771,13 @@ export default function BagManagementModal({
               <div className="space-y-4 sm:space-y-6">
                 <div className="flex justify-center p-4 sm:p-8 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl sm:rounded-2xl border-2 border-slate-200">
                   <div className="qr-code-container bg-white rounded-lg sm:rounded-xl p-2 sm:p-4 shadow-lg">
-                    <div className="relative">
-                      <div className="w-[320px] h-[320px]" aria-hidden="true" />
-                      <div className="absolute inset-0">
-                        <BrandedQRCode
-                          url={qrData.url}
-                          size={320}
-                          colorStart={tagColorStart || undefined}
-                          colorEnd={tagColorEnd || undefined}
-                          onInstanceReady={handleQRInstanceReady}
-                        />
-                      </div>
-                    </div>
+                    <BrandedQRCode
+                      url={qrData.url}
+                      size={320}
+                      colorStart={tagColorStart || undefined}
+                      colorEnd={tagColorEnd || undefined}
+                      onInstanceReady={handleQRInstanceReady}
+                    />
                   </div>
                 </div>
 
@@ -888,7 +883,7 @@ export default function BagManagementModal({
                           !colorFromPreset && isColorTooLight(tagColorEnd);
                         return (
                           <>
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                               <div>
                                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                                   Start Color
@@ -982,7 +977,7 @@ export default function BagManagementModal({
                     onClick={() => {
                       if (qrInstanceRef.current) printQR(qrInstanceRef.current);
                     }}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 sm:px-6 py-3 sm:py-4 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 font-semibold rounded-xl transition-all"
+                    className="hidden sm:flex flex-1 items-center justify-center gap-2 px-4 sm:px-6 py-3 sm:py-4 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 font-semibold rounded-xl transition-all"
                   >
                     <PrintIcon color="currentColor" />
                     Print
@@ -1932,7 +1927,7 @@ export default function BagManagementModal({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-2">
                       Start Color

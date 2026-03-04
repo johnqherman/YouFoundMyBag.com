@@ -112,7 +112,7 @@ export default function BagCreated({
               onClick={() => {
                 if (qrInstanceRef.current) printQR(qrInstanceRef.current);
               }}
-              className="btn-secondary w-full flex items-center justify-center gap-2"
+              className="btn-secondary w-full hidden sm:flex items-center justify-center gap-2"
             >
               <PrintIcon color="currentColor" /> Print QR Code
             </button>
