@@ -2360,7 +2360,7 @@ export default function BagManagementModal({
           className="modal-container bg-white sm:rounded-2xl shadow-2xl w-full h-full sm:h-[90vh] sm:max-w-6xl flex flex-col md:grid md:grid-cols-[280px_1fr] overflow-hidden animate-slideUp"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="md:hidden bg-gradient-to-r from-slate-800 to-slate-900 px-4 py-4 flex items-center justify-between shrink-0">
+          <div className="modal-sidebar md:hidden bg-gradient-to-r from-slate-800 to-slate-900 px-4 py-4 flex items-center justify-between shrink-0">
             <div className="flex-1 min-w-0">
               <h1 className="text-lg font-bold text-white truncate">
                 {bag.bag_name || 'Bag Settings'}
