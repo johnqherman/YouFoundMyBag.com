@@ -171,6 +171,7 @@ export default function ContactPage() {
     <>
       <div
         aria-hidden="true"
+        className="dark-mode-immune"
         style={{
           position: 'fixed',
           inset: 0,
