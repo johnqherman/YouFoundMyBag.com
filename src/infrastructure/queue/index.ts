@@ -81,6 +81,7 @@ export async function initializeQueues(): Promise<void> {
     host: config.REDIS_HOST,
     port: config.REDIS_PORT,
     password: config.REDIS_PASSWORD || undefined,
+    tls: config.REDIS_TLS_ENABLED === 'true' ? {} : undefined,
   };
 
   emailQueue = new Queue<EmailJobData>('emails', {
@@ -101,6 +102,10 @@ export async function initializeQueues(): Promise<void> {
     },
   });
 
+  emailQueue.on('error', (err) => {
+    logger.error('Email queue error:', { error: err.message });
+  });
+
   queueEvents = new QueueEvents('emails', { connection });
 
   queueEvents.on('completed', ({ jobId }) => {
@@ -109,6 +114,10 @@ export async function initializeQueues(): Promise<void> {
 
   queueEvents.on('failed', ({ jobId, failedReason }) => {
     logger.error('Email job failed', { jobId, failedReason });
+  });
+
+  queueEvents.on('error', (err) => {
+    logger.error('Queue events error:', { error: err.message });
   });
 
   logger.info('BullMQ queues initialized successfully');
@@ -123,6 +132,7 @@ export async function initializeWorkers(
     host: config.REDIS_HOST,
     port: config.REDIS_PORT,
     password: config.REDIS_PASSWORD || undefined,
+    tls: config.REDIS_TLS_ENABLED === 'true' ? {} : undefined,
   };
 
   emailWorker = new Worker<EmailJobData>('emails', emailProcessor, {
@@ -148,6 +158,10 @@ export async function initializeWorkers(
       error: err.message,
       attempt: job?.attemptsMade,
     });
+  });
+
+  emailWorker.on('error', (err) => {
+    logger.error('Email worker error:', { error: err.message });
   });
 
   logger.info('BullMQ workers initialized successfully');

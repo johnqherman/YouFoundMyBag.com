@@ -41,7 +41,12 @@ class ApiClient {
               response.status === 429
                 ? 'Rate limit exceeded'
                 : 'An error occurred',
-            message: textResponse || 'An unexpected error occurred',
+            message:
+              response.status === 429
+                ? 'Rate limit exceeded. Please try again later.'
+                : response.status >= 500
+                  ? 'Server error. Please try again later.'
+                  : 'An unexpected error occurred',
           };
         }
       }
