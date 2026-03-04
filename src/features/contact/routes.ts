@@ -38,6 +38,9 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
   const contactEmail = config.EMAIL_CONTACT;
 
   try {
+    logger.info(
+      `Contact form submission from ${email} — attempting to send emails`
+    );
     await Promise.all([
       sendMail({
         to: contactEmail,
