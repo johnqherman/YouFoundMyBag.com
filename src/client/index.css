@@ -233,10 +233,6 @@ html.dark .modal-backdrop {
   background-color: rgba(255, 255, 255, 0.75);
 }
 
-html.dark .request-modal-overlay {
-  background-color: rgba(0, 0, 0, 0.6);
-}
-
 html.dark .modal-sidebar {
   filter: invert(1) hue-rotate(180deg);
 }

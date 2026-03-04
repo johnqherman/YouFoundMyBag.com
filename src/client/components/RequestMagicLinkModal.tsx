@@ -85,7 +85,7 @@ export default function RequestMagicLinkModal({
   if (success) {
     return (
       <div
-        className="fixed inset-0 request-modal-overlay bg-regal-navy-900 bg-opacity-50 flex items-center justify-center p-4 z-50"
+        className="fixed inset-0 modal-backdrop bg-regal-navy-900 bg-opacity-50 flex items-center justify-center p-4 z-50"
         onClick={onClose}
       >
         <div
@@ -117,7 +117,7 @@ export default function RequestMagicLinkModal({
 
   return (
     <div
-      className="fixed inset-0 request-modal-overlay bg-regal-navy-900 bg-opacity-50 flex items-center justify-center p-4 z-50"
+      className="fixed inset-0 modal-backdrop bg-regal-navy-900 bg-opacity-50 flex items-center justify-center p-4 z-50"
       {...backdropProps}
     >
       <div
@@ -169,10 +169,12 @@ export default function RequestMagicLinkModal({
               required
               autoFocus
             />
-            <p className="text-xs text-regal-navy-600 mt-1.5">
-              We&apos;ll send a new 30-day access link to this address if
-              it&apos;s in our system.
-            </p>
+            {!initialEmail && (
+              <p className="text-xs text-regal-navy-600 mt-1.5">
+                We&apos;ll send a new 30-day access link to this address if
+                it&apos;s in our system.
+              </p>
+            )}
           </div>
 
           {error && (
