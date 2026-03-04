@@ -1440,44 +1440,16 @@ export default function BagManagementModal({
                 </div>
               </div>
 
-              {bagStatus === 'disabled' && isFree ? (
-                <div className="bg-regal-navy-50 border border-regal-navy-200 rounded-xl p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-lg bg-regal-navy-100 flex items-center justify-center shrink-0">
-                      <BagIcon
-                        color="currentColor"
-                        className="text-regal-navy-600"
-                      />
-                    </div>
-                    <div className="flex-1 pt-0.5">
-                      <p className="text-sm font-medium text-regal-navy-900 mb-1">
-                        Re-enabling requires a Pro plan
-                      </p>
-                      <p className="text-xs text-regal-navy-600 mb-4">
-                        Free accounts can disable bags but need a Pro plan to
-                        turn them back on.
-                      </p>
-                      <a
-                        href="/pricing"
-                        className="inline-block px-5 py-2.5 bg-regal-navy-600 hover:bg-regal-navy-700 text-white text-sm font-semibold rounded-xl transition-all"
-                      >
-                        Upgrade to Pro
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setConfirmStatusToggle(true)}
-                  className={`w-full px-6 py-4 font-semibold rounded-xl transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 ${
-                    bagStatus === 'active'
-                      ? 'bg-saffron-400 hover:bg-saffron-500 border border-saffron-600 text-saffron-950'
-                      : 'bg-regal-navy-600 hover:bg-regal-navy-700 text-white'
-                  }`}
-                >
-                  {bagStatus === 'active' ? 'Disable Bag' : 'Enable Bag'}
-                </button>
-              )}
+              <button
+                onClick={() => setConfirmStatusToggle(true)}
+                className={`w-full px-6 py-4 font-semibold rounded-xl transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 ${
+                  bagStatus === 'active'
+                    ? 'bg-saffron-400 hover:bg-saffron-500 border border-saffron-600 text-saffron-950'
+                    : 'bg-regal-navy-600 hover:bg-regal-navy-700 text-white'
+                }`}
+              >
+                {bagStatus === 'active' ? 'Disable Bag' : 'Enable Bag'}
+              </button>
             </div>
           </div>
         );

@@ -462,21 +462,6 @@ router.patch(
         return;
       }
 
-      if (status === 'active') {
-        const authReq = req as AuthenticatedRequest;
-        if (authReq.ownerEmail) {
-          const emailHash = hashForLookup(authReq.ownerEmail);
-          const planInfo = await billingService.resolvePlan(emailHash);
-          if (!planInfo.canEditBags) {
-            res.status(403).json({
-              error: 'Upgrade required',
-              message: 'Reactivating bags requires a Pro plan.',
-            });
-            return;
-          }
-        }
-      }
-
       await bagRepository.updateBagStatus(bagId, status);
       res.json({ success: true, message: `Bag ${status}` });
     } catch (error) {
