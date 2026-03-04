@@ -59,6 +59,8 @@ export const EmailText = {
     '🔒 <strong>Security Notice:</strong> This link expires in 24 hours.',
   securityNotice7d:
     '🔒 <strong>Security Notice:</strong> This link expires in 7 days.',
+  securityNotice30d:
+    '🔒 <strong>Security Notice:</strong> This link expires in 30 days.',
   brandMessage: 'YouFoundMyBag.com - Privacy-first lost item recovery',
   secureMessaging:
     "This message was sent through YouFoundMyBag.com's secure messaging system.",
@@ -119,11 +121,15 @@ export function emailMessageQuote(senderName: string, message: string): string {
 `;
 }
 
-export function emailSecurityNotice(expiryTime: '24h' | '7d' = '24h'): string {
+export function emailSecurityNotice(
+  expiryTime: '24h' | '7d' | '30d' = '30d'
+): string {
   const text =
     expiryTime === '24h'
       ? EmailText.securityNotice24h
-      : EmailText.securityNotice7d;
+      : expiryTime === '7d'
+        ? EmailText.securityNotice7d
+        : EmailText.securityNotice30d;
   return `
       <div style="${EmailStyles.security.wrapper}">
         <p style="${EmailStyles.security.text}">
@@ -169,7 +175,7 @@ export function buildMagicLinkEmail(params: MagicLinkEmailParams): string {
     emailHeader(params.greeting) +
       emailParagraph(params.description) +
       emailButton(params.magicLinkUrl, params.buttonText) +
-      emailSecurityNotice('24h') +
+      emailSecurityNotice('30d') +
       (params.footerText ? emailParagraph(params.footerText, 'muted') : '') +
       emailFooter(params.preferencesUrl)
   );
@@ -183,7 +189,7 @@ export function buildNotificationEmail(
       (params.description ? emailParagraph(params.description) : '') +
       emailMessageQuote(params.senderName, params.message) +
       emailButton(params.continueUrl, params.buttonText) +
-      emailSecurityNotice('24h') +
+      emailSecurityNotice('30d') +
       emailFooter(params.preferencesUrl)
   );
 }
@@ -200,7 +206,7 @@ export function buildConversationResolvedEmail(
         'You can still view the full conversation history if needed:'
       ) +
       emailButton(params.continueUrl, 'View Conversation') +
-      emailSecurityNotice('24h') +
+      emailSecurityNotice('30d') +
       emailParagraph(
         'Thank you for using YouFoundMyBag.com to help reunite lost items with their owners!',
         'centered'
@@ -232,7 +238,7 @@ export function buildBagCreatedEmail(params: BagCreatedEmailParams): string {
       emailInfoBox(urlBoxContent) +
       emailInfoBox(whatNextContent, true) +
       emailButton(params.magicLinkUrl, 'Access Your Dashboard') +
-      emailSecurityNotice('24h') +
+      emailSecurityNotice('30d') +
       emailFooter(params.preferencesUrl)
   );
 }

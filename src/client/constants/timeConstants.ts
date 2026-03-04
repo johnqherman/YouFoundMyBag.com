@@ -25,6 +25,8 @@ export const TIME_MS = {
   ONE_DAY: DAY_MS,
   THREE_DAYS: 3 * DAY_MS,
   ONE_WEEK: WEEK_MS,
+  THIRTY_DAYS: 30 * DAY_MS,
+  ONE_YEAR: 365 * DAY_MS,
 } as const;
 
 export const TIME_SECONDS = {

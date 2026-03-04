@@ -19,6 +19,7 @@ import {
 import { logger } from '../../infrastructure/logger/index.js';
 import { TIME_SECONDS as t } from '../../client/constants/timeConstants.js';
 import { Bag, Contact } from '../types/index.js';
+import * as billingService from '../billing/service.js';
 
 export async function createBag(
   data: CreateBagRequest,
@@ -122,11 +123,14 @@ export async function getFinderPageData(shortId: string) {
     return {
       status: 'active' as const,
       short_id: cached.short_id,
-      owner_name: cached.owner_name,
+      owner_name: cached.owner_name_override ?? cached.owner_name,
       bag_name: cached.bag_name,
       owner_message: cached.owner_message,
       secure_messaging_enabled: cached.secure_messaging_enabled,
       contact_options: contactOptions,
+      show_branding: cached.show_branding ?? true,
+      tag_color_start: cached.tag_color_start ?? null,
+      tag_color_end: cached.tag_color_end ?? null,
     };
   }
 
@@ -155,13 +159,36 @@ export async function getFinderPageData(shortId: string) {
     }
   );
 
-  const cacheData = {
+  const bagRow = await pool.query(
+    'SELECT owner_email_hash, tag_color_start, tag_color_end, show_branding FROM bags WHERE id = $1',
+    [bag.id]
+  );
+  const ownerEmailHash = bagRow.rows[0]?.owner_email_hash;
+  const bagShowBranding: boolean | null = bagRow.rows[0]?.show_branding ?? null;
+  const tagColorStart: string | null = bagRow.rows[0]?.tag_color_start ?? null;
+  const tagColorEnd: string | null = bagRow.rows[0]?.tag_color_end ?? null;
+
+  let showBranding: boolean;
+  if (bagShowBranding !== null) {
+    showBranding = bagShowBranding;
+  } else if (ownerEmailHash) {
+    const planInfo = await billingService.resolvePlan(ownerEmailHash);
+    showBranding = planInfo.showBranding;
+  } else {
+    showBranding = true;
+  }
+
+  const cacheData: CachedFinderPageData = {
     short_id: bag.short_id,
     owner_name: bag.owner_name,
+    owner_name_override: bag.owner_name_override,
     bag_name: bag.bag_name,
     owner_message: bag.owner_message,
     secure_messaging_enabled: bag.secure_messaging_enabled,
     contact_options_encrypted: contactsResult.rows,
+    show_branding: showBranding,
+    tag_color_start: tagColorStart,
+    tag_color_end: tagColorEnd,
   };
 
   await cacheSet(`bag:finder:${shortId}`, cacheData, t.ONE_HOUR, 'bag_finder');
@@ -170,12 +197,61 @@ export async function getFinderPageData(shortId: string) {
   return {
     status: 'active' as const,
     short_id: bag.short_id,
-    owner_name: bag.owner_name,
+    owner_name: bag.owner_name_override ?? bag.owner_name,
     bag_name: bag.bag_name,
     owner_message: bag.owner_message,
     secure_messaging_enabled: bag.secure_messaging_enabled,
     contact_options: contactOptions,
+    show_branding: showBranding,
+    tag_color_start: tagColorStart,
+    tag_color_end: tagColorEnd,
   };
+}
+
+export async function getBagAppearance(bagId: string): Promise<{
+  tag_color_start: string | null;
+  tag_color_end: string | null;
+  show_branding: boolean | null;
+} | null> {
+  const result = await pool.query(
+    'SELECT tag_color_start, tag_color_end, show_branding FROM bags WHERE id = $1',
+    [bagId]
+  );
+  if (result.rows.length === 0) return null;
+  return {
+    tag_color_start: result.rows[0].tag_color_start ?? null,
+    tag_color_end: result.rows[0].tag_color_end ?? null,
+    show_branding: result.rows[0].show_branding ?? null,
+  };
+}
+
+export async function updateBagAppearance(
+  bagId: string,
+  appearance: {
+    tag_color_start: string | null;
+    tag_color_end: string | null;
+    show_branding: boolean | null;
+  }
+): Promise<void> {
+  await pool.query(
+    'UPDATE bags SET tag_color_start = $1, tag_color_end = $2, show_branding = $3, updated_at = NOW() WHERE id = $4',
+    [
+      appearance.tag_color_start,
+      appearance.tag_color_end,
+      appearance.show_branding,
+      bagId,
+    ]
+  );
+
+  const bag = await pool.query('SELECT short_id FROM bags WHERE id = $1', [
+    bagId,
+  ]);
+  if (bag.rows[0]) {
+    await cacheDel(`bag:short:${bag.rows[0].short_id}`, 'bag');
+    await cacheDel(`bag:finder:${bag.rows[0].short_id}`, 'bag_finder');
+  }
+
+  logger.info(`Updated appearance for bag ${bagId}`);
 }
 
 export async function getContactsByBagId(bagId: string): Promise<Contact[]> {
@@ -207,6 +283,35 @@ export async function getBagsByOwnerEmail(ownerEmail: string): Promise<Bag[]> {
     ...row,
     owner_email: decryptField(row.owner_email) ?? undefined,
   }));
+}
+
+export async function updateBagOwnerNameOverride(
+  bagId: string,
+  ownerNameOverride: string | null
+): Promise<void> {
+  await pool.query(
+    'UPDATE bags SET owner_name_override = $1, updated_at = NOW() WHERE id = $2',
+    [ownerNameOverride || null, bagId]
+  );
+  const bag = await pool.query('SELECT short_id FROM bags WHERE id = $1', [
+    bagId,
+  ]);
+  if (bag.rows[0]) {
+    await cacheDel(`bag:short:${bag.rows[0].short_id}`, 'bag');
+    await cacheDel(`bag:finder:${bag.rows[0].short_id}`, 'bag_finder');
+  }
+  logger.info(`Updated owner name override for bag ${bagId}`);
+}
+
+export async function updateOwnerNameForEmail(
+  ownerEmail: string,
+  ownerName: string
+): Promise<void> {
+  const ownerEmailHash = hashForLookup(ownerEmail);
+  await pool.query(
+    'UPDATE bags SET owner_name = $1, updated_at = NOW() WHERE owner_email_hash = $2',
+    [ownerName || null, ownerEmailHash]
+  );
 }
 
 export async function getBagById(bagId: string): Promise<Bag | null> {
@@ -243,7 +348,8 @@ export async function canRotateShortId(bagId: string): Promise<{
 
 export async function rotateShortId(
   bagId: string,
-  newShortId: string
+  newShortId: string,
+  bypassCooldown = false
 ): Promise<void> {
   const bagResult = await pool.query(
     'SELECT short_id FROM bags WHERE id = $1',
@@ -255,13 +361,26 @@ export async function rotateShortId(
     throw new Error('Bag not found');
   }
 
-  try {
-    await pool.query('SELECT rotate_short_id($1, $2)', [bagId, newShortId]);
-  } catch (error) {
-    if (error instanceof Error) {
-      throw error;
+  if (bypassCooldown) {
+    await withTransaction(async (client) => {
+      await client.query(
+        'INSERT INTO short_id_history (bag_id, short_id, replaced_at) VALUES ($1, $2, NOW())',
+        [bagId, oldShortId]
+      );
+      await client.query(
+        'UPDATE bags SET short_id = $1, last_rotation = NOW(), rotation_count = COALESCE(rotation_count, 0) + 1 WHERE id = $2',
+        [newShortId, bagId]
+      );
+    });
+  } else {
+    try {
+      await pool.query('SELECT rotate_short_id($1, $2)', [bagId, newShortId]);
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('Failed to rotate short ID');
     }
-    throw new Error('Failed to rotate short ID');
   }
 
   await cacheDel(`bag:short:${oldShortId}`, 'bag');
@@ -273,13 +392,20 @@ export async function rotateShortId(
 
 export async function updateBagName(
   bagId: string,
-  newName: string
+  newName: string,
+  bypassCooldown = false
 ): Promise<void> {
+  const client = await pool.connect();
   try {
-    await pool.query('UPDATE bags SET bag_name = $1 WHERE id = $2', [
+    await client.query('BEGIN');
+    if (bypassCooldown) {
+      await client.query("SET LOCAL app.bypass_name_cooldown = 'true'");
+    }
+    await client.query('UPDATE bags SET bag_name = $1 WHERE id = $2', [
       newName,
       bagId,
     ]);
+    await client.query('COMMIT');
 
     const bag = await pool.query('SELECT short_id FROM bags WHERE id = $1', [
       bagId,
@@ -291,10 +417,13 @@ export async function updateBagName(
 
     logger.info(`Updated bag name for bag ${bagId} to "${newName}"`);
   } catch (error) {
+    await client.query('ROLLBACK');
     if (error instanceof Error && error.message.includes('once per week')) {
       throw error;
     }
     throw new Error('Failed to update bag name');
+  } finally {
+    client.release();
   }
 }
 

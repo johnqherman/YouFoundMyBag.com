@@ -49,6 +49,7 @@ export default {
   plugins: [
     new webpack.EnvironmentPlugin({
       CLOUDFLARE_TURNSTILE_SITE_KEY: null,
+      STRIPE_PUBLISHABLE_KEY: null,
     }),
     new HtmlWebpackPlugin({
       template: './src/client/index.html',

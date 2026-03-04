@@ -388,7 +388,7 @@ export async function sendMagicLinkReissue(
     description,
     magicLinkUrl: magicLink,
     buttonText,
-    expiryDays: '7d',
+    expiryDays: '30d',
     preferencesUrl,
   });
 

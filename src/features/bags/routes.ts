@@ -12,6 +12,9 @@ import { emailValidationMiddleware } from '../../infrastructure/utils/email-vali
 import { verifyOwnerSession } from '../auth/service.js';
 import { qrScanRateLimit } from '../security/middleware.js';
 import { Bag } from '../types/index.js';
+import { hashForLookup } from '../../infrastructure/security/encryption.js';
+import * as billingService from '../billing/service.js';
+import { cacheDel } from '../../infrastructure/cache/index.js';
 
 const router = express.Router();
 
@@ -62,6 +65,23 @@ router.post(
   async (req, res): Promise<void> => {
     try {
       const validatedData = await createBagSchema.parseAsync(req.body);
+
+      if (validatedData.owner_email) {
+        const emailHash = hashForLookup(validatedData.owner_email);
+        const check = await billingService.canCreateBag(emailHash);
+        if (!check.allowed) {
+          res.status(403).json({
+            error: 'Plan limit reached',
+            message: check.reason,
+            data: {
+              current_count: check.currentCount,
+              limit: check.limit,
+            },
+          });
+          return;
+        }
+      }
+
       const clientIp = req.ip || req.connection.remoteAddress || undefined;
       const result = await bagService.createBagWithQR(validatedData, clientIp);
 
@@ -110,7 +130,7 @@ router.get('/:shortId', qrScanRateLimit(), async (req, res): Promise<void> => {
     }
 
     res.set({
-      'Cache-Control': 'public, max-age=300',
+      'Cache-Control': 'no-store',
       'X-Robots-Tag': 'noindex, nofollow',
     });
 
@@ -157,6 +177,17 @@ router.get(
         res.status(400).json({ error: 'Bag ID is required' });
         return;
       }
+
+      const authReq = req as AuthenticatedRequest;
+      if (authReq.ownerEmail) {
+        const emailHash = hashForLookup(authReq.ownerEmail);
+        const planInfo = await billingService.resolvePlan(emailHash);
+        if (planInfo.plan === 'pro') {
+          res.json({ success: true, data: { canRotate: true } });
+          return;
+        }
+      }
+
       const cooldown = await bagRepository.canRotateShortId(bagId);
       res.json({ success: true, data: cooldown });
     } catch (error) {
@@ -176,7 +207,16 @@ router.post(
         res.status(400).json({ error: 'Bag ID is required' });
         return;
       }
-      const result = await bagService.rotateBagShortId(bagId);
+
+      const authReq = req as AuthenticatedRequest;
+      let isPro = false;
+      if (authReq.ownerEmail) {
+        const emailHash = hashForLookup(authReq.ownerEmail);
+        const planInfo = await billingService.resolvePlan(emailHash);
+        isPro = planInfo.plan === 'pro';
+      }
+
+      const result = await bagService.rotateBagShortId(bagId, isPro);
       res.json({ success: true, data: result });
     } catch (error) {
       if (error instanceof Error && error.message.includes('once per week')) {
@@ -199,6 +239,7 @@ router.patch(
         res.status(400).json({ error: 'Bag ID is required' });
         return;
       }
+
       const { bag_name } = req.body;
 
       if (!bag_name || typeof bag_name !== 'string' || bag_name.length > 30) {
@@ -208,7 +249,27 @@ router.patch(
         return;
       }
 
-      await bagRepository.updateBagName(bagId, bag_name);
+      const authReq = req as AuthenticatedRequest;
+      let isPro = false;
+      if (authReq.ownerEmail) {
+        const emailHash = hashForLookup(authReq.ownerEmail);
+        const planInfo = await billingService.resolvePlan(emailHash);
+        isPro = planInfo.plan === 'pro';
+      }
+
+      if (!isPro) {
+        const cooldown = await bagRepository.canUpdateBagName(bagId);
+        if (!cooldown.canUpdate) {
+          res.status(429).json({
+            error: 'Cooldown active',
+            message: 'Bag name can only be updated once per week.',
+            nextUpdateAt: cooldown.nextUpdateAt,
+          });
+          return;
+        }
+      }
+
+      await bagRepository.updateBagName(bagId, bag_name, isPro);
       res.json({ success: true, message: 'Bag name updated' });
     } catch (error) {
       if (error instanceof Error && error.message.includes('once per week')) {
@@ -217,6 +278,137 @@ router.patch(
       }
       logger.error('Error updating bag name:', error);
       res.status(500).json({ error: 'Failed to update bag name' });
+    }
+  }
+);
+
+router.patch(
+  '/:bagId/owner-name',
+  verifyBagOwnership,
+  async (req, res): Promise<void> => {
+    try {
+      const bagId = req.params.bagId;
+      if (!bagId) {
+        res.status(400).json({ error: 'Bag ID is required' });
+        return;
+      }
+
+      const authReq = req as AuthenticatedRequest;
+      if (!authReq.ownerEmail) {
+        res.status(401).json({ error: 'Authentication required' });
+        return;
+      }
+
+      const emailHash = hashForLookup(authReq.ownerEmail);
+      const planInfo = await billingService.resolvePlan(emailHash);
+      if (planInfo.plan !== 'pro') {
+        res.status(403).json({
+          error: 'Upgrade required',
+          message: 'Per-bag owner name requires a Pro plan.',
+        });
+        return;
+      }
+
+      const { owner_name_override } = req.body;
+      if (
+        owner_name_override !== undefined &&
+        owner_name_override !== null &&
+        (typeof owner_name_override !== 'string' ||
+          owner_name_override.length > 30)
+      ) {
+        res
+          .status(400)
+          .json({ error: 'Invalid owner name. Must be 0–30 characters.' });
+        return;
+      }
+
+      const override =
+        typeof owner_name_override === 'string' && owner_name_override.trim()
+          ? owner_name_override.trim()
+          : null;
+
+      await bagRepository.updateBagOwnerNameOverride(bagId, override);
+      await cacheDel(`conversations:owner:${emailHash}`, 'dashboard');
+
+      res.json({ success: true, message: 'Owner name updated' });
+    } catch (error) {
+      logger.error('Error updating owner name override:', error);
+      res.status(500).json({ error: 'Failed to update owner name' });
+    }
+  }
+);
+
+router.get(
+  '/:bagId/appearance',
+  verifyBagOwnership,
+  async (req, res): Promise<void> => {
+    try {
+      const bagId = req.params.bagId;
+      if (!bagId) {
+        res.status(400).json({ error: 'Bag ID is required' });
+        return;
+      }
+      const appearance = await bagRepository.getBagAppearance(bagId);
+      if (!appearance) {
+        res.status(404).json({ error: 'Bag not found' });
+        return;
+      }
+      res.json({ success: true, data: appearance });
+    } catch (error) {
+      logger.error('Error getting bag appearance:', error);
+      res.status(500).json({ error: 'Failed to get appearance settings' });
+    }
+  }
+);
+
+router.patch(
+  '/:bagId/appearance',
+  verifyBagOwnership,
+  async (req, res): Promise<void> => {
+    try {
+      const bagId = req.params.bagId;
+      if (!bagId) {
+        res.status(400).json({ error: 'Bag ID is required' });
+        return;
+      }
+
+      const authReq = req as AuthenticatedRequest;
+      if (authReq.ownerEmail) {
+        const emailHash = hashForLookup(authReq.ownerEmail);
+        const planInfo = await billingService.resolvePlan(emailHash);
+        if (planInfo.plan !== 'pro') {
+          res.status(403).json({
+            error: 'Upgrade required',
+            message: 'Appearance customization requires a Pro plan.',
+          });
+          return;
+        }
+      }
+
+      const { tag_color_start, tag_color_end, show_branding } = req.body;
+
+      const hexRegex = /^#[0-9a-fA-F]{6}$/;
+      const colorStart =
+        tag_color_start != null && hexRegex.test(tag_color_start)
+          ? (tag_color_start as string)
+          : null;
+      const colorEnd =
+        tag_color_end != null && hexRegex.test(tag_color_end)
+          ? (tag_color_end as string)
+          : null;
+      const brandingOverride =
+        typeof show_branding === 'boolean' ? show_branding : null;
+
+      await bagRepository.updateBagAppearance(bagId, {
+        tag_color_start: colorStart,
+        tag_color_end: colorEnd,
+        show_branding: brandingOverride,
+      });
+
+      res.json({ success: true, message: 'Appearance updated' });
+    } catch (error) {
+      logger.error('Error updating bag appearance:', error);
+      res.status(500).json({ error: 'Failed to update appearance settings' });
     }
   }
 );
@@ -231,6 +423,17 @@ router.get(
         res.status(400).json({ error: 'Bag ID is required' });
         return;
       }
+
+      const authReq = req as AuthenticatedRequest;
+      if (authReq.ownerEmail) {
+        const emailHash = hashForLookup(authReq.ownerEmail);
+        const planInfo = await billingService.resolvePlan(emailHash);
+        if (planInfo.plan === 'pro') {
+          res.json({ success: true, data: { canUpdate: true } });
+          return;
+        }
+      }
+
       const cooldown = await bagRepository.canUpdateBagName(bagId);
       res.json({ success: true, data: cooldown });
     } catch (error) {
@@ -257,6 +460,21 @@ router.patch(
           .status(400)
           .json({ error: 'Invalid status. Must be "active" or "disabled".' });
         return;
+      }
+
+      if (status === 'active') {
+        const authReq = req as AuthenticatedRequest;
+        if (authReq.ownerEmail) {
+          const emailHash = hashForLookup(authReq.ownerEmail);
+          const planInfo = await billingService.resolvePlan(emailHash);
+          if (!planInfo.canEditBags) {
+            res.status(403).json({
+              error: 'Upgrade required',
+              message: 'Reactivating bags requires a Pro plan.',
+            });
+            return;
+          }
+        }
       }
 
       await bagRepository.updateBagStatus(bagId, status);

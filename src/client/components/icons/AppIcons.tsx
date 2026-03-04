@@ -22,6 +22,15 @@ import RefreshIcon from '@atlaskit/icon/core/refresh';
 import LightbulbIcon from '@atlaskit/icon/core/lightbulb';
 import GridIcon from '@atlaskit/icon/core/grid';
 import DeleteIconAtlas from '@atlaskit/icon/core/delete';
+import EyeOpenStrikethroughIcon from '@atlaskit/icon/core/eye-open-strikethrough';
+import HashtagIconAtlas from '@atlaskit/icon/core/hashtag';
+import AngleBracketsIcon from '@atlaskit/icon/core/angle-brackets';
+import PriorityBlockerIcon from '@atlaskit/icon/core/priority-blocker';
+import CameraIcon from '@atlaskit/icon/core/camera';
+import PaintPaletteIcon from '@atlaskit/icon/core/paint-palette';
+import InboxIconAtlas from '@atlaskit/icon/core/inbox';
+import CrossIconAtlas from '@atlaskit/icon/core/cross';
+import ChevronRightIconAtlas from '@atlaskit/icon/core/chevron-right';
 import type { IconSize, IconColor } from '../../types/index.js';
 
 import {
@@ -358,6 +367,129 @@ export const DeleteIcon = ({
       spacing="compact"
       color={color}
       label={label || 'Delete'}
+    />
+  </IconWrapper>
+);
+
+export const EyeOffIcon = ({
+  size = 'small',
+  color = 'currentColor',
+  label = '',
+  className = '',
+}: IconProps) => (
+  <IconWrapper className={className} size={size}>
+    <EyeOpenStrikethroughIcon
+      spacing="compact"
+      color={color}
+      label={label || 'Hidden'}
+    />
+  </IconWrapper>
+);
+
+export const HashtagIcon = ({
+  size = 'small',
+  color = 'currentColor',
+  label = '',
+  className = '',
+}: IconProps) => (
+  <IconWrapper className={className} size={size}>
+    <HashtagIconAtlas
+      spacing="compact"
+      color={color}
+      label={label || 'Hashtag'}
+    />
+  </IconWrapper>
+);
+
+export const CodeBracketsIcon = ({
+  size = 'small',
+  color = 'currentColor',
+  label = '',
+  className = '',
+}: IconProps) => (
+  <IconWrapper className={className} size={size}>
+    <AngleBracketsIcon
+      spacing="compact"
+      color={color}
+      label={label || 'Code'}
+    />
+  </IconWrapper>
+);
+
+export const BotAgentIcon = ({
+  size = 'small',
+  color = 'currentColor',
+  label = '',
+  className = '',
+}: IconProps) => (
+  <IconWrapper className={className} size={size}>
+    <PriorityBlockerIcon
+      spacing="compact"
+      color={color}
+      label={label || 'Block'}
+    />
+  </IconWrapper>
+);
+
+export const CameraScanIcon = ({
+  size = 'small',
+  color = 'currentColor',
+  label = '',
+  className = '',
+}: IconProps) => (
+  <IconWrapper className={className} size={size}>
+    <CameraIcon spacing="compact" color={color} label={label || 'Camera'} />
+  </IconWrapper>
+);
+
+export const PaletteIcon = ({
+  size = 'small',
+  color = 'currentColor',
+  label = '',
+  className = '',
+}: IconProps) => (
+  <IconWrapper className={className} size={size}>
+    <PaintPaletteIcon
+      spacing="compact"
+      color={color}
+      label={label || 'Palette'}
+    />
+  </IconWrapper>
+);
+
+export const InboxTrayIcon = ({
+  size = 'small',
+  color = 'currentColor',
+  label = '',
+  className = '',
+}: IconProps) => (
+  <IconWrapper className={className} size={size}>
+    <InboxIconAtlas spacing="compact" color={color} label={label || 'Inbox'} />
+  </IconWrapper>
+);
+
+export const CrossIcon = ({
+  size = 'small',
+  color = 'currentColor',
+  label = '',
+  className = '',
+}: IconProps) => (
+  <IconWrapper className={className} size={size}>
+    <CrossIconAtlas spacing="compact" color={color} label={label || 'Cross'} />
+  </IconWrapper>
+);
+
+export const ChevronRightIcon = ({
+  size = 'small',
+  color = 'currentColor',
+  label = '',
+  className = '',
+}: IconProps) => (
+  <IconWrapper className={className} size={size}>
+    <ChevronRightIconAtlas
+      spacing="compact"
+      color={color}
+      label={label || 'Next'}
     />
   </IconWrapper>
 );

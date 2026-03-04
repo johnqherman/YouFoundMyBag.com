@@ -65,9 +65,11 @@ export default function ConversationPage() {
   const [resolving, setResolving] = useState(false);
   const [archiving, setArchiving] = useState(false);
   const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
+  const [showResolveConfirm, setShowResolveConfirm] = useState(false);
   const [showReissueModal, setShowReissueModal] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const replyInputRef = useRef<HTMLTextAreaElement>(null);
+  const scrollAfterLoad = useRef(false);
 
   const tokenKey = isFinderView
     ? 'finder_session_token'
@@ -206,6 +208,7 @@ export default function ConversationPage() {
       }
 
       setReplyMessage('');
+      scrollAfterLoad.current = true;
       await loadConversation();
       setTimeout(() => replyInputRef.current?.focus(), 0);
     } catch (err) {
@@ -257,6 +260,7 @@ export default function ConversationPage() {
       }
 
       await api.resolveConversation(conversationId, token);
+      scrollAfterLoad.current = true;
       await loadConversation();
     } catch (err) {
       setError(
@@ -337,27 +341,45 @@ export default function ConversationPage() {
 
   useEffect(() => {
     if (!conversation?.messages.length) return;
+    if (!scrollAfterLoad.current) return;
+    scrollAfterLoad.current = false;
 
     const timeout = setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+      const el = messagesEndRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      if (rect.top > window.innerHeight) {
+        el.scrollIntoView({ behavior: 'smooth' });
+      }
     }, 0);
 
     return () => clearTimeout(timeout);
   }, [conversation?.messages.length]);
+
+  useEffect(() => {
+    if (!conversation || conversation.conversation.status !== 'active') return;
+    const interval = setInterval(() => {
+      loadConversation();
+    }, 12_000);
+    return () => clearInterval(interval);
+  }, [conversation?.conversation.status, loadConversation]);
 
   if (loading || authenticating) {
     return (
       <div className="min-h-screen bg-regal-navy-50 text-regal-navy-900 flex items-center justify-center">
         <Helmet>
           <title>
-            {authenticating ? 'Authenticating...' : 'Loading Conversation...'} |
+            {authenticating ? 'Authenticating...' : 'Loading Conversation...'} -
             YouFoundMyBag.com
           </title>
         </Helmet>
-        <div className="text-center">
+        <div className="text-center animate-fadeIn">
           <LoadingSpinner />
-          <p className="mt-4 text-regal-navy-600">
+          <p className="mt-4 font-display text-xl text-regal-navy-700">
             {authenticating ? 'Authenticating...' : 'Loading conversation...'}
+          </p>
+          <p className="mt-1 text-sm text-regal-navy-500">
+            {authenticating ? 'Verifying your access link' : 'Just a moment'}
           </p>
         </div>
       </div>
@@ -376,7 +398,7 @@ export default function ConversationPage() {
       <div className="min-h-screen bg-regal-navy-50 text-regal-navy-900">
         <Helmet>
           <title>
-            {isFinderView ? 'Access Error' : 'Error'} | YouFoundMyBag.com
+            {isFinderView ? 'Access Error' : 'Error'} - YouFoundMyBag.com
           </title>
         </Helmet>
         <div className="max-w-readable mx-auto p-6">
@@ -384,7 +406,7 @@ export default function ConversationPage() {
             <div className="mb-4 flex justify-center text-cinnabar-600">
               <ErrorIcon color="currentColor" size="large" />
             </div>
-            <h1 className="text-2xl font-semibold text-cinnabar-600 mb-4">
+            <h1 className="text-2xl font-display tracking-tight text-cinnabar-600 mb-4">
               {isFinderView ? 'Access Error' : 'Error Loading Conversation'}
             </h1>
             <p className="text-regal-navy-600 mb-6">{error}</p>
@@ -425,14 +447,14 @@ export default function ConversationPage() {
     return (
       <div className="min-h-screen bg-regal-navy-50 text-regal-navy-900">
         <Helmet>
-          <title>Conversation Not Found | YouFoundMyBag.com</title>
+          <title>Conversation Not Found - YouFoundMyBag.com</title>
         </Helmet>
         <div className="max-w-readable mx-auto p-6">
           <div className="text-center">
             <div className="mb-4 flex justify-center text-saffron-700">
               <QuestionIcon color="currentColor" size="large" />
             </div>
-            <h1 className="text-2xl font-semibold text-saffron-700 mb-4">
+            <h1 className="text-2xl font-display tracking-tight text-saffron-700 mb-4">
               Conversation Not Found
             </h1>
             <p className="text-regal-navy-600 mb-6">
@@ -456,28 +478,59 @@ export default function ConversationPage() {
               conversation.bag.owner_name,
               conversation.bag.bag_name,
               conversation.bag.short_id
-            )} | YouFoundMyBag.com`
-    : 'Conversation | YouFoundMyBag.com';
+            )} - YouFoundMyBag.com`
+    : 'Conversation - YouFoundMyBag.com';
+
+  const nameInfo = {
+    ownerName: conversation.bag.owner_name,
+    bagName: conversation.bag.bag_name,
+    finderName: conversation.conversation.finder_display_name,
+  };
+
+  const replyingAsName = isFinderView
+    ? conversation.conversation.finder_display_name || 'Finder'
+    : conversation.bag.owner_name || 'Owner';
 
   return (
-    <div className="min-h-screen bg-regal-navy-50 text-regal-navy-900">
+    <div className="relative min-h-screen bg-regal-navy-50 text-regal-navy-900">
       <Helmet>
         <title>{conversationTitle}</title>
       </Helmet>
-      <div className="max-w-4xl mx-auto p-4 sm:p-6">
-        <div className="sticky top-0 z-10 bg-regal-navy-50 pb-3 sm:pb-4 mb-4 sm:mb-6 -mx-4 sm:-mx-6 px-4 sm:px-6 pt-4 sm:pt-6 shadow-sm">
+
+      <div className="fixed inset-0 pointer-events-none" aria-hidden="true">
+        <div className="absolute top-0 left-0 w-80 h-80 bg-gradient-to-br from-regal-navy-100/70 to-transparent rounded-full -translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tl from-regal-navy-100/50 to-transparent rounded-full translate-x-1/3 translate-y-1/3" />
+      </div>
+
+      <div className="relative max-w-4xl mx-auto p-4 sm:p-6">
+        <div className="sticky top-0 z-10 bg-regal-navy-50/95 backdrop-blur-sm border-b border-regal-navy-200/70 pb-3 sm:pb-4 mb-4 sm:mb-6 -mx-4 sm:-mx-6 px-4 sm:px-6 pt-4 sm:pt-6">
           {!isFinderView ? (
             <Link
               to="/dashboard"
-              className="link mb-3 sm:mb-4 inline-block text-sm sm:text-base"
+              className="group inline-flex items-center gap-1.5 text-sm text-regal-navy-500 hover:text-regal-navy-800 transition-colors mb-3 sm:mb-4"
             >
-              ← Back to Dashboard
+              <svg
+                className="w-4 h-4 transition-transform group-hover:-translate-x-0.5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+              Dashboard
             </Link>
           ) : (
             <div className="mb-3 sm:mb-4" />
           )}
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold mb-2">
-            Conversation about{' '}
+
+          <p className="text-xs font-medium tracking-widest uppercase text-regal-navy-400 mb-1">
+            Conversation
+          </p>
+          <h1 className="font-display text-2xl sm:text-3xl md:text-4xl tracking-tight mb-2">
             <Twemoji>
               {formatBagDisplayName(
                 conversation.bag.owner_name,
@@ -486,94 +539,168 @@ export default function ConversationPage() {
               )}
             </Twemoji>
           </h1>
-          <div className="flex flex-wrap items-center gap-2 text-sm sm:text-base text-regal-navy-600">
+
+          <div className="flex flex-wrap items-center gap-3 text-sm text-regal-navy-600">
             <span className="flex items-center gap-1.5">
-              Status:{' '}
               <span
-                className={`badge ${
+                className={`w-2 h-2 rounded-full ${
                   conversation.conversation.status === 'active'
-                    ? 'badge-success'
+                    ? 'bg-medium-jungle-500'
                     : conversation.conversation.status === 'resolved'
-                      ? 'bg-regal-navy-100 text-regal-navy-700'
-                      : 'badge-neutral'
+                      ? 'bg-regal-navy-400'
+                      : 'bg-regal-navy-300'
                 }`}
-              >
+              />
+              <span className="text-xs font-medium tracking-widest uppercase text-regal-navy-500">
                 {conversation.conversation.status === 'resolved'
                   ? 'Resolved'
                   : 'Active'}
               </span>
             </span>
-            {isFinderView && conversation.bag.owner_name && (
-              <span className="hidden sm:inline">
-                • Owner: <Twemoji>{conversation.bag.owner_name}</Twemoji>
+
+            <span className="hidden sm:flex items-center gap-1.5">
+              <span
+                className="w-6 h-6 rounded-full bg-regal-navy-200 text-regal-navy-700 flex items-center justify-center text-xs font-medium"
+                title={conversation.bag.owner_name || 'Owner'}
+              >
+                {(conversation.bag.owner_name || 'O').charAt(0).toUpperCase()}
               </span>
-            )}
-            {!isFinderView && conversation.conversation.finder_display_name && (
-              <span className="hidden sm:inline">
-                • Finder:{' '}
-                <Twemoji>
-                  {conversation.conversation.finder_display_name}
-                </Twemoji>
+              {conversation.conversation.finder_display_name && (
+                <span
+                  className="w-6 h-6 rounded-full bg-dark-coffee-100 text-dark-coffee-700 flex items-center justify-center text-xs font-medium"
+                  title={conversation.conversation.finder_display_name}
+                >
+                  {conversation.conversation.finder_display_name
+                    .charAt(0)
+                    .toUpperCase()}
+                </span>
+              )}
+              <span className="text-regal-navy-400 text-xs">
+                {isFinderView && conversation.bag.owner_name && (
+                  <Twemoji>{conversation.bag.owner_name}</Twemoji>
+                )}
+                {!isFinderView &&
+                  conversation.conversation.finder_display_name && (
+                    <Twemoji>
+                      {conversation.conversation.finder_display_name}
+                    </Twemoji>
+                  )}
               </span>
-            )}
+            </span>
           </div>
         </div>
 
-        <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
-          {conversation.messages.map((message: ConversationMessage) => {
-            const isCurrentUserMessage = isFinderView
-              ? message.sender_type === 'finder'
-              : message.sender_type === 'owner';
+        <div className="space-y-4 sm:space-y-5 mb-4 sm:mb-6">
+          {(() => {
+            const currentUserSenderType = isFinderView ? 'finder' : 'owner';
+            const lastReadMessage = [...conversation.messages]
+              .reverse()
+              .find(
+                (m) => m.sender_type === currentUserSenderType && m.read_at
+              );
+            const lastReadMessageId = lastReadMessage?.id;
 
-            return (
-              <div
-                key={message.id}
-                className={`p-3 sm:p-4 rounded-lg ${
-                  isCurrentUserMessage
-                    ? 'bg-regal-navy-600 text-white ml-4 sm:ml-8 md:ml-12 shadow-soft'
-                    : 'bg-white border border-regal-navy-200 text-regal-navy-900 mr-4 sm:mr-8 md:mr-12 shadow-soft'
-                }`}
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <Twemoji className="font-medium text-sm">
-                    {formatConversationParticipant(
-                      message.sender_type,
-                      {
-                        ownerName: conversation.bag.owner_name,
-                        bagName: conversation.bag.bag_name,
-                        finderName:
-                          conversation.conversation.finder_display_name,
-                      },
-                      isCurrentUserMessage
-                    )}
-                  </Twemoji>
-                  <span
-                    className={`text-xs ${
-                      isCurrentUserMessage
-                        ? 'text-regal-navy-200'
-                        : 'text-regal-navy-500'
-                    }`}
+            return conversation.messages.map((message: ConversationMessage) => {
+              const isCurrentUserMessage = isFinderView
+                ? message.sender_type === 'finder'
+                : message.sender_type === 'owner';
+
+              const participantName = formatConversationParticipant(
+                message.sender_type,
+                nameInfo,
+                false
+              );
+
+              const avatarInitial = participantName.charAt(0).toUpperCase();
+
+              const isOwnerMessage = message.sender_type === 'owner';
+
+              if (isCurrentUserMessage) {
+                return (
+                  <div
+                    key={message.id}
+                    className="flex flex-col items-end ml-8 sm:ml-14 md:ml-20"
                   >
-                    {formatRelativeTimestamp(message.sent_at)}
-                  </span>
-                </div>
-                <Twemoji
-                  tag="p"
-                  className="text-wrap-aggressive leading-relaxed"
-                >
-                  {message.message_content}
-                </Twemoji>
-              </div>
-            );
-          })}
+                    <div className="flex items-baseline gap-2 mb-1 px-1">
+                      <Twemoji className="text-xs font-medium text-regal-navy-500">
+                        You
+                      </Twemoji>
+                      <span className="text-xs text-regal-navy-400">
+                        {formatRelativeTimestamp(message.sent_at)}
+                      </span>
+                    </div>
+                    <div className="bg-regal-navy-700 text-white px-4 py-3 rounded-t-2xl rounded-bl-2xl rounded-br-sm shadow-soft max-w-full">
+                      <Twemoji
+                        tag="p"
+                        className="text-wrap-aggressive leading-relaxed"
+                      >
+                        {message.message_content}
+                      </Twemoji>
+                    </div>
+                    {message.id === lastReadMessageId && (
+                      <span className="text-xs text-regal-navy-400 mt-0.5 px-1 flex items-center gap-1">
+                        <CheckIcon color="currentColor" size="small" />
+                        Seen {formatRelativeTimestamp(message.read_at!)}
+                      </span>
+                    )}
+                  </div>
+                );
+              } else {
+                return (
+                  <div
+                    key={message.id}
+                    className="flex items-end gap-2.5 mr-8 sm:mr-14 md:mr-20"
+                  >
+                    <span
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium shrink-0 ${
+                        isOwnerMessage
+                          ? 'bg-regal-navy-200 text-regal-navy-700'
+                          : 'bg-dark-coffee-100 text-dark-coffee-700'
+                      }`}
+                      title={participantName}
+                    >
+                      {avatarInitial}
+                    </span>
+                    <div className="flex flex-col items-start min-w-0">
+                      <div className="flex items-baseline gap-2 mb-1 px-1">
+                        <Twemoji className="text-xs font-medium text-regal-navy-500">
+                          {participantName}
+                        </Twemoji>
+                        <span className="text-xs text-regal-navy-400">
+                          {formatRelativeTimestamp(message.sent_at)}
+                        </span>
+                      </div>
+                      <div className="bg-white border border-regal-navy-200 text-regal-navy-900 px-4 py-3 rounded-t-2xl rounded-br-2xl rounded-bl-sm shadow-soft max-w-full">
+                        <Twemoji
+                          tag="p"
+                          className="text-wrap-aggressive leading-relaxed"
+                        >
+                          {message.message_content}
+                        </Twemoji>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+            });
+          })()}
           <div ref={messagesEndRef} />
         </div>
 
         {conversation.conversation.status === 'active' && (
-          <form onSubmit={sendReply} className="card">
-            <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-regal-navy-900">
+          <form
+            onSubmit={sendReply}
+            className="bg-white border border-regal-navy-200/80 rounded-2xl shadow-soft-md p-4 sm:p-6"
+          >
+            <h3 className="font-display text-lg sm:text-xl tracking-tight text-regal-navy-900 mb-1">
               Send a Reply
             </h3>
+            <p className="text-sm text-regal-navy-500 mb-3 sm:mb-4">
+              Replying as{' '}
+              <Twemoji className="font-medium text-regal-navy-700">
+                {replyingAsName}
+              </Twemoji>
+            </p>
             <div onKeyDown={handleKeyDown}>
               <CharacterLimitTextArea
                 ref={replyInputRef}
@@ -597,10 +724,11 @@ export default function ConversationPage() {
               {!isFinderView ? (
                 <button
                   type="button"
-                  onClick={handleResolveConversation}
-                  className="bg-regal-navy-100 hover:bg-regal-navy-200 text-regal-navy-800 border border-regal-navy-300 px-4 py-2.5 sm:py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
+                  onClick={() => setShowResolveConfirm(true)}
+                  className="bg-medium-jungle-50 hover:bg-medium-jungle-100 text-medium-jungle-800 border border-medium-jungle-200 px-4 py-2.5 sm:py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base flex items-center justify-center gap-2"
                   disabled={sending || resolving}
                 >
+                  <span className="w-2 h-2 rounded-full bg-medium-jungle-500" />
                   {resolving ? 'Resolving...' : 'Mark as Resolved'}
                 </button>
               ) : (
@@ -618,42 +746,67 @@ export default function ConversationPage() {
         )}
 
         {conversation.conversation.status === 'resolved' && (
-          <div className="card">
-            <div className="alert-success text-center mb-4">
-              <div className="mb-2 flex justify-center">
-                <CheckIcon color="currentColor" />
+          <div className="bg-white border border-regal-navy-200/80 rounded-2xl shadow-soft-md p-6 sm:p-8">
+            <div className="text-center">
+              <div className="mb-4 flex justify-center">
+                <div className="w-14 h-14 rounded-full bg-medium-jungle-100 flex items-center justify-center text-medium-jungle-700">
+                  <CheckIcon color="currentColor" />
+                </div>
               </div>
-              <p className="font-medium mb-1">
-                This conversation has been resolved.
+              <h2 className="font-display text-2xl sm:text-3xl tracking-tight text-regal-navy-900 mb-2">
+                All sorted!
+              </h2>
+              <p className="text-regal-navy-600 text-sm">
+                This conversation has been resolved. No further replies can be
+                sent.
               </p>
-              <p className="text-sm">No further replies can be sent.</p>
             </div>
+
             {!isFinderView && (
               <>
-                <button
-                  onClick={handleArchiveClick}
-                  disabled={archiving}
-                  className="bg-saffron-100 hover:bg-saffron-200 text-saffron-800 border border-saffron-300 w-full py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  <ArchiveIcon color="currentColor" />
-                  {archiving ? 'Archiving...' : 'Archive Conversation'}
-                </button>
-                <p className="text-xs text-regal-navy-600 text-center mt-2">
-                  Resolved conversations are automatically archived after 30
-                  days. Archived conversations are permanently deleted after 6
-                  months.
-                </p>
+                <div className="border-t border-regal-navy-100 my-6" />
+                <div className="flex flex-col items-center gap-3">
+                  <button
+                    onClick={handleArchiveClick}
+                    disabled={archiving}
+                    className="inline-flex items-center gap-2 bg-saffron-50 hover:bg-saffron-100 text-saffron-800 border border-saffron-200 px-5 py-2.5 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ArchiveIcon color="currentColor" />
+                    {archiving ? 'Archiving...' : 'Archive Conversation'}
+                  </button>
+                  <p className="text-xs text-regal-navy-500 text-center max-w-sm">
+                    Resolved conversations are automatically archived after 30
+                    days. Archived conversations are permanently deleted after 6
+                    months.
+                  </p>
+                </div>
               </>
             )}
           </div>
         )}
 
         {conversation.conversation.status === 'archived' && (
-          <div className="alert-info text-center">
+          <div className="bg-regal-navy-100/60 border border-regal-navy-200/60 rounded-xl px-6 py-4 text-center text-regal-navy-600">
             <p>This conversation has been archived.</p>
           </div>
         )}
       </div>
+
+      {!isFinderView && (
+        <ConfirmModal
+          isOpen={showResolveConfirm}
+          title="Mark as Resolved"
+          message="Are you sure you want to mark this conversation as resolved? No further replies can be sent."
+          confirmText="Mark as Resolved"
+          cancelText="Cancel"
+          variant="primary"
+          onConfirm={() => {
+            setShowResolveConfirm(false);
+            handleResolveConversation();
+          }}
+          onCancel={() => setShowResolveConfirm(false)}
+        />
+      )}
 
       {!isFinderView && (
         <ConfirmModal

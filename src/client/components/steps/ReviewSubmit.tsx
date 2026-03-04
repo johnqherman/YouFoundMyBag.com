@@ -120,7 +120,6 @@ export default function ReviewSubmit({
   onSubmit,
   onContactsReorder,
   loading,
-  error,
 }: ReviewSubmitProps) {
   const [contacts, setContacts] = useState<ContactWithId[]>(() => {
     const sorted = [...formData.contacts];
@@ -283,8 +282,6 @@ export default function ReviewSubmit({
           </DndContext>
         </div>
       )}
-
-      {error && <div className="alert-error">{error}</div>}
 
       <div className="flex justify-between pt-2">
         <button

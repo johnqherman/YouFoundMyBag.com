@@ -26,6 +26,8 @@ import { conversationRoutes } from './features/conversations/routes.js';
 import { finderRoutes } from './features/conversations/finderRoutes.js';
 import { authRoutes } from './features/auth/routes.js';
 import { default as emailPreferencesRoutes } from './features/email-preferences/routes.js';
+import { billingRoutes, webhookHandler } from './features/billing/routes.js';
+import contactRoutes from './features/contact/routes.js';
 
 const app = express();
 
@@ -40,6 +42,13 @@ app.use(
     credentials: true,
   })
 );
+
+app.post(
+  '/api/billing/webhook',
+  express.raw({ type: 'application/json' }),
+  webhookHandler
+);
+
 app.use(basicRateLimit);
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
@@ -55,6 +64,8 @@ app.use(
   dbRateLimit(10, 60),
   emailPreferencesRoutes
 );
+app.use('/api/billing', basicRateLimit, dbRateLimit(10, 60), billingRoutes);
+app.use('/api/contact', basicRateLimit, contactRoutes);
 
 if (config.NODE_ENV === 'production') {
   app.use(
@@ -84,14 +95,29 @@ app.use(
     res: express.Response,
     _next: express.NextFunction
   ) => {
-    logger.error('Unhandled error:', err);
-    res.status(500).json({
-      error: 'Internal server error',
-      message:
-        config.NODE_ENV === 'production'
-          ? 'An unexpected error occurred'
-          : err.message,
-    });
+    console.error(
+      '[UNHANDLED ERROR]',
+      err?.constructor?.name,
+      err?.message,
+      err?.stack
+    );
+    try {
+      logger.error('Unhandled error:', {
+        message: err?.message,
+        stack: err?.stack,
+      });
+    } catch (_logErr) {
+      // logger itself failed
+    }
+    if (!res.headersSent) {
+      res.status(500).json({
+        error: 'Internal server error',
+        message:
+          config.NODE_ENV === 'production'
+            ? 'An unexpected error occurred'
+            : err?.message,
+      });
+    }
   }
 );
 

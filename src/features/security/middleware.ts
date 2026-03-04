@@ -162,23 +162,30 @@ export function dbRateLimit(maxRequests: number, windowMinutes: number) {
     const windowSeconds = windowMinutes * 60;
     const rateLimitKey = `ratelimit:${key}`;
 
-    const count = await cacheIncr(rateLimitKey, 'ratelimit');
+    try {
+      const count = await cacheIncr(rateLimitKey, 'ratelimit');
 
-    if (count === 1) {
-      await cacheExpire(rateLimitKey, windowSeconds);
-    }
+      if (count === 1) {
+        await cacheExpire(rateLimitKey, windowSeconds);
+      }
 
-    if (count > maxRequests) {
-      logger.debug('Rate limit exceeded', {
+      if (count > maxRequests) {
+        logger.debug('Rate limit exceeded', {
+          key,
+          count,
+          max: maxRequests,
+        });
+
+        return res.status(429).json({
+          error: 'Rate limit exceeded',
+          message: 'Too many requests. Please try again later.',
+          retry_after: windowMinutes * 60,
+        });
+      }
+    } catch (err) {
+      logger.warn('dbRateLimit: Redis unavailable, skipping rate limit check', {
         key,
-        count,
-        max: maxRequests,
-      });
-
-      return res.status(429).json({
-        error: 'Rate limit exceeded',
-        message: 'Too many requests. Please try again later.',
-        retry_after: windowMinutes * 60,
+        error: err instanceof Error ? err.message : String(err),
       });
     }
 

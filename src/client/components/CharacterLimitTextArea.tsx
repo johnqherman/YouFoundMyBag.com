@@ -79,7 +79,6 @@ const CharacterLimitTextArea = React.forwardRef<
           maxLength={maxLength}
         />
 
-        {/* Character counter - positioned inside on desktop, below on mobile */}
         <div
           className={`absolute bottom-2 right-3 text-xs font-medium pointer-events-none ${getCounterColor()}`}
         >

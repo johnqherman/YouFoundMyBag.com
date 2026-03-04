@@ -2,6 +2,7 @@ export interface Bag {
   id: string;
   short_id: string;
   owner_name?: string;
+  owner_name_override?: string;
   bag_name?: string;
   owner_message?: string;
   owner_email?: string;
@@ -11,6 +12,9 @@ export interface Bag {
   status: 'active' | 'disabled';
   created_at: Date;
   updated_at: Date;
+  tag_color_start?: string | null;
+  tag_color_end?: string | null;
+  show_branding?: boolean | null;
 }
 
 export interface Contact {

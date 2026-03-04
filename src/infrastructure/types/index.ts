@@ -72,7 +72,7 @@ export interface ReissueEmailParams {
   description: string;
   magicLinkUrl: string;
   buttonText: string;
-  expiryDays: '7d';
+  expiryDays: '24h' | '7d' | '30d';
   preferencesUrl: string;
 }
 

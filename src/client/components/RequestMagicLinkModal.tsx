@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { useScrollLock } from '../hooks/useScrollLock.js';
+import { useModalBackdrop } from '../hooks/useModalBackdrop.js';
 import { emailSchema } from '../../infrastructure/utils/validation.js';
 import { SuccessIcon, ErrorIcon } from './icons/AppIcons.js';
 import type { RequestMagicLinkModalProps } from '../types/index.js';
@@ -8,6 +10,8 @@ export default function RequestMagicLinkModal({
   onClose,
   conversationId,
 }: RequestMagicLinkModalProps) {
+  useScrollLock(isOpen);
+  const backdropProps = useModalBackdrop(onClose);
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -113,7 +117,7 @@ export default function RequestMagicLinkModal({
   return (
     <div
       className="fixed inset-0 bg-regal-navy-900 bg-opacity-50 flex items-center justify-center p-4 z-50"
-      onClick={onClose}
+      {...backdropProps}
     >
       <div
         className="bg-white rounded-lg p-5 sm:p-6 w-full max-w-md shadow-soft-lg"

@@ -32,6 +32,9 @@ export interface FinderPageData {
         bag_name?: string;
         owner_message?: string;
         secure_messaging_enabled: boolean;
+        show_branding?: boolean;
+        tag_color_start?: string | null;
+        tag_color_end?: string | null;
         contact_options: Array<{
           type:
             | 'sms'
@@ -170,6 +173,9 @@ export interface BagData {
   status: 'active' | 'disabled';
   created_at: string;
   updated_at: string;
+  tag_color_start?: string | null;
+  tag_color_end?: string | null;
+  show_branding?: boolean | null;
 }
 
 export interface CachedBag {
@@ -183,6 +189,9 @@ export interface CachedBag {
   status: 'active' | 'disabled';
   created_at: Date;
   updated_at: Date;
+  tag_color_start?: string | null;
+  tag_color_end?: string | null;
+  show_branding?: boolean | null;
 }
 
 export interface CachedContact {
@@ -195,10 +204,14 @@ export interface CachedContact {
 export interface CachedFinderPageData {
   short_id: string;
   owner_name?: string;
+  owner_name_override?: string;
   bag_name?: string;
   owner_message?: string;
   secure_messaging_enabled: boolean;
   contact_options_encrypted: CachedContact[];
+  show_branding?: boolean;
+  tag_color_start?: string | null;
+  tag_color_end?: string | null;
 }
 
 export interface CachedConversationMessage {
@@ -230,12 +243,26 @@ export interface TwemojiProps {
 
 export type { IntlTelInputRef } from 'intl-tel-input/reactWithUtils';
 
+export interface PlanInfo {
+  plan: 'free' | 'pro';
+  bagLimit: number;
+  canEditBags: boolean;
+  showBranding: boolean;
+  subscription_status?:
+    | 'active'
+    | 'past_due'
+    | 'canceled'
+    | 'incomplete'
+    | null;
+}
+
 export interface DashboardData {
   owner_email?: string;
   bags: Array<{
     id: string;
     short_id: string;
     owner_name?: string;
+    owner_name_override?: string;
     bag_name?: string;
     status: 'active' | 'disabled';
     created_at: string;
@@ -244,6 +271,7 @@ export interface DashboardData {
     latest_conversation?: string;
   }>;
   conversations: ConversationThread[];
+  plan?: PlanInfo;
 }
 
 export interface EmailPreferences {
@@ -266,6 +294,7 @@ export type SectionId =
   | 'rotate'
   | 'status'
   | 'email'
+  | 'appearance'
   | 'resolve'
   | 'delete';
 
@@ -379,12 +408,14 @@ export interface BagManagementModalProps {
     id: string;
     short_id: string;
     owner_name?: string;
+    owner_name_override?: string;
     bag_name?: string;
     status: 'active' | 'disabled';
     owner_email?: string;
     conversation_count?: number;
   };
   onBagUpdated: () => void;
+  planInfo?: PlanInfo;
 }
 
 export interface CreateBagFormProps {
@@ -443,7 +474,7 @@ export interface ReviewSubmitProps {
   onSubmit: (e: React.FormEvent) => void;
   onContactsReorder?: (contacts: ContactWithId[]) => void;
   loading: boolean;
-  error: string | null;
+  error?: string | null;
 }
 
 export interface SortableContactItemProps {

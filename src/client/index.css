@@ -27,12 +27,29 @@ img.emoji {
 }
 
 @layer components {
-  /* Buttons - Mobile-optimized with min-height for touch targets */
   .btn-primary {
     @apply bg-regal-navy-600 hover:bg-regal-navy-700 active:bg-regal-navy-800
            text-white font-medium py-3 px-4 sm:py-2.5 sm:px-5 rounded-lg shadow-soft
            transition-all duration-150 min-h-[44px]
-           focus:outline-none focus:ring-2 focus:ring-regal-navy-500 focus:ring-offset-2;
+           focus:outline-none focus:ring-2 focus:ring-regal-navy-500 focus:ring-offset-2
+           disabled:bg-regal-navy-300 disabled:cursor-not-allowed disabled:shadow-none;
+  }
+
+  .btn-glass {
+    @apply text-white font-medium py-3 px-4 sm:py-2.5 sm:px-5 rounded-lg
+           transition-all duration-150 min-h-[44px]
+           focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-1;
+    background: rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+  .btn-glass:hover {
+    background: rgba(255, 255, 255, 0.35);
+  }
+  .btn-glass:active {
+    background: rgba(255, 255, 255, 0.45);
   }
 
   .btn-secondary {
@@ -56,7 +73,6 @@ img.emoji {
            focus:outline-none focus:ring-2 focus:ring-regal-navy-300 focus:ring-offset-2;
   }
 
-  /* Input fields - Larger touch targets on mobile */
   .input-field {
     @apply w-full px-3 py-3 sm:py-2.5 bg-white border border-regal-navy-200 rounded-lg
            text-base sm:text-sm text-regal-navy-900 placeholder-regal-navy-400
@@ -73,7 +89,6 @@ img.emoji {
            disabled:bg-regal-navy-900 disabled:text-regal-navy-600 disabled:cursor-not-allowed;
   }
 
-  /* Cards - Responsive padding */
   .card {
     @apply bg-white border border-regal-navy-100 rounded-lg shadow-soft p-4 sm:p-6;
   }
@@ -82,7 +97,6 @@ img.emoji {
     @apply bg-regal-navy-950 border border-regal-navy-900 rounded-lg shadow-soft p-4 sm:p-6;
   }
 
-  /* Page containers - Responsive padding */
   .page-container {
     @apply min-h-screen bg-regal-navy-50 px-4 py-6 sm:py-8;
   }
@@ -145,13 +159,126 @@ img.emoji {
   }
 
   .progress-bar {
-    width: var(--progress-width, 0%);
-    max-width: calc(100% - 0.75rem);
+    width: calc(var(--progress-width, 0%) - 0.5rem);
   }
 
-  /* Safe area for iOS notch/home indicator */
+  @media (min-width: 640px) {
+    .progress-bar {
+      width: calc(var(--progress-width, 0%) - 0.375rem);
+    }
+  }
+
   .safe-area-bottom {
     padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+}
+
+html.dark {
+  filter: invert(0.9) hue-rotate(180deg);
+  background-color: #fff;
+}
+
+html.dark img,
+html.dark video,
+html.dark canvas,
+html.dark picture,
+html.dark svg image,
+html.dark [style*='background-image'],
+html.dark .iti__flag {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+html.dark .qr-code-container {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+html.dark .qr-code-container *,
+html.dark .qr-code-container img,
+html.dark .qr-code-container svg,
+html.dark .qr-code-container svg image {
+  filter: none !important;
+}
+
+html.dark .theme-toggle-fab {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+html.dark .dark-mode-immune {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+html.dark .dark-mode-immune * {
+  filter: none !important;
+}
+
+html.dark img.emoji,
+html.dark .emoji {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+html.dark .btn-primary,
+html.dark .btn-secondary,
+html.dark .btn-danger,
+html.dark .btn-ghost,
+html.dark .billing-toggle,
+html.dark .recommended-badge {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+html.dark .payment-modal-card {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+html.dark .modal-backdrop {
+  background-color: rgba(255, 255, 255, 0.75);
+}
+
+html.dark .modal-sidebar {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+html.dark .modal-container {
+  box-shadow: 0 25px 50px -12px rgba(255, 255, 255, 0.25);
+}
+
+html.dark {
+  --tw-shadow-color: rgba(0, 0, 0, 0.5);
+}
+
+@media print {
+  @page {
+    size: letter;
+    margin: 0.5in;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: white;
+    z-index: 9998;
+  }
+
+  .qr-code-container {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 2.125in !important;
+    height: 2.125in !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    background: white !important;
+    filter: none !important;
+    box-shadow: none !important;
+    display: block !important;
+    z-index: 9999 !important;
+  }
+
+  .qr-code-container svg {
+    width: 2.125in !important;
+    height: 2.125in !important;
+    display: block !important;
   }
 }
 

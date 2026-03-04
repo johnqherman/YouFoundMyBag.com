@@ -17,7 +17,7 @@ export async function generateMagicLinkToken(
   email: string,
   conversationId?: string,
   bagIds?: string[],
-  expirationMs: number = t.ONE_DAY
+  expirationMs: number = t.THIRTY_DAYS
 ): Promise<{ magicLinkToken: string; expiresAt: Date }> {
   await authRepository.deleteExpiredSessions();
 
@@ -108,7 +108,7 @@ export async function verifyMagicLink(magicLinkToken: string): Promise<{
   logger.debug(`DEBUG: Found magic session for email: ${magicSession.email}`);
 
   const sessionToken = crypto.randomBytes(32).toString('hex');
-  const sessionExpiresAt = new Date(Date.now() + t.THREE_DAYS);
+  const sessionExpiresAt = new Date(Date.now() + t.ONE_YEAR);
 
   logger.debug(
     `DEBUG: Creating new session token: ${sessionToken.substring(0, 8)}...`
@@ -158,7 +158,7 @@ export async function getOwnerDashboard(): Promise<{
 export async function generateFinderMagicLinkToken(
   email: string,
   conversationId: string,
-  expirationMs: number = t.ONE_DAY
+  expirationMs: number = t.THIRTY_DAYS
 ): Promise<{ magicLinkToken: string; expiresAt: Date }> {
   await authRepository.deleteExpiredSessions();
 
@@ -325,7 +325,7 @@ export async function requestMagicLinkReissue(
       const { magicLinkToken } = await generateFinderMagicLinkToken(
         email,
         conversationId,
-        t.ONE_WEEK
+        t.THIRTY_DAYS
       );
       await sendMagicLinkReissue({
         userType: 'finder',
@@ -346,7 +346,7 @@ export async function requestMagicLinkReissue(
         email,
         undefined,
         bagIds,
-        t.ONE_WEEK
+        t.THIRTY_DAYS
       );
       await sendMagicLinkReissue({
         userType: 'owner',

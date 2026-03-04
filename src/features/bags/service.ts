@@ -91,7 +91,10 @@ export async function getBagQRCode(shortId: string): Promise<{
   };
 }
 
-export async function rotateBagShortId(bagId: string): Promise<{
+export async function rotateBagShortId(
+  bagId: string,
+  bypassCooldown = false
+): Promise<{
   new_short_id: string;
   qr_code: string;
   url: string;
@@ -112,7 +115,7 @@ export async function rotateBagShortId(bagId: string): Promise<{
     }
   } while (attempts < maxAttempts);
 
-  await repository.rotateShortId(bagId, newShortId);
+  await repository.rotateShortId(bagId, newShortId, bypassCooldown);
 
   const bagUrl = `${config.FRONTEND_URL}/b/${newShortId}`;
   const qrCodeDataUrl = await generateQRCode(bagUrl);

@@ -40,7 +40,15 @@ const configSchema = z.object({
   EMAIL_FROM: z
     .string()
     .default('YouFoundMyBag.com <noreply@youfoundmybag.com>'),
+  EMAIL_CONTACT: z
+    .string()
+    .default('YouFoundMyBag.com <contact@youfoundmybag.com>'),
   APP_ENCRYPTION_KEY: z.string().optional(),
+
+  STRIPE_SECRET_KEY: z.string().optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
+  STRIPE_PRO_MONTHLY_PRICE_ID: z.string().optional(),
+  STRIPE_PRO_ANNUAL_PRICE_ID: z.string().optional(),
 });
 
 function loadConfig() {

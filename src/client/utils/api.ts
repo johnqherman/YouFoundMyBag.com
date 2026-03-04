@@ -15,11 +15,11 @@ class ApiClient {
   ): Promise<T> {
     const url = `${API_BASE}${endpoint}`;
     const config: RequestInit = {
+      ...options,
       headers: {
         'Content-Type': 'application/json',
         ...options.headers,
       },
-      ...options,
     };
 
     const response = await fetch(url, config);
@@ -96,6 +96,134 @@ class ApiClient {
       headers: {
         Authorization: `Bearer ${token}`,
       },
+    });
+  }
+
+  async createCheckoutSession(
+    billingPeriod: 'monthly' | 'annual',
+    token?: string
+  ): Promise<{ success: boolean; data: { url: string } }> {
+    if (token) {
+      return this.request('/billing/checkout', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ billing_period: billingPeriod }),
+      });
+    }
+    throw new Error('Authentication required for checkout');
+  }
+
+  async createSubscriptionIntent(
+    billingPeriod: 'monthly' | 'annual',
+    tokenOrEmail: string,
+    isEmail?: boolean
+  ): Promise<{
+    success: boolean;
+    data: { clientSecret: string; subscriptionId: string };
+  }> {
+    if (isEmail) {
+      return this.request('/billing/subscribe', {
+        method: 'POST',
+        body: JSON.stringify({
+          email: tokenOrEmail,
+          billing_period: billingPeriod,
+        }),
+      });
+    }
+    return this.request('/billing/subscribe', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${tokenOrEmail}` },
+      body: JSON.stringify({ billing_period: billingPeriod }),
+    });
+  }
+
+  async createGuestCheckoutSession(
+    email: string,
+    billingPeriod: 'monthly' | 'annual'
+  ): Promise<{ success: boolean; data: { url: string } }> {
+    return this.request('/billing/checkout-guest', {
+      method: 'POST',
+      body: JSON.stringify({ email, billing_period: billingPeriod }),
+    });
+  }
+
+  async createPortalSession(
+    token: string
+  ): Promise<{ success: boolean; data: { url: string } }> {
+    return this.request('/billing/portal', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  }
+
+  async submitContact(data: {
+    name: string;
+    email: string;
+    subject: string;
+    message: string;
+  }): Promise<{ success: boolean }> {
+    return this.request('/contact', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getSubscriptionDetails(token: string): Promise<{
+    success: boolean;
+    data: {
+      plan: 'free' | 'pro';
+      status: 'active' | 'past_due' | 'canceled' | 'incomplete' | null;
+      billing_period: 'monthly' | 'annual' | null;
+      current_period_end: string | null;
+      canceled_at: string | null;
+    };
+  }> {
+    return this.request('/billing/subscription', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  }
+
+  async cancelSubscription(token: string): Promise<{
+    success: boolean;
+    data: { canceled_at: string; current_period_end: string | null };
+  }> {
+    return this.request('/billing/cancel', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  }
+
+  async createSetupIntent(
+    token: string
+  ): Promise<{ success: boolean; data: { clientSecret: string } }> {
+    return this.request('/billing/setup-intent', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  }
+
+  async updateDefaultPaymentMethod(
+    token: string,
+    paymentMethodId: string
+  ): Promise<{ success: boolean }> {
+    return this.request('/billing/update-payment-method', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ paymentMethodId }),
+    });
+  }
+
+  async getPlan(token: string): Promise<{
+    success: boolean;
+    data: {
+      plan: 'free' | 'pro';
+      bagLimit: number;
+      canEditBags: boolean;
+      showBranding: boolean;
+    };
+  }> {
+    return this.request('/billing/plan', {
+      headers: { Authorization: `Bearer ${token}` },
     });
   }
 }

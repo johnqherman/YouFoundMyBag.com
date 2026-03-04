@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import Twemoji from './Twemoji.js';
 import type { PrivacyWarningProps } from '../types/index.js';
 
 export default function PrivacyWarning({
@@ -38,7 +39,7 @@ export default function PrivacyWarning({
 
   return (
     <div className={baseClasses}>
-      <span className="text-base">💡</span>
+      <Twemoji className="text-base">💡</Twemoji>
       <span className="flex-1">{message}</span>
       <button
         type="button"

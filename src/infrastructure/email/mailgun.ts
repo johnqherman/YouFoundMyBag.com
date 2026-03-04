@@ -35,16 +35,27 @@ export interface SendMailOptions {
   subject: string;
   html: string;
   text?: string;
+  from?: string;
 }
 
 export async function sendMail(options: SendMailOptions): Promise<void> {
+  const from = options.from ?? config.EMAIL_FROM;
+
+  if (config.NODE_ENV === 'development') {
+    const linkMatch = options.html.match(/href="([^"]*token=[^"]*)"/);
+    logger.info(
+      `\n📧 DEV EMAIL → ${options.to}\n   Subject: ${options.subject}${linkMatch ? `\n   🔗 ${linkMatch[1]}` : ''}\n`
+    );
+    return;
+  }
+
   const mg = getMailgunClient();
   if (!mg) {
     throw new Error('Mailgun not configured');
   }
 
   await mg.messages.create(config.MAILGUN_DOMAIN!, {
-    from: config.EMAIL_FROM,
+    from,
     to: options.to,
     subject: options.subject,
     html: options.html,

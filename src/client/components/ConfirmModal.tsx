@@ -1,4 +1,6 @@
 import type { ConfirmModalProps } from '../types/index.js';
+import { useScrollLock } from '../hooks/useScrollLock.js';
+import { useEscapeKey } from '../hooks/useEscapeKey.js';
 
 export default function ConfirmModal({
   isOpen,
@@ -10,6 +12,9 @@ export default function ConfirmModal({
   onCancel,
   variant = 'primary',
 }: ConfirmModalProps) {
+  useScrollLock(isOpen);
+  useEscapeKey(isOpen, onCancel);
+
   if (!isOpen) return null;
 
   const getVariantStyles = () => {
@@ -35,8 +40,14 @@ export default function ConfirmModal({
   const styles = getVariantStyles();
 
   return (
-    <div className="fixed inset-0 bg-regal-navy-900 bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-soft-lg">
+    <div
+      className="modal-backdrop fixed inset-0 bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn"
+      onClick={onCancel}
+    >
+      <div
+        className="modal-container bg-white rounded-lg p-6 w-full max-w-md shadow-soft-lg"
+        onClick={(e) => e.stopPropagation()}
+      >
         <h2 className={`text-xl font-semibold mb-3 ${styles.icon}`}>{title}</h2>
         <p className="text-regal-navy-700 mb-6 leading-relaxed">{message}</p>
         <div className="flex gap-3 justify-end">

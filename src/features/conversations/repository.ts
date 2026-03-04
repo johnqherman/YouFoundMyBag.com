@@ -179,7 +179,7 @@ export async function getConversationsByOwnerEmail(
     `
     SELECT
       c.*,
-      b.short_id, b.owner_name, b.bag_name, b.status as bag_status,
+      b.short_id, b.owner_name, b.owner_name_override, b.bag_name, b.status as bag_status,
       (
         SELECT json_build_object(
           'id', cm.id,
@@ -235,7 +235,7 @@ export async function getConversationsByOwnerEmail(
     unread_count: row.unread_count,
     bag: {
       short_id: row.short_id,
-      owner_name: row.owner_name,
+      owner_name: row.owner_name_override ?? row.owner_name,
       bag_name: row.bag_name,
       status: row.bag_status,
     },
@@ -257,7 +257,7 @@ export async function getConversationsByOwnerEmail(
     unread_count: row.unread_count,
     bag: {
       short_id: row.short_id,
-      owner_name: row.owner_name,
+      owner_name: row.owner_name_override ?? row.owner_name,
       bag_name: row.bag_name,
       status: row.bag_status,
     },
@@ -329,7 +329,7 @@ export async function getConversationById(
     `
     SELECT
       c.*,
-      b.short_id, b.owner_name, b.bag_name, b.status as bag_status, b.owner_email,
+      b.short_id, b.owner_name, b.owner_name_override, b.bag_name, b.status as bag_status, b.owner_email,
       array_agg(
         json_build_object(
           'id', cm.id,
@@ -344,7 +344,7 @@ export async function getConversationById(
     JOIN bags b ON c.bag_id = b.id
     LEFT JOIN conversation_messages cm ON c.id = cm.conversation_id
     WHERE c.id = $1
-    GROUP BY c.id, b.short_id, b.owner_name, b.bag_name, b.status, b.owner_email
+    GROUP BY c.id, b.short_id, b.owner_name, b.owner_name_override, b.bag_name, b.status, b.owner_email
   `,
     [conversationId]
   );
@@ -372,7 +372,7 @@ export async function getConversationById(
       })),
     bag: {
       short_id: row.short_id,
-      owner_name: row.owner_name,
+      owner_name: row.owner_name_override ?? row.owner_name,
       bag_name: row.bag_name,
       status: row.bag_status,
     },
@@ -393,7 +393,7 @@ export async function getConversationById(
     messages: row.messages.filter((msg: DatabaseMessage) => msg.id !== null),
     bag: {
       short_id: row.short_id,
-      owner_name: row.owner_name,
+      owner_name: row.owner_name_override ?? row.owner_name,
       bag_name: row.bag_name,
       status: row.bag_status,
     },

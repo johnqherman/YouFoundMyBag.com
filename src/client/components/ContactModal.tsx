@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useScrollLock } from '../hooks/useScrollLock.js';
+import { useEscapeKey } from '../hooks/useEscapeKey.js';
 import { api } from '../utils/api.js';
+import { useToast } from '../hooks/useToast.js';
+import { useModalBackdrop } from '../hooks/useModalBackdrop.js';
 import CharacterLimitTextArea from './CharacterLimitTextArea.js';
 import PrivacyWarning from './PrivacyWarning.js';
 import Twemoji from './Twemoji.js';
@@ -23,12 +27,15 @@ export default function ContactModal({
   bagName,
   onClose,
 }: ContactModalProps) {
+  useScrollLock(true);
+  useEscapeKey(true, onClose);
+  const { toast } = useToast();
+  const backdropProps = useModalBackdrop(onClose);
   const [message, setMessage] = useState('');
   const [senderInfo, setSenderInfo] = useState('');
   const [senderName, setSenderName] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [widgetId, setWidgetId] = useState<string | null>(null);
 
@@ -91,13 +98,15 @@ export default function ContactModal({
     e.preventDefault();
 
     if (!turnstileToken || !message.trim() || !senderInfo.trim()) {
-      setError('Please complete all required fields and security verification');
+      toast.error(
+        'Please complete all required fields and security verification'
+      );
       return;
     }
 
     const result = emailSchema.safeParse(senderInfo.trim());
     if (!result.success) {
-      setError('Please enter a valid email address');
+      toast.error('Please enter a valid email address');
       return;
     }
 
@@ -111,7 +120,9 @@ export default function ContactModal({
       });
       setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to send message');
+      toast.error(
+        err instanceof Error ? err.message : 'Failed to send message'
+      );
       resetWidget();
     } finally {
       setLoading(false);
@@ -120,8 +131,14 @@ export default function ContactModal({
 
   if (success) {
     return (
-      <div className="fixed inset-0 bg-regal-navy-900 bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div className="bg-white rounded-lg p-8 w-full max-w-md shadow-soft-lg">
+      <div
+        className="fixed inset-0 bg-regal-navy-900 bg-opacity-50 flex items-center justify-center p-4 z-50"
+        {...backdropProps}
+      >
+        <div
+          className="bg-white rounded-lg p-8 w-full max-w-md shadow-soft-lg"
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="text-center">
             <div className="mb-4 flex justify-center text-medium-jungle-700">
               <SuccessIcon color="currentColor" size="large" />
@@ -150,8 +167,14 @@ export default function ContactModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-regal-navy-900 bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg p-5 sm:p-6 w-full max-w-md shadow-soft-lg max-h-[90vh] overflow-y-auto">
+    <div
+      className="fixed inset-0 bg-regal-navy-900 bg-opacity-50 flex items-center justify-center p-4 z-50"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-lg p-5 sm:p-6 w-full max-w-md shadow-soft-lg max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex justify-between items-start gap-4 mb-4 sm:mb-6">
           <h2 className="text-lg sm:text-xl font-semibold text-regal-navy-900">
             Contact {ownerName || 'Owner'}
@@ -237,8 +260,6 @@ export default function ContactModal({
           <div className="min-h-[65px] flex items-center">
             <div id="turnstile-widget" className="w-full"></div>
           </div>
-
-          {error && <div className="alert-error">{error}</div>}
 
           <div className="flex gap-3 pt-1">
             <button

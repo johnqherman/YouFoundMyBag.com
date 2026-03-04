@@ -3,6 +3,7 @@ import { logger } from '../../infrastructure/logger/index.js';
 import * as authService from './service.js';
 import * as conversationService from '../conversations/service.js';
 import * as bagRepository from '../bags/repository.js';
+import * as billingService from '../billing/service.js';
 import { ConversationThread } from '../../client/types/index.js';
 import {
   magicLinkSchema,
@@ -10,6 +11,7 @@ import {
   emailSchema,
 } from '../../infrastructure/utils/validation.js';
 import { extractBearerToken } from './utils.js';
+import { hashForLookup } from '../../infrastructure/security/encryption.js';
 import {
   authMagicLinkRateLimit,
   authVerifyRateLimit,
@@ -85,23 +87,15 @@ router.post(
         },
       });
     } catch (error) {
-      logger.debug('DEBUG: Error verifying magic link:', error);
-      logger.debug(
-        'DEBUG: Error type:',
-        error instanceof Error ? error.constructor.name : typeof error
-      );
-      logger.debug(
-        'DEBUG: Error message:',
-        error instanceof Error ? error.message : String(error)
-      );
-      res.status(400).json({
-        success: false,
-        error: 'verification_error',
-        message:
-          error instanceof Error
-            ? error.message
-            : 'Failed to verify magic link',
-      });
+      const msg = error instanceof Error ? error.message : String(error);
+      console.error('[verify] caught error:', msg);
+      if (!res.headersSent) {
+        res.status(400).json({
+          success: false,
+          error: 'verification_error',
+          message: msg || 'Failed to verify magic link',
+        });
+      }
     }
   }
 );
@@ -130,10 +124,14 @@ router.get(
         return;
       }
 
-      const [allBags, conversations] = await Promise.all([
-        bagRepository.getBagsByOwnerEmail(session.email),
-        conversationService.getOwnerConversations(session.email),
-      ]);
+      const emailHash = hashForLookup(session.email);
+      const [allBags, conversations, planInfo, subscriptionStatus] =
+        await Promise.all([
+          bagRepository.getBagsByOwnerEmail(session.email),
+          conversationService.getOwnerConversations(session.email),
+          billingService.resolvePlan(emailHash),
+          billingService.getSubscriptionStatus(emailHash),
+        ]);
 
       const bagMap = new Map<
         string,
@@ -141,6 +139,7 @@ router.get(
           id: string;
           short_id: string;
           owner_name?: string;
+          owner_name_override?: string;
           bag_name?: string;
           status: 'active' | 'disabled';
           created_at: string;
@@ -156,6 +155,7 @@ router.get(
             id: bag.id,
             short_id: bag.short_id,
             owner_name: bag.owner_name,
+            owner_name_override: bag.owner_name_override,
             bag_name: bag.bag_name,
             status: bag.status,
             created_at: bag.created_at.toISOString(),
@@ -189,6 +189,7 @@ router.get(
         id: bag.id,
         short_id: bag.short_id,
         owner_name: bag.owner_name,
+        owner_name_override: bag.owner_name_override,
         bag_name: bag.bag_name,
         status: bag.status,
         created_at: bag.created_at,
@@ -207,6 +208,10 @@ router.get(
               new Date(a.latest_conversation || a.created_at).getTime()
           ),
           conversations,
+          plan: {
+            ...planInfo,
+            subscription_status: subscriptionStatus,
+          },
         },
       });
     } catch (error) {
@@ -281,24 +286,63 @@ router.post(
         data: result,
       });
     } catch (error) {
-      if (
-        error instanceof Error &&
-        error.message.includes('Too many requests')
-      ) {
-        res.status(429).json({
+      const msg = error instanceof Error ? error.message : String(error);
+      console.error('[request-magic-link] caught error:', msg);
+
+      if (!res.headersSent) {
+        if (msg.includes('Too many requests')) {
+          res.status(429).json({
+            success: false,
+            error: 'rate_limit_exceeded',
+            message: msg,
+          });
+          return;
+        }
+
+        res.status(500).json({
           success: false,
-          error: 'rate_limit_exceeded',
-          message: error.message,
+          error: 'request_error',
+          message: 'Failed to process request. Please try again later.',
         });
+      }
+    }
+  }
+);
+
+router.patch(
+  '/auth/owner-name',
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const token = extractBearerToken(req.headers.authorization);
+      if (!token) {
+        res.status(401).json({ success: false, error: 'unauthorized' });
+        return;
+      }
+      const session = await authService.verifyOwnerSession(token);
+      if (!session) {
+        res.status(401).json({ success: false, error: 'unauthorized' });
         return;
       }
 
-      logger.error('Error requesting magic link reissue:', error);
-      res.status(500).json({
-        success: false,
-        error: 'request_error',
-        message: 'Failed to process request. Please try again later.',
-      });
+      const { owner_name } = req.body;
+      if (
+        owner_name !== undefined &&
+        (typeof owner_name !== 'string' || owner_name.length > 30)
+      ) {
+        res
+          .status(400)
+          .json({ error: 'Invalid owner name. Must be 0–30 characters.' });
+        return;
+      }
+
+      await bagRepository.updateOwnerNameForEmail(
+        session.email,
+        owner_name ?? ''
+      );
+      res.json({ success: true, message: 'Display name updated' });
+    } catch (error) {
+      logger.error('Error updating owner name:', error);
+      res.status(500).json({ error: 'Failed to update display name' });
     }
   }
 );

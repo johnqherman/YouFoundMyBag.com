@@ -20,6 +20,30 @@
   display: block;
 }
 
+.brand-icon-lg {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  line-height: 1;
+}
+
+.brand-icon-lg span {
+  margin: 0;
+  line-height: 0;
+}
+
+.brand-icon-lg span svg {
+  transform: scale(1.25);
+  transform-origin: center;
+  display: block;
+}
+
+.brand-icon-lg > svg {
+  display: block;
+  max-height: 20px;
+}
+
 .brand-icon-signal {
   color: var(--brand-color-signal);
 }

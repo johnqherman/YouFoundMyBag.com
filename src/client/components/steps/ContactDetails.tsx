@@ -13,7 +13,6 @@ export default function ContactDetails({
   removeContact,
   updateContact,
   getAvailableContactTypes,
-  error,
 }: ContactDetailsProps) {
   const contactsEndRef = useRef<HTMLDivElement>(null);
   const prevContactsLength = useRef(formData.contacts.length);
@@ -134,8 +133,6 @@ export default function ContactDetails({
           )}
         </div>
       </div>
-
-      {error && <div className="alert-error">{error}</div>}
 
       <div className="flex justify-between pt-2 select-none">
         <button type="button" onClick={onBack} className="btn-ghost">

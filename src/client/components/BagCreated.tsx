@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
 import type { BagCreatedProps } from '../types/index.js';
 import { TIME_MS as t } from '../constants/timeConstants.js';
@@ -9,12 +9,22 @@ import {
   DownloadActionIcon,
   PlusIcon,
 } from './icons/AppIcons.js';
+import BrandedQRCode, {
+  downloadQRWithBorder,
+  printQR,
+} from './BrandedQRCode.js';
+import type QRCodeStyling from 'qr-code-styling';
 
 export default function BagCreated({
   bagData,
   onCreateAnother,
 }: BagCreatedProps) {
   const [copied, setCopied] = useState(false);
+  const qrInstanceRef = useRef<QRCodeStyling | null>(null);
+
+  const handleQRInstanceReady = useCallback((instance: QRCodeStyling) => {
+    qrInstanceRef.current = instance;
+  }, []);
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -27,30 +37,30 @@ export default function BagCreated({
   };
 
   const downloadQR = () => {
-    const link = document.createElement('a');
-    link.href = bagData.data.qr_code;
-    link.download = `youfoundmybag-${bagData.data.short_id}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    if (qrInstanceRef.current) {
+      downloadQRWithBorder(
+        qrInstanceRef.current,
+        `youfoundmybag-${bagData.data.short_id}`
+      );
+    }
   };
 
   return (
-    <div className="min-h-screen bg-regal-navy-50 text-regal-navy-900 pb-20">
+    <div className="flex-1 flex flex-col justify-center bg-regal-navy-50 text-regal-navy-900">
       <Helmet>
-        <title>Your QR code is ready! | YouFoundMyBag.com</title>
+        <title>Your QR Code is Ready - YouFoundMyBag.com</title>
       </Helmet>
-      <div className="max-w-md mx-auto p-6 lg:max-w-2xl">
+      <div className="max-w-3xl mx-auto p-6 w-full 2xl:[zoom:1.25]">
         <div className="card text-center">
           <h1 className="text-2xl font-semibold mb-6 text-medium-jungle-700 flex items-center justify-center gap-2">
             <SuccessIcon color="currentColor" /> Your QR code is ready!
           </h1>
 
-          <div className="bg-white p-6 rounded-lg mb-6 inline-block border border-regal-navy-100">
-            <img
-              src={bagData.data.qr_code}
-              alt="QR Code"
-              className="w-64 h-64 mx-auto"
+          <div className="qr-code-container bg-white p-2 rounded-lg mb-6 inline-block border border-regal-navy-100">
+            <BrandedQRCode
+              url={bagData.data.url}
+              size={256}
+              onInstanceReady={handleQRInstanceReady}
             />
           </div>
 
@@ -99,7 +109,9 @@ export default function BagCreated({
               <DownloadActionIcon color="currentColor" /> Download QR Code
             </button>
             <button
-              onClick={() => window.print()}
+              onClick={() => {
+                if (qrInstanceRef.current) printQR(qrInstanceRef.current);
+              }}
               className="btn-secondary w-full flex items-center justify-center gap-2"
             >
               <PrintIcon color="currentColor" /> Print QR Code
@@ -113,20 +125,6 @@ export default function BagCreated({
           </div>
         </div>
       </div>
-
-      <footer className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-sm border-t border-regal-navy-100 text-center py-4 text-regal-navy-500 text-sm">
-        <p>
-          Privacy-first • No tracking •{' '}
-          <a
-            href="https://github.com/johnqherman/YouFoundMyBag.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="link"
-          >
-            Open source
-          </a>
-        </p>
-      </footer>
     </div>
   );
 }

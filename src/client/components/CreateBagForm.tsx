@@ -1,5 +1,7 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useLayoutEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { api } from '../utils/api.js';
+import { useToast } from '../hooks/useToast.js';
 import type {
   CreateBagRequest,
   ContactWithId,
@@ -14,6 +16,7 @@ import ContactDetails from './steps/ContactDetails.js';
 import ReviewSubmit from './steps/ReviewSubmit.js';
 
 export default function CreateBagForm({ onSuccess }: CreateBagFormProps) {
+  const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<FormData>({
     owner_name: '',
@@ -24,7 +27,18 @@ export default function CreateBagForm({ onSuccess }: CreateBagFormProps) {
     secure_messaging_enabled: true,
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [cardHeight, setCardHeight] = useState<number | undefined>(undefined);
+
+  useLayoutEffect(() => {
+    const el = contentRef.current;
+    if (!el) return;
+    setCardHeight(el.offsetHeight);
+    const observer = new ResizeObserver(() => setCardHeight(el.offsetHeight));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const stepNames = [
     'Basic Information',
@@ -108,20 +122,18 @@ export default function CreateBagForm({ onSuccess }: CreateBagFormProps) {
   };
 
   const validateCurrentStep = (): boolean => {
-    setError(null);
-
     switch (currentStep) {
       case 2:
         return true;
       case 3: {
         if (formData.secure_messaging_enabled) {
           if (!formData.owner_email.trim()) {
-            setError('An email address is required for secure messaging');
+            toast.error('An email address is required for secure messaging');
             return false;
           }
           const result = emailSchema.safeParse(formData.owner_email.trim());
           if (!result.success) {
-            setError('Please enter a valid email address');
+            toast.error('Please enter a valid email address');
             return false;
           }
 
@@ -129,7 +141,7 @@ export default function CreateBagForm({ onSuccess }: CreateBagFormProps) {
             (contact) => !contact.value.trim()
           );
           if (blankContacts.length > 0) {
-            setError('Please fill in or remove empty contact methods');
+            toast.error('Please fill in or remove empty contact methods');
             return false;
           }
         } else {
@@ -137,7 +149,7 @@ export default function CreateBagForm({ onSuccess }: CreateBagFormProps) {
             contact.value.trim()
           );
           if (validContacts.length === 0) {
-            setError(
+            toast.error(
               'At least one contact method is required for direct contact'
             );
             return false;
@@ -153,7 +165,7 @@ export default function CreateBagForm({ onSuccess }: CreateBagFormProps) {
             contact.value
           );
           if (validationError) {
-            setError(validationError);
+            toast.error(validationError);
             return false;
           }
         }
@@ -171,7 +183,6 @@ export default function CreateBagForm({ onSuccess }: CreateBagFormProps) {
   };
 
   const prevStep = () => {
-    setError(null);
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
@@ -191,19 +202,18 @@ export default function CreateBagForm({ onSuccess }: CreateBagFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     setLoading(true);
 
     try {
       if (formData.secure_messaging_enabled) {
         if (!formData.owner_email.trim()) {
-          setError('An email address is required for secure messaging');
+          toast.error('An email address is required for secure messaging');
           return;
         }
 
         const result = emailSchema.safeParse(formData.owner_email.trim());
         if (!result.success) {
-          setError('Please enter a valid email address');
+          toast.error('Please enter a valid email address');
           return;
         }
 
@@ -211,7 +221,7 @@ export default function CreateBagForm({ onSuccess }: CreateBagFormProps) {
           (contact) => !contact.value.trim()
         );
         if (blankContacts.length > 0) {
-          setError('Please fill in or remove empty contact methods');
+          toast.error('Please fill in or remove empty contact methods');
           return;
         }
       } else {
@@ -220,7 +230,7 @@ export default function CreateBagForm({ onSuccess }: CreateBagFormProps) {
         );
 
         if (validContacts.length === 0) {
-          setError(
+          toast.error(
             'At least one contact method is required for direct contact'
           );
           return;
@@ -235,7 +245,7 @@ export default function CreateBagForm({ onSuccess }: CreateBagFormProps) {
         const contactTypes = validContacts.map((contact) => contact.type);
         const uniqueTypes = new Set(contactTypes);
         if (contactTypes.length !== uniqueTypes.size) {
-          setError('You cannot use the same contact type more than once');
+          toast.error('You cannot use the same contact type more than once');
           return;
         }
 
@@ -245,7 +255,7 @@ export default function CreateBagForm({ onSuccess }: CreateBagFormProps) {
             contact.value
           );
           if (validationError) {
-            setError(validationError);
+            toast.error(validationError);
             return;
           }
         }
@@ -277,7 +287,15 @@ export default function CreateBagForm({ onSuccess }: CreateBagFormProps) {
       const result = await api.createBag(requestData);
       onSuccess(result);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create bag');
+      const message =
+        err instanceof Error ? err.message : 'Failed to create bag';
+      if (message.includes('plan limit') || message.includes('Plan limit')) {
+        toast.error(
+          "You've reached your free plan limit of 1 tag. Upgrade to Pro for up to 10 tags."
+        );
+      } else {
+        toast.error(message);
+      }
     } finally {
       setLoading(false);
     }
@@ -372,7 +390,6 @@ export default function CreateBagForm({ onSuccess }: CreateBagFormProps) {
             removeContact={removeContact}
             updateContact={updateContact}
             getAvailableContactTypes={getAvailableContactTypes}
-            error={error}
           />
         );
       case 4:
@@ -383,7 +400,6 @@ export default function CreateBagForm({ onSuccess }: CreateBagFormProps) {
             onSubmit={handleSubmit}
             onContactsReorder={handleContactsReorder}
             loading={loading}
-            error={error}
           />
         );
       default:
@@ -392,16 +408,32 @@ export default function CreateBagForm({ onSuccess }: CreateBagFormProps) {
   };
 
   return (
-    <div className="card">
-      <StepIndicator
-        currentStep={currentStep}
-        totalSteps={totalSteps}
-        stepNames={stepNames}
-      />
+    <motion.div
+      className="bg-white border border-regal-navy-100 rounded-lg shadow-soft overflow-hidden"
+      animate={{ height: cardHeight ?? 'auto' }}
+      transition={{ duration: 0.3, ease: 'easeInOut' }}
+    >
+      <div ref={contentRef} className="p-4 sm:p-6">
+        <StepIndicator
+          currentStep={currentStep}
+          totalSteps={totalSteps}
+          stepNames={stepNames}
+        />
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {renderCurrentStep()}
-      </form>
-    </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={currentStep}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              {renderCurrentStep()}
+            </motion.div>
+          </AnimatePresence>
+        </form>
+      </div>
+    </motion.div>
   );
 }
