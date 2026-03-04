@@ -89,7 +89,7 @@ export default function RequestMagicLinkModal({
         onClick={onClose}
       >
         <div
-          className="bg-white rounded-lg p-8 w-full max-w-md shadow-soft-lg"
+          className="modal-container bg-white rounded-lg p-8 w-full max-w-md shadow-soft-lg"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="text-center">
@@ -121,7 +121,7 @@ export default function RequestMagicLinkModal({
       {...backdropProps}
     >
       <div
-        className="bg-white rounded-lg p-5 sm:p-6 w-full max-w-md shadow-soft-lg"
+        className="modal-container bg-white rounded-lg p-5 sm:p-6 w-full max-w-md shadow-soft-lg"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-start gap-4 mb-4 sm:mb-6">
