@@ -323,6 +323,7 @@ export interface RequestMagicLinkModalProps {
   isOpen: boolean;
   onClose: () => void;
   conversationId?: string;
+  initialEmail?: string;
 }
 
 export interface CharacterLimitTextAreaProps {

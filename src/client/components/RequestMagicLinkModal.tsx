@@ -9,21 +9,22 @@ export default function RequestMagicLinkModal({
   isOpen,
   onClose,
   conversationId,
+  initialEmail,
 }: RequestMagicLinkModalProps) {
   useScrollLock(isOpen);
   const backdropProps = useModalBackdrop(onClose);
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(initialEmail ?? '');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
-      setEmail('');
+      setEmail(initialEmail ?? '');
       setSuccess(false);
       setError(null);
     }
-  }, [isOpen]);
+  }, [isOpen, initialEmail]);
 
   useEffect(() => {
     const handleEscKey = (event: KeyboardEvent) => {
@@ -125,7 +126,9 @@ export default function RequestMagicLinkModal({
       >
         <div className="flex justify-between items-start gap-4 mb-4 sm:mb-6">
           <h2 className="text-lg sm:text-xl font-semibold text-regal-navy-900">
-            Lost your secure chat link?
+            {initialEmail
+              ? 'Access your dashboard'
+              : 'Lost your secure chat link?'}
           </h2>
           <button
             onClick={onClose}
@@ -136,8 +139,9 @@ export default function RequestMagicLinkModal({
         </div>
 
         <p className="text-sm sm:text-base text-regal-navy-700 mb-4 sm:mb-6 leading-relaxed">
-          Enter your email address and we&apos;ll send you a new secure link to
-          access your {conversationId ? 'conversation' : 'dashboard'}.
+          {initialEmail
+            ? `You already have a tag registered to ${initialEmail}. Enter your email below and we'll send you a link to access your dashboard.`
+            : `Enter your email address and we'll send you a new secure link to access your ${conversationId ? 'conversation' : 'dashboard'}.`}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
@@ -191,6 +195,19 @@ export default function RequestMagicLinkModal({
               {loading ? 'Sending...' : 'Send Access Link'}
             </button>
           </div>
+
+          {initialEmail && (
+            <p className="text-center text-xs text-regal-navy-500 pt-1">
+              Want more tags?{' '}
+              <a
+                href="/pricing"
+                className="text-regal-navy-700 underline hover:text-regal-navy-900 transition-colors"
+              >
+                Upgrade to Pro
+              </a>{' '}
+              for up to 10 tags.
+            </p>
+          )}
         </form>
       </div>
     </div>

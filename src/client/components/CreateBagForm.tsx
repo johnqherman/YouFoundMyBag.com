@@ -14,6 +14,7 @@ import { emailSchema } from '../../infrastructure/utils/validation.js';
 import ContactPreference from './steps/ContactPreference.js';
 import ContactDetails from './steps/ContactDetails.js';
 import ReviewSubmit from './steps/ReviewSubmit.js';
+import RequestMagicLinkModal from './RequestMagicLinkModal.js';
 
 export default function CreateBagForm({ onSuccess }: CreateBagFormProps) {
   const { toast } = useToast();
@@ -27,6 +28,7 @@ export default function CreateBagForm({ onSuccess }: CreateBagFormProps) {
     secure_messaging_enabled: true,
   });
   const [loading, setLoading] = useState(false);
+  const [showDashboardModal, setShowDashboardModal] = useState(false);
 
   const contentRef = useRef<HTMLDivElement>(null);
   const [cardHeight, setCardHeight] = useState<number | undefined>(undefined);
@@ -290,9 +292,7 @@ export default function CreateBagForm({ onSuccess }: CreateBagFormProps) {
       const message =
         err instanceof Error ? err.message : 'Failed to create bag';
       if (message.includes('plan limit') || message.includes('Plan limit')) {
-        toast.error(
-          "You've reached your free plan limit of 1 tag. Upgrade to Pro for up to 10 tags."
-        );
+        setShowDashboardModal(true);
       } else {
         toast.error(message);
       }
@@ -408,32 +408,40 @@ export default function CreateBagForm({ onSuccess }: CreateBagFormProps) {
   };
 
   return (
-    <motion.div
-      className="bg-white border border-regal-navy-100 rounded-lg shadow-soft overflow-hidden"
-      animate={{ height: cardHeight ?? 'auto' }}
-      transition={{ duration: 0.3, ease: 'easeInOut' }}
-    >
-      <div ref={contentRef} className="p-4 sm:p-6">
-        <StepIndicator
-          currentStep={currentStep}
-          totalSteps={totalSteps}
-          stepNames={stepNames}
-        />
+    <>
+      <motion.div
+        className="bg-white border border-regal-navy-100 rounded-lg shadow-soft overflow-hidden"
+        animate={{ height: cardHeight ?? 'auto' }}
+        transition={{ duration: 0.3, ease: 'easeInOut' }}
+      >
+        <div ref={contentRef} className="p-4 sm:p-6">
+          <StepIndicator
+            currentStep={currentStep}
+            totalSteps={totalSteps}
+            stepNames={stepNames}
+          />
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={currentStep}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-            >
-              {renderCurrentStep()}
-            </motion.div>
-          </AnimatePresence>
-        </form>
-      </div>
-    </motion.div>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={currentStep}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
+              >
+                {renderCurrentStep()}
+              </motion.div>
+            </AnimatePresence>
+          </form>
+        </div>
+      </motion.div>
+
+      <RequestMagicLinkModal
+        isOpen={showDashboardModal}
+        onClose={() => setShowDashboardModal(false)}
+        initialEmail={formData.owner_email.trim()}
+      />
+    </>
   );
 }
