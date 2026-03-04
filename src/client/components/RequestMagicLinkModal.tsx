@@ -85,7 +85,7 @@ export default function RequestMagicLinkModal({
   if (success) {
     return (
       <div
-        className="fixed inset-0 bg-regal-navy-900 bg-opacity-50 flex items-center justify-center p-4 z-50"
+        className="fixed inset-0 bg-regal-navy-900 bg-opacity-50 dark:bg-black/60 flex items-center justify-center p-4 z-50"
         onClick={onClose}
       >
         <div
@@ -104,7 +104,7 @@ export default function RequestMagicLinkModal({
               you&apos;ll receive a new secure chat link shortly.
               <br />
               <br />
-              The link will be valid for <strong>7 days</strong>.
+              The link will be valid for <strong>30 days</strong>.
             </p>
             <button onClick={onClose} className="btn-primary w-full">
               Close
@@ -117,7 +117,7 @@ export default function RequestMagicLinkModal({
 
   return (
     <div
-      className="fixed inset-0 bg-regal-navy-900 bg-opacity-50 flex items-center justify-center p-4 z-50"
+      className="fixed inset-0 bg-regal-navy-900 bg-opacity-50 dark:bg-black/60 flex items-center justify-center p-4 z-50"
       {...backdropProps}
     >
       <div
@@ -139,9 +139,15 @@ export default function RequestMagicLinkModal({
         </div>
 
         <p className="text-sm sm:text-base text-regal-navy-700 mb-4 sm:mb-6 leading-relaxed">
-          {initialEmail
-            ? `You already have a tag registered to ${initialEmail}. Enter your email below and we'll send you a link to access your dashboard.`
-            : `Enter your email address and we'll send you a new secure link to access your ${conversationId ? 'conversation' : 'dashboard'}.`}
+          {initialEmail ? (
+            <>
+              You already have a tag registered to{' '}
+              <strong>({initialEmail})</strong>. Enter your email below and
+              we&apos;ll send you a link to access your dashboard.
+            </>
+          ) : (
+            `Enter your email address and we'll send you a new secure link to access your ${conversationId ? 'conversation' : 'dashboard'}.`
+          )}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
@@ -164,7 +170,7 @@ export default function RequestMagicLinkModal({
               autoFocus
             />
             <p className="text-xs text-regal-navy-600 mt-1.5">
-              We&apos;ll send a new 7-day access link to this address if
+              We&apos;ll send a new 30-day access link to this address if
               it&apos;s in our system.
             </p>
           </div>
