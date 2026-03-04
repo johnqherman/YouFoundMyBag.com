@@ -241,7 +241,8 @@ html.dark .modal-container {
   box-shadow: 0 25px 50px -12px rgba(255, 255, 255, 0.25);
 }
 
-html.dark .landing-tag-glow {
+html.dark .landing-tag-glow,
+html.dark .lost-tag-glow {
   display: none;
 }
 

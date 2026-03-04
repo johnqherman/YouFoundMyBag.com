@@ -280,7 +280,7 @@ function LostTagIllustration() {
           <div className="h-1 bg-regal-navy-50" />
         </div>
 
-        <div className="absolute -inset-2 top-2 bg-regal-navy-200/30 rounded-3xl blur-xl -z-10" />
+        <div className="lost-tag-glow absolute -inset-2 top-2 bg-regal-navy-200/30 rounded-3xl blur-xl -z-10" />
       </div>
     </div>
   );
