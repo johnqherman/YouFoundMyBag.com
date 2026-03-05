@@ -328,49 +328,45 @@ export default function BagManagementModal({
     }
   }, [bag.id, toast]);
 
-  const loadRotationCooldownInfo = useCallback(async () => {
-    try {
-      const token = getAuthToken();
-      const response = await fetch(`/api/bags/${bag.id}/rotation-cooldown`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to check rotation cooldown');
+  const loadRotationCooldownInfo = useCallback(
+    async (force = false) => {
+      try {
+        const token = getAuthToken();
+        const data = await api.getBagRotationCooldown(
+          bag.id,
+          token ?? undefined,
+          force
+        );
+        setRotationCooldownInfo(data);
+      } catch (err) {
+        toast.error(
+          err instanceof Error
+            ? err.message
+            : 'Failed to check rotation cooldown'
+        );
       }
+    },
+    [bag.id, toast]
+  );
 
-      const data = await response.json();
-      setRotationCooldownInfo(data.data);
-    } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : 'Failed to check rotation cooldown'
-      );
-    }
-  }, [bag.id, toast]);
-
-  const loadCooldownInfo = useCallback(async () => {
-    try {
-      const token = getAuthToken();
-      const response = await fetch(`/api/bags/${bag.id}/name-cooldown`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to check cooldown');
+  const loadCooldownInfo = useCallback(
+    async (force = false) => {
+      try {
+        const token = getAuthToken();
+        const data = await api.getBagNameCooldown(
+          bag.id,
+          token ?? undefined,
+          force
+        );
+        setCooldownInfo(data);
+      } catch (err) {
+        toast.error(
+          err instanceof Error ? err.message : 'Failed to check cooldown'
+        );
       }
-
-      const data = await response.json();
-      setCooldownInfo(data.data);
-    } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : 'Failed to check cooldown'
-      );
-    }
-  }, [bag.id, toast]);
+    },
+    [bag.id, toast]
+  );
 
   const loadAppearance = useCallback(async () => {
     setAppearanceLoading(true);
@@ -501,6 +497,7 @@ export default function BagManagementModal({
       );
       setConfirmRotate(false);
       setActiveSection('qr');
+      void loadRotationCooldownInfo(true);
       onBagUpdated();
     } catch (err) {
       toast.error(
@@ -531,6 +528,7 @@ export default function BagManagementModal({
       }
 
       toast.success('Bag name updated successfully!');
+      void loadCooldownInfo(true);
       onBagUpdated();
     } catch (err) {
       toast.error(

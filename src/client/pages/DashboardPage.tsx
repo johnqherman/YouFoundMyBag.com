@@ -106,7 +106,7 @@ function formatBagDisplayName(
     return bagName;
   }
   if (ownerName) {
-    return `${ownerName}'s bag`;
+    return `${ownerName}'s Bag`;
   }
   return `Bag ${shortId}`;
 }
@@ -232,7 +232,7 @@ export default function DashboardPage() {
     loadDashboard();
   }, []);
 
-  const loadDashboard = async () => {
+  const loadDashboard = async (force = false) => {
     try {
       const token = localStorage.getItem('owner_session_token');
       if (!token) {
@@ -243,13 +243,10 @@ export default function DashboardPage() {
         return;
       }
 
-      const response = await fetch('/api/auth/dashboard', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.status === 401) {
+      const data = await api.getDashboard(token, force);
+      setDashboardData(data);
+    } catch (err) {
+      if ((err as { status?: number }).status === 401) {
         localStorage.removeItem('owner_session_token');
         setError(
           'Not authenticated. Please check your email for an access link.'
@@ -257,14 +254,6 @@ export default function DashboardPage() {
         setLoading(false);
         return;
       }
-
-      if (!response.ok) {
-        throw new Error('Failed to load dashboard');
-      }
-
-      const result = await response.json();
-      setDashboardData(result.data);
-    } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load dashboard');
     } finally {
       setLoading(false);
@@ -333,7 +322,7 @@ export default function DashboardPage() {
 
       if (!response.ok) {
         if (response.status === 404 || response.status === 500) {
-          await loadDashboard();
+          await loadDashboard(true);
           throw new Error(
             'This conversation no longer exists. Dashboard has been refreshed.'
           );
@@ -341,7 +330,7 @@ export default function DashboardPage() {
         throw new Error('Failed to archive conversation');
       }
 
-      await loadDashboard();
+      await loadDashboard(true);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : 'Failed to archive conversation'
@@ -377,7 +366,7 @@ export default function DashboardPage() {
         prev.filter((thread) => thread.conversation.id !== conversationId)
       );
 
-      await loadDashboard();
+      await loadDashboard(true);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : 'Failed to restore conversation'
@@ -396,7 +385,7 @@ export default function DashboardPage() {
   const handleUpgradeSuccess = () => {
     setPaymentModalOpen(false);
     setPaymentClientSecret(null);
-    loadDashboard();
+    loadDashboard(true);
   };
 
   if (loading) {
@@ -1043,7 +1032,7 @@ export default function DashboardPage() {
             <CreateBagForm
               onSuccess={() => {
                 setShowCreateBagModal(false);
-                loadDashboard();
+                loadDashboard(true);
               }}
               initialEmail={dashboardData?.owner_email}
             />
@@ -1068,7 +1057,7 @@ export default function DashboardPage() {
           onClose={() => setManagementModalBag(null)}
           bag={managementModalBag}
           onBagUpdated={() => {
-            loadDashboard();
+            loadDashboard(true);
           }}
           planInfo={dashboardData?.plan}
         />
@@ -1080,7 +1069,7 @@ export default function DashboardPage() {
         planInfo={dashboardData?.plan}
         email={dashboardData?.owner_email}
         ownerName={dashboardData.bags[0]?.owner_name}
-        onSaved={loadDashboard}
+        onSaved={() => loadDashboard(true)}
       />
 
       {paymentModalOpen && paymentClientSecret && (

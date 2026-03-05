@@ -4,11 +4,32 @@ import {
   FinderPageData,
   StartConversationRequest,
   ApiError,
+  DashboardData,
 } from '../types/index.js';
 
 const API_BASE = '/api';
 
 class ApiClient {
+  private cache = new Map<string, { data: unknown; expiresAt: number }>();
+
+  private getCached<T>(key: string): T | null {
+    const entry = this.cache.get(key);
+    if (!entry || Date.now() > entry.expiresAt) return null;
+    return entry.data as T;
+  }
+
+  private setCached(key: string, data: unknown, ttlMs: number): void {
+    this.cache.set(key, { data, expiresAt: Date.now() + ttlMs });
+  }
+
+  private invalidate(...keys: string[]): void {
+    keys.forEach((k) => this.cache.delete(k));
+  }
+
+  invalidatePlan(): void {
+    this.invalidate('plan');
+  }
+
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
@@ -66,10 +87,12 @@ class ApiClient {
   }
 
   async createBag(bagData: CreateBagRequest): Promise<CreateBagResponse> {
-    return this.request<CreateBagResponse>('/bags', {
+    const result = await this.request<CreateBagResponse>('/bags', {
       method: 'POST',
       body: JSON.stringify(bagData),
     });
+    this.invalidate('dashboard');
+    return result;
   }
 
   async getFinderPageData(shortId: string): Promise<FinderPageData> {
@@ -183,19 +206,38 @@ class ApiClient {
       canceled_at: string | null;
     };
   }> {
-    return this.request('/billing/subscription', {
+    type T = {
+      success: boolean;
+      data: {
+        plan: 'free' | 'pro';
+        status: 'active' | 'past_due' | 'canceled' | 'incomplete' | null;
+        billing_period: 'monthly' | 'annual' | null;
+        current_period_end: string | null;
+        canceled_at: string | null;
+      };
+    };
+    const cached = this.getCached<T>('subscription');
+    if (cached) return cached;
+    const data = await this.request<T>('/billing/subscription', {
       headers: { Authorization: `Bearer ${token}` },
     });
+    this.setCached('subscription', data, 5 * 60 * 1000);
+    return data;
   }
 
   async cancelSubscription(token: string): Promise<{
     success: boolean;
     data: { canceled_at: string; current_period_end: string | null };
   }> {
-    return this.request('/billing/cancel', {
+    const result = await this.request<{
+      success: boolean;
+      data: { canceled_at: string; current_period_end: string | null };
+    }>('/billing/cancel', {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
     });
+    this.invalidate('subscription', 'plan');
+    return result;
   }
 
   async createSetupIntent(
@@ -211,11 +253,16 @@ class ApiClient {
     token: string,
     paymentMethodId: string
   ): Promise<{ success: boolean }> {
-    return this.request('/billing/update-payment-method', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ paymentMethodId }),
-    });
+    const result = await this.request<{ success: boolean }>(
+      '/billing/update-payment-method',
+      {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ paymentMethodId }),
+      }
+    );
+    this.invalidate('subscription');
+    return result;
   }
 
   async getPlan(token: string): Promise<{
@@ -227,17 +274,35 @@ class ApiClient {
       showBranding: boolean;
     };
   }> {
-    return this.request('/billing/plan', {
+    type T = {
+      success: boolean;
+      data: {
+        plan: 'free' | 'pro';
+        bagLimit: number;
+        canEditBags: boolean;
+        showBranding: boolean;
+      };
+    };
+    const cached = this.getCached<T>('plan');
+    if (cached) return cached;
+    const data = await this.request<T>('/billing/plan', {
       headers: { Authorization: `Bearer ${token}` },
     });
+    this.setCached('plan', data, 5 * 60 * 1000);
+    return data;
   }
 
   async getOwnerEmail(
     token: string
   ): Promise<{ success: boolean; data: { email: string } }> {
-    return this.request('/auth/me', {
+    type T = { success: boolean; data: { email: string } };
+    const cached = this.getCached<T>('me');
+    if (cached) return cached;
+    const data = await this.request<T>('/auth/me', {
       headers: { Authorization: `Bearer ${token}` },
     });
+    this.setCached('me', data, 30 * 60 * 1000);
+    return data;
   }
 
   async deleteAccount(token: string): Promise<void> {
@@ -251,20 +316,89 @@ class ApiClient {
     success: boolean;
     data: { conversation_retention_months: number | null };
   }> {
-    return this.request('/auth/settings', {
+    type T = {
+      success: boolean;
+      data: { conversation_retention_months: number | null };
+    };
+    const cached = this.getCached<T>('settings');
+    if (cached) return cached;
+    const data = await this.request<T>('/auth/settings', {
       headers: { Authorization: `Bearer ${token}` },
     });
+    this.setCached('settings', data, 10 * 60 * 1000);
+    return data;
   }
 
   async updateOwnerSettings(
     token: string,
     settings: { conversation_retention_months: number | null }
   ): Promise<{ success: boolean }> {
-    return this.request('/auth/settings', {
+    const result = await this.request<{ success: boolean }>('/auth/settings', {
       method: 'PATCH',
       headers: { Authorization: `Bearer ${token}` },
       body: JSON.stringify(settings),
     });
+    this.invalidate('settings');
+    return result;
+  }
+
+  async getDashboard(token: string, force = false): Promise<DashboardData> {
+    if (force) this.invalidate('dashboard');
+    const cached = this.getCached<DashboardData>('dashboard');
+    if (cached) return cached;
+    const response = await fetch(`${API_BASE}/auth/dashboard`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (response.status === 401) {
+      throw Object.assign(new Error('Unauthorized'), { status: 401 });
+    }
+    if (!response.ok) {
+      throw new Error('Failed to load dashboard');
+    }
+    const result = await response.json();
+    this.setCached('dashboard', result.data, 2 * 60 * 1000);
+    return result.data as DashboardData;
+  }
+
+  async getBagNameCooldown(
+    bagId: string,
+    token: string | undefined,
+    force = false
+  ): Promise<{ canUpdate: boolean; nextUpdateAt?: Date }> {
+    type T = { canUpdate: boolean; nextUpdateAt?: Date };
+    const key = `cooldown::${bagId}::name`;
+    if (force) this.invalidate(key);
+    const cached = this.getCached<T>(key);
+    if (cached) return cached;
+    const response = await fetch(`${API_BASE}/bags/${bagId}/name-cooldown`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!response.ok) throw new Error('Failed to check cooldown');
+    const data = await response.json();
+    this.setCached(key, data.data, 45 * 1000);
+    return data.data as T;
+  }
+
+  async getBagRotationCooldown(
+    bagId: string,
+    token: string | undefined,
+    force = false
+  ): Promise<{ canRotate: boolean; nextRotationAt?: Date }> {
+    type T = { canRotate: boolean; nextRotationAt?: Date };
+    const key = `cooldown::${bagId}::rotation`;
+    if (force) this.invalidate(key);
+    const cached = this.getCached<T>(key);
+    if (cached) return cached;
+    const response = await fetch(
+      `${API_BASE}/bags/${bagId}/rotation-cooldown`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    if (!response.ok) throw new Error('Failed to check rotation cooldown');
+    const data = await response.json();
+    this.setCached(key, data.data, 45 * 1000);
+    return data.data as T;
   }
 }
 

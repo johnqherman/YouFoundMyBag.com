@@ -119,6 +119,7 @@ export default function PricingPage() {
     setPaymentClientSecret(null);
     setCurrentPlan('pro');
     setProSuccess(true);
+    api.invalidatePlan();
   };
 
   return (
