@@ -24,7 +24,9 @@ export default function BasicInfo({
           className="block text-sm font-medium mb-2 text-regal-navy-800"
         >
           Your name{' '}
-          <span className="text-regal-navy-500 font-normal">(optional)</span>
+          {!ownerNameLocked && (
+            <span className="text-regal-navy-500 font-normal">(optional)</span>
+          )}
         </label>
         <CharacterLimitInput
           value={formData.owner_name}
