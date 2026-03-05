@@ -25,26 +25,26 @@ const freeLimits = [
 
 const proFeatures = [
   { text: 'Up to 10 active QR tags', included: true },
+  { text: 'Unlimited bag name changes', included: true },
+  { text: 'Per-bag owner names', included: true },
   {
-    text: 'Customizable QR codes',
+    text: 'Custom QR colors',
     included: true,
-    detail: 'Color, label, basic styling',
+    detail: 'Gradient presets or any hex color',
   },
+  { text: 'Custom finder page theme', included: true },
   { text: 'No branding on finder page', included: true },
-  { text: 'Tag edit & reactivation anytime', included: true },
-  { text: 'Priority support', included: true },
 ];
 
 const comparisonRows = [
   { label: 'Active QR tags', free: '1', pro: 'Up to 10' },
-  { label: 'QR design', free: 'Basic', pro: 'Custom styling' },
+  { label: 'Bag name updates', free: 'Once per week', pro: 'Unlimited' },
+  { label: 'QR colors', free: '\u2014', pro: 'Custom gradients' },
   {
     label: 'Finder page branding',
     free: 'YouFoundMyBag branded',
     pro: 'No branding',
   },
-  { label: 'Tag editing', free: '\u2014', pro: 'Edit & reactivate' },
-  { label: 'Support', free: 'Standard', pro: 'Priority' },
 ];
 
 export default function PricingPage() {

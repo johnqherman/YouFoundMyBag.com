@@ -105,7 +105,7 @@ const contactChannels = [
 const dashboardFeatures = [
   { text: 'View all your bags in one place' },
   { text: 'Conversation inbox with unread counts' },
-  { text: 'Edit bag details anytime', pro: true },
+  { text: 'Edit bag details anytime' },
   { text: 'Activate or deactivate tags' },
   { text: 'Delete bags you no longer need' },
   { text: 'Rotate short IDs for enhanced privacy' },
@@ -120,11 +120,9 @@ const emailFeatures = [
 
 const comparisonRows = [
   { label: 'Active QR tags', free: '1', pro: 'Up to 10' },
-  { label: 'QR design', free: 'Basic', pro: 'Custom styling' },
-  { label: 'Scan insights', free: false, pro: true },
-  { label: 'Tag editing', free: false, pro: true },
+  { label: 'Bag name updates', free: 'Once per week', pro: 'Unlimited' },
+  { label: 'QR colors', free: '\u2014', pro: true },
   { label: 'Finder page branding', free: 'YouFoundMyBag', pro: 'No branding' },
-  { label: 'Support level', free: 'Standard', pro: 'Priority' },
 ];
 
 function QrFeatureCard({
