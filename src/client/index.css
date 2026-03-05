@@ -188,17 +188,6 @@ html.dark .iti__flag {
   filter: invert(1) hue-rotate(180deg);
 }
 
-html.dark .qr-code-container {
-  filter: invert(1) hue-rotate(180deg);
-}
-
-html.dark .qr-code-container *,
-html.dark .qr-code-container img,
-html.dark .qr-code-container svg,
-html.dark .qr-code-container svg image {
-  filter: none !important;
-}
-
 html.dark .theme-toggle-fab {
   filter: invert(1) hue-rotate(180deg);
 }
