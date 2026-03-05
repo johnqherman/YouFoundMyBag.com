@@ -10,7 +10,7 @@ import * as bagRepository from './repository.js';
 import * as conversationRepository from '../conversations/repository.js';
 import { emailValidationMiddleware } from '../../infrastructure/utils/email-validation.js';
 import { verifyOwnerSession } from '../auth/service.js';
-import { qrScanRateLimit } from '../security/middleware.js';
+import { qrScanRateLimit, createBagRateLimit } from '../security/middleware.js';
 import { Bag } from '../types/index.js';
 import { hashForLookup } from '../../infrastructure/security/encryption.js';
 import * as billingService from '../billing/service.js';
@@ -61,6 +61,7 @@ async function verifyBagOwnership(
 
 router.post(
   '/',
+  createBagRateLimit,
   emailValidationMiddleware({ fields: ['owner_email'] }),
   async (req, res): Promise<void> => {
     try {
