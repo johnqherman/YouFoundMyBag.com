@@ -70,7 +70,7 @@ We have rate limiting, CAPTCHA protection, and the ability to disable bags or bl
 <details>
 <summary><strong>Is this free?</strong></summary>
 
-YouFoundMyBag has a free tier (1 bag, core features) and a Pro plan at $5/month or $45/year (up to 10 bags, custom QR colors, no branding). Sign up at [youfoundmybag.com](https://youfoundmybag.com).
+YouFoundMyBag has a free tier (1 bag, core features) and a Pro plan at $5/month or $45/year (up to 10 bags, custom QR colors, no branding). Sign up at [youfoundmybag.com](https://youfoundmybag.com/pricing).
 
 </details>
 
