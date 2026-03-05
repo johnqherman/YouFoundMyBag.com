@@ -25,11 +25,13 @@ import RequestMagicLinkModal from './RequestMagicLinkModal.js';
 export default function CreateBagForm({
   onSuccess,
   initialEmail = '',
+  initialOwnerName = '',
+  isPro = false,
 }: CreateBagFormProps) {
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<FormData>({
-    owner_name: '',
+    owner_name: initialOwnerName,
     bag_name: '',
     owner_message: '',
     owner_email: initialEmail,
@@ -371,7 +373,8 @@ export default function CreateBagForm({
 
   const renderCurrentStep = () => {
     switch (currentStep) {
-      case 1:
+      case 1: {
+        const ownerNameLocked = !isPro && !!initialOwnerName;
         return (
           <BasicInfo
             formData={{
@@ -381,8 +384,10 @@ export default function CreateBagForm({
             }}
             onChange={updateFormData}
             onNext={nextStep}
+            ownerNameLocked={ownerNameLocked}
           />
         );
+      }
       case 2:
         return (
           <ContactPreference

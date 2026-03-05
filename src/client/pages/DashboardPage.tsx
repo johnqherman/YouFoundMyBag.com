@@ -1035,6 +1035,8 @@ export default function DashboardPage() {
                 loadDashboard(true);
               }}
               initialEmail={dashboardData?.owner_email}
+              initialOwnerName={dashboardData?.bags[0]?.owner_name}
+              isPro={dashboardData?.plan?.plan === 'pro'}
             />
           </div>
         </div>

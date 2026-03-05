@@ -423,6 +423,8 @@ export interface BagManagementModalProps {
 export interface CreateBagFormProps {
   onSuccess: (bagData: CreateBagResponse) => void;
   initialEmail?: string;
+  initialOwnerName?: string;
+  isPro?: boolean;
 }
 
 export interface FormData {
@@ -494,4 +496,5 @@ export interface BasicInfoProps {
   };
   onChange: (updates: Partial<BasicInfoProps['formData']>) => void;
   onNext: () => void;
+  ownerNameLocked?: boolean;
 }

@@ -7,6 +7,7 @@ export default function BasicInfo({
   formData,
   onChange,
   onNext,
+  ownerNameLocked = false,
 }: BasicInfoProps) {
   return (
     <div className="space-y-6">
@@ -31,7 +32,14 @@ export default function BasicInfo({
           maxLength={30}
           placeholder="e.g., John"
           className="input-field"
+          disabled={ownerNameLocked}
         />
+        {ownerNameLocked && (
+          <p className="mt-1.5 text-xs text-regal-navy-500">
+            Linked to your account display name. Upgrade to Pro to set per-bag
+            names.
+          </p>
+        )}
       </div>
 
       <div>

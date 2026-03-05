@@ -312,6 +312,7 @@ export async function updateOwnerNameForEmail(
     'UPDATE bags SET owner_name = $1, updated_at = NOW() WHERE owner_email_hash = $2',
     [ownerName || null, ownerEmailHash]
   );
+  await cacheDel(`conversations:owner:${ownerEmailHash}`, 'dashboard');
 }
 
 export async function getBagById(bagId: string): Promise<Bag | null> {
