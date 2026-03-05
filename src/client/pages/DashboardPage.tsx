@@ -563,7 +563,7 @@ export default function DashboardPage() {
               {dashboardData.bags.length === 0 ? (
                 <div className="text-center text-regal-navy-500 py-8">
                   <p>No bags created yet.</p>
-                  <a href="/" className="link mt-2 inline-block">
+                  <a href="/new" className="link mt-2 inline-block">
                     Create your first bag
                   </a>
                 </div>
