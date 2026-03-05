@@ -102,7 +102,7 @@ const contactChannels = [
   { name: 'Signal', icon: <SignalIcon /> },
 ];
 
-const dashboardFeatures = [
+const dashboardFeatures: { text: string; pro?: boolean }[] = [
   { text: 'View all your bags in one place' },
   { text: 'Conversation inbox with unread counts' },
   { text: 'Edit bag details anytime' },
