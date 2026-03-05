@@ -13,11 +13,13 @@ import {
   SendReplyRequest,
 } from '../../client/types/index.js';
 import { emailValidationMiddleware } from '../../infrastructure/utils/email-validation.js';
+import { sendMessageRateLimit } from '../security/middleware.js';
 
 const router = Router();
 
 router.post(
   '/bags/:shortId/conversations',
+  sendMessageRateLimit,
   emailValidationMiddleware({ fields: ['finder_email'] }),
   async (req: Request, res: Response): Promise<void> => {
     try {
@@ -75,6 +77,7 @@ router.post(
 
 router.post(
   '/conversations/:conversationId/reply',
+  sendMessageRateLimit,
   async (req: Request, res: Response): Promise<void> => {
     try {
       const { conversationId } = req.params;
