@@ -258,6 +258,7 @@ export interface PlanInfo {
 
 export interface DashboardData {
   owner_email?: string;
+  owner_name?: string | null;
   bags: Array<{
     id: string;
     short_id: string;

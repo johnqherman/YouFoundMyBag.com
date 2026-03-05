@@ -164,15 +164,29 @@ export async function deleteAccountData(
   });
 }
 
-export async function getOwnerSettings(
-  emailHash: string
-): Promise<{ conversation_retention_months: number | null }> {
+export async function getOwnerSettings(emailHash: string): Promise<{
+  conversation_retention_months: number | null;
+  owner_name: string | null;
+}> {
   const result = await pool.query(
-    'SELECT conversation_retention_months FROM owner_settings WHERE owner_email_hash = $1',
+    'SELECT conversation_retention_months, owner_name FROM owner_settings WHERE owner_email_hash = $1',
     [emailHash]
   );
   if (result.rows[0]) return result.rows[0];
-  return { conversation_retention_months: 6 }; // default
+  return { conversation_retention_months: 6, owner_name: null }; // defaults
+}
+
+export async function upsertOwnerName(
+  emailHash: string,
+  ownerName: string | null
+): Promise<void> {
+  await pool.query(
+    `INSERT INTO owner_settings (owner_email_hash, owner_name)
+     VALUES ($1, $2)
+     ON CONFLICT (owner_email_hash) DO UPDATE
+       SET owner_name = EXCLUDED.owner_name`,
+    [emailHash, ownerName || null]
+  );
 }
 
 export async function upsertOwnerSettings(

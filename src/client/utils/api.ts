@@ -314,11 +314,17 @@ class ApiClient {
 
   async getOwnerSettings(token: string): Promise<{
     success: boolean;
-    data: { conversation_retention_months: number | null };
+    data: {
+      conversation_retention_months: number | null;
+      owner_name: string | null;
+    };
   }> {
     type T = {
       success: boolean;
-      data: { conversation_retention_months: number | null };
+      data: {
+        conversation_retention_months: number | null;
+        owner_name: string | null;
+      };
     };
     const cached = this.getCached<T>('settings');
     if (cached) return cached;

@@ -126,13 +126,19 @@ router.get(
       }
 
       const emailHash = hashForLookup(session.email);
-      const [allBags, conversations, planInfo, subscriptionStatus] =
-        await Promise.all([
-          bagRepository.getBagsByOwnerEmail(session.email),
-          conversationService.getOwnerConversations(session.email),
-          billingService.resolvePlan(emailHash),
-          billingService.getSubscriptionStatus(emailHash),
-        ]);
+      const [
+        allBags,
+        conversations,
+        planInfo,
+        subscriptionStatus,
+        ownerSettings,
+      ] = await Promise.all([
+        bagRepository.getBagsByOwnerEmail(session.email),
+        conversationService.getOwnerConversations(session.email),
+        billingService.resolvePlan(emailHash),
+        billingService.getSubscriptionStatus(emailHash),
+        authRepository.getOwnerSettings(emailHash),
+      ]);
 
       const bagMap = new Map<
         string,
@@ -203,6 +209,7 @@ router.get(
         success: true,
         data: {
           owner_email: session.email,
+          owner_name: ownerSettings.owner_name ?? null,
           bags: bags.sort(
             (a, b) =>
               new Date(b.latest_conversation || b.created_at).getTime() -
@@ -362,10 +369,11 @@ router.patch(
         return;
       }
 
-      await bagRepository.updateOwnerNameForEmail(
-        session.email,
-        owner_name ?? ''
-      );
+      const emailHash = hashForLookup(session.email);
+      await Promise.all([
+        authRepository.upsertOwnerName(emailHash, owner_name ?? null),
+        bagRepository.updateOwnerNameForEmail(session.email, owner_name ?? ''),
+      ]);
       res.json({ success: true, message: 'Display name updated' });
     } catch (error) {
       logger.error('Error updating owner name:', error);

@@ -1035,7 +1035,7 @@ export default function DashboardPage() {
                 loadDashboard(true);
               }}
               initialEmail={dashboardData?.owner_email}
-              initialOwnerName={dashboardData?.bags[0]?.owner_name}
+              initialOwnerName={dashboardData?.owner_name ?? undefined}
               isPro={dashboardData?.plan?.plan === 'pro'}
             />
           </div>
@@ -1070,7 +1070,7 @@ export default function DashboardPage() {
         onClose={() => setShowAccountSettings(false)}
         planInfo={dashboardData?.plan}
         email={dashboardData?.owner_email}
-        ownerName={dashboardData.bags[0]?.owner_name}
+        ownerName={dashboardData.owner_name ?? undefined}
         onSaved={() => loadDashboard(true)}
       />
 
