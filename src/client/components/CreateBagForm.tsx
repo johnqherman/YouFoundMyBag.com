@@ -51,6 +51,12 @@ export default function CreateBagForm({
     }
   }, [initialEmail]);
 
+  useEffect(() => {
+    if (initialOwnerName && !formData.owner_name) {
+      setFormData((prev) => ({ ...prev, owner_name: initialOwnerName }));
+    }
+  }, [initialOwnerName]);
+
   const contentRef = useRef<HTMLDivElement>(null);
   const [cardHeight, setCardHeight] = useState<number | undefined>(undefined);
 
