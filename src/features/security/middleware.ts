@@ -145,7 +145,11 @@ export const securityHeaders = helmet({
   referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
 });
 
-export function dbRateLimit(maxRequests: number, windowMinutes: number) {
+export function dbRateLimit(
+  maxRequests: number,
+  windowMinutes: number,
+  namespace = 'default'
+) {
   return async (req: Request, res: Response, next: NextFunction) => {
     if (config.NODE_ENV === 'development') {
       return next();
@@ -157,7 +161,7 @@ export function dbRateLimit(maxRequests: number, windowMinutes: number) {
       .update(clientId)
       .digest('hex')
       .substring(0, 16);
-    const key = `${req.route?.path || req.path}:${ipHash}`;
+    const key = `${namespace}:${req.route?.path || req.path}:${ipHash}`;
 
     const windowSeconds = windowMinutes * 60;
     const rateLimitKey = `ratelimit:${key}`;

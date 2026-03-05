@@ -50,17 +50,22 @@ app.use(basicRateLimit);
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
-app.use('/api/bags', dbRateLimit(60, 60), bagRoutes);
-app.use('/api', dbRateLimit(5, 60), conversationRoutes);
-app.use('/api', basicRateLimit, dbRateLimit(60, 60), finderRoutes);
-app.use('/api', basicRateLimit, dbRateLimit(60, 60), authRoutes);
+app.use('/api/bags', dbRateLimit(60, 60, 'bags'), bagRoutes);
+app.use('/api', dbRateLimit(5, 60, 'conversations'), conversationRoutes);
+app.use('/api', basicRateLimit, dbRateLimit(60, 60, 'finder'), finderRoutes);
+app.use('/api', basicRateLimit, dbRateLimit(60, 60, 'auth'), authRoutes);
 app.use(
   '/api/email-preferences',
   basicRateLimit,
-  dbRateLimit(10, 60),
+  dbRateLimit(10, 60, 'email-preferences'),
   emailPreferencesRoutes
 );
-app.use('/api/billing', basicRateLimit, dbRateLimit(10, 60), billingRoutes);
+app.use(
+  '/api/billing',
+  basicRateLimit,
+  dbRateLimit(10, 60, 'billing'),
+  billingRoutes
+);
 app.use('/api/contact', basicRateLimit, contactRoutes);
 
 if (config.NODE_ENV === 'production') {
