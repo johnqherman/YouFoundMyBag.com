@@ -51,7 +51,7 @@ app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
 app.use('/api/bags', dbRateLimit(60, 60, 'bags'), bagRoutes);
-app.use('/api', dbRateLimit(5, 60, 'conversations'), conversationRoutes);
+app.use('/api', conversationRoutes);
 app.use('/api', basicRateLimit, dbRateLimit(60, 60, 'finder'), finderRoutes);
 app.use('/api', basicRateLimit, dbRateLimit(60, 60, 'auth'), authRoutes);
 app.use(
