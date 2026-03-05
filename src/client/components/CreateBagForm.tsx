@@ -1,4 +1,10 @@
-import { useState, useCallback, useRef, useLayoutEffect } from 'react';
+import {
+  useState,
+  useCallback,
+  useRef,
+  useLayoutEffect,
+  useEffect,
+} from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { api } from '../utils/api.js';
 import { useToast } from '../hooks/useToast.js';
@@ -16,19 +22,32 @@ import ContactDetails from './steps/ContactDetails.js';
 import ReviewSubmit from './steps/ReviewSubmit.js';
 import RequestMagicLinkModal from './RequestMagicLinkModal.js';
 
-export default function CreateBagForm({ onSuccess }: CreateBagFormProps) {
+export default function CreateBagForm({
+  onSuccess,
+  initialEmail = '',
+}: CreateBagFormProps) {
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<FormData>({
     owner_name: '',
     bag_name: '',
     owner_message: '',
-    owner_email: '',
+    owner_email: initialEmail,
     contacts: [],
     secure_messaging_enabled: true,
   });
   const [loading, setLoading] = useState(false);
   const [showDashboardModal, setShowDashboardModal] = useState(false);
+
+  useEffect(() => {
+    if (
+      initialEmail &&
+      formData.secure_messaging_enabled &&
+      !formData.owner_email
+    ) {
+      setFormData((prev) => ({ ...prev, owner_email: initialEmail }));
+    }
+  }, [initialEmail]);
 
   const contentRef = useRef<HTMLDivElement>(null);
   const [cardHeight, setCardHeight] = useState<number | undefined>(undefined);
@@ -118,6 +137,7 @@ export default function CreateBagForm({ onSuccess }: CreateBagFormProps) {
       setFormData((prev) => ({
         ...prev,
         secure_messaging_enabled: true,
+        owner_email: prev.owner_email || initialEmail,
         contacts: [],
       }));
     }

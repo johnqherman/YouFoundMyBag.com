@@ -232,6 +232,14 @@ class ApiClient {
     });
   }
 
+  async getOwnerEmail(
+    token: string
+  ): Promise<{ success: boolean; data: { email: string } }> {
+    return this.request('/auth/me', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  }
+
   async deleteAccount(token: string): Promise<void> {
     await this.request('/auth/account', {
       method: 'DELETE',

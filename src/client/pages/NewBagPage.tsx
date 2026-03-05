@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import CreateBagForm from '../components/CreateBagForm.js';
 import BagCreated from '../components/BagCreated.js';
@@ -8,6 +8,16 @@ import { api } from '../utils/api.js';
 export default function NewBagPage() {
   const [createdBag, setCreatedBag] = useState<CreateBagResponse | null>(null);
   const [isPro, setIsPro] = useState(false);
+  const [ownerEmail, setOwnerEmail] = useState('');
+
+  useEffect(() => {
+    const token = localStorage.getItem('owner_session_token');
+    if (!token) return;
+    api
+      .getOwnerEmail(token)
+      .then((result) => setOwnerEmail(result.data.email))
+      .catch(() => {});
+  }, []);
 
   const handleBagCreated = async (bagData: CreateBagResponse) => {
     const token = localStorage.getItem('owner_session_token');
@@ -41,7 +51,10 @@ export default function NewBagPage() {
       </Helmet>
       <div className="flex-1 flex flex-col justify-center max-w-3xl mx-auto p-4 sm:p-6 w-full 2xl:[zoom:1.25]">
         <main>
-          <CreateBagForm onSuccess={handleBagCreated} />
+          <CreateBagForm
+            onSuccess={handleBagCreated}
+            initialEmail={ownerEmail}
+          />
         </main>
       </div>
     </div>

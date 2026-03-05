@@ -1045,6 +1045,7 @@ export default function DashboardPage() {
                 setShowCreateBagModal(false);
                 loadDashboard();
               }}
+              initialEmail={dashboardData?.owner_email}
             />
           </div>
         </div>

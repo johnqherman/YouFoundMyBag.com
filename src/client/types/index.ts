@@ -422,6 +422,7 @@ export interface BagManagementModalProps {
 
 export interface CreateBagFormProps {
   onSuccess: (bagData: CreateBagResponse) => void;
+  initialEmail?: string;
 }
 
 export interface FormData {

@@ -398,6 +398,25 @@ router.get(
   }
 );
 
+router.get('/auth/me', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const token = extractBearerToken(req.headers.authorization);
+    if (!token) {
+      res.status(401).json({ success: false, error: 'unauthorized' });
+      return;
+    }
+    const session = await authService.verifyOwnerSession(token);
+    if (!session) {
+      res.status(401).json({ success: false, error: 'unauthorized' });
+      return;
+    }
+    res.json({ success: true, data: { email: session.email } });
+  } catch (error) {
+    logger.error('Error getting owner info:', error);
+    res.status(500).json({ success: false, error: 'server_error' });
+  }
+});
+
 router.patch(
   '/auth/settings',
   async (req: Request, res: Response): Promise<void> => {
