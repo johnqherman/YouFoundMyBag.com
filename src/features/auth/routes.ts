@@ -16,6 +16,7 @@ import {
   authMagicLinkRateLimit,
   authVerifyRateLimit,
 } from '../security/middleware.js';
+import * as authRepository from './repository.js';
 
 const router = Router();
 
@@ -309,6 +310,32 @@ router.post(
   }
 );
 
+router.delete(
+  '/auth/account',
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const token = extractBearerToken(req.headers.authorization);
+      if (!token) {
+        res.status(401).json({
+          success: false,
+          error: 'unauthorized',
+          message: 'Authentication required',
+        });
+        return;
+      }
+      await authService.deleteAccount(token);
+      res.json({ success: true, message: 'Account deleted' });
+    } catch (error) {
+      logger.error('Error deleting account:', error);
+      res.status(500).json({
+        success: false,
+        error: 'delete_error',
+        message: 'Failed to delete account',
+      });
+    }
+  }
+);
+
 router.patch(
   '/auth/owner-name',
   async (req: Request, res: Response): Promise<void> => {
@@ -343,6 +370,63 @@ router.patch(
     } catch (error) {
       logger.error('Error updating owner name:', error);
       res.status(500).json({ error: 'Failed to update display name' });
+    }
+  }
+);
+
+router.get(
+  '/auth/settings',
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const token = extractBearerToken(req.headers.authorization);
+      if (!token) {
+        res.status(401).json({ success: false, error: 'unauthorized' });
+        return;
+      }
+      const session = await authService.verifyOwnerSession(token);
+      if (!session) {
+        res.status(401).json({ success: false, error: 'unauthorized' });
+        return;
+      }
+      const emailHash = hashForLookup(session.email);
+      const settings = await authRepository.getOwnerSettings(emailHash);
+      res.json({ success: true, data: settings });
+    } catch (error) {
+      logger.error('Error getting owner settings:', error);
+      res.status(500).json({ success: false, error: 'settings_error' });
+    }
+  }
+);
+
+router.patch(
+  '/auth/settings',
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const token = extractBearerToken(req.headers.authorization);
+      if (!token) {
+        res.status(401).json({ success: false, error: 'unauthorized' });
+        return;
+      }
+      const session = await authService.verifyOwnerSession(token);
+      if (!session) {
+        res.status(401).json({ success: false, error: 'unauthorized' });
+        return;
+      }
+      const { conversation_retention_months } = req.body;
+      const valid = [null, 1, 3, 6, 12];
+      if (!valid.includes(conversation_retention_months)) {
+        res.status(400).json({ success: false, error: 'invalid_value' });
+        return;
+      }
+      const emailHash = hashForLookup(session.email);
+      await authRepository.upsertOwnerSettings(
+        emailHash,
+        conversation_retention_months
+      );
+      res.json({ success: true });
+    } catch (error) {
+      logger.error('Error updating owner settings:', error);
+      res.status(500).json({ success: false, error: 'settings_error' });
     }
   }
 );

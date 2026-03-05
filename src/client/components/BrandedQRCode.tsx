@@ -32,13 +32,11 @@ async function buildBorderedBlob(
   canvas.height = totalSize;
   const ctx = canvas.getContext('2d')!;
 
-  // Rounded white card
   ctx.fillStyle = '#ffffff';
   ctx.beginPath();
   ctx.roundRect(0, 0, totalSize, totalSize, DOWNLOAD_BORDER_RADIUS);
   ctx.fill();
 
-  // Subtle border
   ctx.strokeStyle = DOWNLOAD_BORDER_COLOR;
   ctx.lineWidth = 3;
   ctx.beginPath();

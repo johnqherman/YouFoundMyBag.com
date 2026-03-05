@@ -21,6 +21,8 @@ const ConversationPage = lazy(() => import('./pages/ConversationPage.js'));
 const EmailPreferencesPage = lazy(
   () => import('./pages/EmailPreferencesPage.js')
 );
+const TermsPage = lazy(() => import('./pages/TermsPage.js'));
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage.js'));
 import Header from './components/Header.js';
 import Footer from './components/Footer.js';
 import ThemeToggle from './components/ThemeToggle.js';
@@ -76,6 +78,8 @@ function AppShell() {
               path="/email-preferences/:token"
               element={<EmailPreferencesPage />}
             />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>

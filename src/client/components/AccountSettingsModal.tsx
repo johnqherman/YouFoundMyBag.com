@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useScrollLock } from '../hooks/useScrollLock.js';
 import ConfirmModal from './ConfirmModal.js';
 import UpdatePaymentMethodModal from './UpdatePaymentMethodModal.js';
@@ -7,6 +8,116 @@ import { api } from '../utils/api.js';
 import type { PlanInfo } from '../types/index.js';
 import { useToast } from '../hooks/useToast.js';
 import { useModalBackdrop } from '../hooks/useModalBackdrop.js';
+
+const RETENTION_OPTIONS = [
+  { value: null, label: 'Never' },
+  { value: 1, label: '1 month' },
+  { value: 3, label: '3 months' },
+  { value: 6, label: '6 months (default)' },
+  { value: 12, label: '1 year' },
+];
+
+function RetentionSelect({
+  value,
+  onChange,
+  disabled,
+}: {
+  value: number | null;
+  onChange: (value: number | null) => void;
+  disabled: boolean;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleOutside);
+    return () => document.removeEventListener('mousedown', handleOutside);
+  }, []);
+
+  const handleOpen = () => {
+    if (disabled) return;
+    if (!isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDropdownStyle({
+        position: 'fixed',
+        top: rect.bottom + 4,
+        left: rect.left,
+        width: rect.width,
+        zIndex: 9999,
+      });
+    }
+    setIsOpen((o) => !o);
+  };
+
+  const selected = RETENTION_OPTIONS.find((o) => o.value === value)!;
+
+  return (
+    <div ref={ref} className="relative w-48">
+      <button
+        ref={buttonRef}
+        type="button"
+        onClick={handleOpen}
+        onKeyDown={(e) => e.key === 'Escape' && setIsOpen(false)}
+        disabled={disabled}
+        className="input-field flex items-center justify-between text-left !py-1.5 !min-h-0"
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+      >
+        <span>{selected.label}</span>
+        <svg
+          className={`w-4 h-4 text-regal-navy-500 shrink-0 ml-2 transition-transform duration-150 ${isOpen ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </button>
+
+      {isOpen &&
+        createPortal(
+          <ul
+            role="listbox"
+            style={dropdownStyle}
+            className="retention-dropdown-list bg-white border border-regal-navy-200 rounded-lg shadow-lg overflow-hidden"
+          >
+            {RETENTION_OPTIONS.map((opt) => (
+              <li
+                key={String(opt.value)}
+                role="option"
+                aria-selected={opt.value === value}
+                onMouseDown={() => {
+                  onChange(opt.value);
+                  setIsOpen(false);
+                }}
+                className={`px-3 py-2.5 text-sm cursor-pointer transition-colors duration-100 ${
+                  opt.value === value
+                    ? 'bg-regal-navy-50 text-regal-navy-900 font-medium'
+                    : 'text-regal-navy-700 hover:bg-regal-navy-50 hover:text-regal-navy-900'
+                }`}
+              >
+                {opt.label}
+              </li>
+            ))}
+          </ul>,
+          document.body
+        )}
+    </div>
+  );
+}
 
 interface SubscriptionDetails {
   plan: 'free' | 'pro';
@@ -51,9 +162,13 @@ export default function AccountSettingsModal({
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [canceling, setCanceling] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [showUpdatePayment, setShowUpdatePayment] = useState(false);
   const [editingName, setEditingName] = useState(ownerName ?? '');
   const [nameSaving, setNameSaving] = useState(false);
+  const [retentionMonths, setRetentionMonths] = useState<number | null>(6);
+  const [retentionSaving, setRetentionSaving] = useState(false);
 
   const loadSubscription = useCallback(async () => {
     const token = localStorage.getItem('owner_session_token');
@@ -61,8 +176,12 @@ export default function AccountSettingsModal({
 
     setLoadingDetails(true);
     try {
-      const result = await api.getSubscriptionDetails(token);
-      setSubscription(result.data);
+      const [subResult, settingsResult] = await Promise.all([
+        api.getSubscriptionDetails(token),
+        api.getOwnerSettings(token),
+      ]);
+      setSubscription(subResult.data);
+      setRetentionMonths(settingsResult.data.conversation_retention_months);
     } catch (err) {
       toast.error(
         err instanceof Error
@@ -84,11 +203,17 @@ export default function AccountSettingsModal({
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen && !showCancelConfirm) onClose();
+      if (
+        e.key === 'Escape' &&
+        isOpen &&
+        !showCancelConfirm &&
+        !showDeleteConfirm
+      )
+        onClose();
     };
     if (isOpen) document.addEventListener('keydown', handleEsc);
     return () => document.removeEventListener('keydown', handleEsc);
-  }, [isOpen, onClose, showCancelConfirm]);
+  }, [isOpen, onClose, showCancelConfirm, showDeleteConfirm]);
 
   const handleCancelConfirm = async () => {
     const token = localStorage.getItem('owner_session_token');
@@ -140,6 +265,42 @@ export default function AccountSettingsModal({
       toast.error('Failed to update display name. Please try again.');
     } finally {
       setNameSaving(false);
+    }
+  };
+
+  const handleRetentionChange = async (months: number | null) => {
+    const token = localStorage.getItem('owner_session_token');
+    if (!token) return;
+    setRetentionMonths(months);
+    setRetentionSaving(true);
+    try {
+      await api.updateOwnerSettings(token, {
+        conversation_retention_months: months,
+      });
+      toast.success('Retention setting saved');
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : 'Failed to save setting'
+      );
+    } finally {
+      setRetentionSaving(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    const token = localStorage.getItem('owner_session_token');
+    if (!token) return;
+    setDeleting(true);
+    setShowDeleteConfirm(false);
+    try {
+      await api.deleteAccount(token);
+      localStorage.removeItem('owner_session_token');
+      window.location.href = '/';
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : 'Failed to delete account'
+      );
+      setDeleting(false);
     }
   };
 
@@ -289,6 +450,15 @@ export default function AccountSettingsModal({
                     />
                   </svg>
                 </button>
+                <div className="pt-1 text-center">
+                  <button
+                    onClick={() => setShowDeleteConfirm(true)}
+                    disabled={deleting}
+                    className="text-sm text-cinnabar-600 hover:text-cinnabar-800 underline underline-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {deleting ? 'Deleting…' : 'Delete account'}
+                  </button>
+                </div>
               </section>
             )}
 
@@ -383,6 +553,24 @@ export default function AccountSettingsModal({
               )}
             </section>
 
+            <section>
+              <h2 className="text-xs font-semibold text-regal-navy-500 uppercase tracking-widest mb-3">
+                Data &amp; Privacy
+              </h2>
+              <div className="bg-regal-navy-50 rounded-xl border border-regal-navy-200">
+                <div className="flex items-center justify-between px-4 py-3">
+                  <span className="text-sm text-regal-navy-600">
+                    Delete conversations after
+                  </span>
+                  <RetentionSelect
+                    value={retentionMonths}
+                    onChange={handleRetentionChange}
+                    disabled={retentionSaving || loadingDetails}
+                  />
+                </div>
+              </div>
+            </section>
+
             {isPro && !loadingDetails && (
               <section className="space-y-3">
                 <h2 className="text-xs font-semibold text-regal-navy-500 uppercase tracking-widest mb-3">
@@ -411,6 +599,17 @@ export default function AccountSettingsModal({
           </div>
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        title="Delete your account?"
+        message="All your bags, conversations, and data will be permanently deleted. This cannot be undone."
+        confirmText="Yes, delete my account"
+        cancelText="Keep account"
+        variant="danger"
+        onConfirm={handleDeleteAccount}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
 
       <ConfirmModal
         isOpen={showCancelConfirm}

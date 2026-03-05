@@ -10,8 +10,14 @@ import * as bagRepository from '../bags/repository.js';
 import * as conversationRepository from '../conversations/repository.js';
 import { TIME_MS as t } from '../../client/constants/timeConstants.js';
 import { hashForLookup } from '../../infrastructure/security/encryption.js';
-import { cacheGet, cacheSet } from '../../infrastructure/cache/index.js';
+import {
+  cacheGet,
+  cacheSet,
+  cacheDel,
+} from '../../infrastructure/cache/index.js';
 import { config } from '../../infrastructure/config/index.js';
+import * as billingService from '../billing/service.js';
+import * as billingRepository from '../billing/repository.js';
 
 export async function generateMagicLinkToken(
   email: string,
@@ -137,6 +143,30 @@ export async function verifyOwnerSession(
 
 export async function logout(token: string): Promise<void> {
   await authRepository.deleteOwnerSession(token);
+}
+
+export async function deleteAccount(sessionToken: string): Promise<void> {
+  const session = await authRepository.getOwnerSession(sessionToken);
+  if (!session) throw new Error('Invalid or expired session');
+
+  const email = session.email;
+  const emailHash = hashForLookup(email);
+
+  await cacheDel(`session:${sessionToken}`, 'session');
+
+  const stripe = billingService.getStripe();
+  const sub = await billingRepository.getSubscriptionByEmailHash(emailHash);
+  if (stripe && sub?.stripe_subscription_id && !sub.canceled_at) {
+    try {
+      await stripe.subscriptions.cancel(sub.stripe_subscription_id);
+    } catch (err) {
+      logger.warn('Stripe subscription cancel failed during account deletion', {
+        err,
+      });
+    }
+  }
+
+  await authRepository.deleteAccountData(email, emailHash);
 }
 
 export async function getOwnerDashboard(): Promise<{

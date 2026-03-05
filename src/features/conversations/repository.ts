@@ -567,9 +567,20 @@ export async function archiveConversation(
   conversationId: string
 ): Promise<void> {
   await pool.query(
-    `UPDATE conversations
-     SET status = 'archived', archived_at = NOW(), permanently_deleted_at = NOW() + INTERVAL '6 months'
-     WHERE id = $1`,
+    `UPDATE conversations c
+     SET status = 'archived',
+         archived_at = NOW(),
+         permanently_deleted_at = (
+           SELECT CASE
+             WHEN os.conversation_retention_months IS NOT NULL
+               THEN NOW() + (os.conversation_retention_months || ' months')::INTERVAL
+             ELSE NULL
+           END
+           FROM bags b
+           LEFT JOIN owner_settings os ON os.owner_email_hash = b.owner_email_hash
+           WHERE b.id = c.bag_id
+         )
+     WHERE c.id = $1`,
     [conversationId]
   );
 
@@ -693,12 +704,23 @@ export async function resolveAndArchiveAllByBagId(
   bagId: string
 ): Promise<{ count: number }> {
   const result = await pool.query(
-    `UPDATE conversations
-     SET status = 'archived', archived_at = NOW(), permanently_deleted_at = NOW() + INTERVAL '6 months'
-     WHERE bag_id = $1
-     AND status IN ('active', 'resolved')
-     AND archived_at IS NULL
-     RETURNING id`,
+    `UPDATE conversations c
+     SET status = 'archived',
+         archived_at = NOW(),
+         permanently_deleted_at = (
+           SELECT CASE
+             WHEN os.conversation_retention_months IS NOT NULL
+               THEN NOW() + (os.conversation_retention_months || ' months')::INTERVAL
+             ELSE NULL
+           END
+           FROM bags b2
+           LEFT JOIN owner_settings os ON os.owner_email_hash = b2.owner_email_hash
+           WHERE b2.id = $1
+         )
+     WHERE c.bag_id = $1
+     AND c.status IN ('active', 'resolved')
+     AND c.archived_at IS NULL
+     RETURNING c.id`,
     [bagId]
   );
 

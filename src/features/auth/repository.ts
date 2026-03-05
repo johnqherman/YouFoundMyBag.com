@@ -1,4 +1,4 @@
-import { pool } from '../../infrastructure/database/index.js';
+import { pool, withTransaction } from '../../infrastructure/database/index.js';
 import { OwnerSession } from '../../client/types/index.js';
 import { hashForLookup } from '../../infrastructure/security/encryption.js';
 import {
@@ -126,6 +126,79 @@ export async function getSessionByConversation(
   );
 
   return result.rows[0] || null;
+}
+
+export async function deleteAccountData(
+  email: string,
+  emailHash: string
+): Promise<void> {
+  return withTransaction(async (client) => {
+    const bagsResult = await client.query(
+      'SELECT short_id FROM bags WHERE owner_email_hash = $1',
+      [emailHash]
+    );
+    const shortIds: string[] = bagsResult.rows.map(
+      (r: { short_id: string }) => r.short_id
+    );
+
+    await client.query('DELETE FROM bags WHERE owner_email_hash = $1', [
+      emailHash,
+    ]);
+    await client.query(
+      'DELETE FROM subscriptions WHERE owner_email_hash = $1',
+      [emailHash]
+    );
+    await client.query('DELETE FROM email_preferences WHERE email = $1', [
+      email,
+    ]);
+    await client.query('DELETE FROM owner_sessions WHERE email = $1', [email]);
+
+    for (const shortId of shortIds) {
+      await cacheDel(`bag:short:${shortId}`, 'bag');
+      await cacheDel(`bag:finder:${shortId}`, 'bag_finder');
+    }
+    await cacheDel(`plan:${emailHash}`, 'plan');
+    await cacheDel(`email_prefs:${email}`, 'email_prefs');
+
+    logger.info('Account deleted', { emailHash });
+  });
+}
+
+export async function getOwnerSettings(
+  emailHash: string
+): Promise<{ conversation_retention_months: number | null }> {
+  const result = await pool.query(
+    'SELECT conversation_retention_months FROM owner_settings WHERE owner_email_hash = $1',
+    [emailHash]
+  );
+  if (result.rows[0]) return result.rows[0];
+  return { conversation_retention_months: 6 }; // default
+}
+
+export async function upsertOwnerSettings(
+  emailHash: string,
+  retentionMonths: number | null
+): Promise<void> {
+  await pool.query(
+    `INSERT INTO owner_settings (owner_email_hash, conversation_retention_months)
+     VALUES ($1, $2)
+     ON CONFLICT (owner_email_hash) DO UPDATE
+       SET conversation_retention_months = EXCLUDED.conversation_retention_months`,
+    [emailHash, retentionMonths]
+  );
+  await pool.query(
+    `UPDATE conversations c
+     SET permanently_deleted_at = CASE
+       WHEN $2::INTEGER IS NOT NULL
+         THEN c.archived_at + ($2 || ' months')::INTERVAL
+       ELSE NULL
+     END
+     FROM bags b
+     WHERE c.bag_id = b.id
+       AND b.owner_email_hash = $1
+       AND c.status = 'archived'`,
+    [emailHash, retentionMonths]
+  );
 }
 
 export async function verifyFinderAccessToConversation(

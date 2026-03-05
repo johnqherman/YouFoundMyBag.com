@@ -231,6 +231,33 @@ class ApiClient {
       headers: { Authorization: `Bearer ${token}` },
     });
   }
+
+  async deleteAccount(token: string): Promise<void> {
+    await this.request('/auth/account', {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  }
+
+  async getOwnerSettings(token: string): Promise<{
+    success: boolean;
+    data: { conversation_retention_months: number | null };
+  }> {
+    return this.request('/auth/settings', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  }
+
+  async updateOwnerSettings(
+    token: string,
+    settings: { conversation_retention_months: number | null }
+  ): Promise<{ success: boolean }> {
+    return this.request('/auth/settings', {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(settings),
+    });
+  }
 }
 
 export const api = new ApiClient();
