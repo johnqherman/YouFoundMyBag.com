@@ -199,7 +199,8 @@ export default function AccountSettingsModal({
       setEditingName(ownerName ?? '');
       loadSubscription();
     }
-  }, [isOpen, loadSubscription, ownerName]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, loadSubscription]);
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
