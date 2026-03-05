@@ -9,13 +9,6 @@
 </p>
 
 <p align="center">
-  <a href="#features">Features</a> •
-  <a href="#quick-start">Quick Start</a> •
-  <a href="#contributing">Contributing</a> •
-  <a href="#license">License</a>
-</p>
-
-<p align="center">
   <a href="https://github.com/johnqherman/YouFoundMyBag.com/blob/master/LICENSE">
     <img src="https://img.shields.io/badge/license-AGPL--3.0-blue.svg" alt="License" />
   </a>
@@ -44,31 +37,6 @@
 - **Abuse Protection** - Rate limiting & CAPTCHA
 - **GDPR-Friendly** - Hashed emails and encrypted storage
 
-## Quick Start
-
-Requires Node.js 18+, PostgreSQL 12+, and Redis 6+.
-
-```bash
-git clone https://github.com/johnqherman/YouFoundMyBag.com.git
-cd YouFoundMyBag
-npm install
-cp .env.example .env  # edit with your values
-npm run db:init
-npm run dev
-```
-
-The app will be available at http://localhost:3000 (frontend) and http://localhost:3001 (API).
-
-**Scripts:** `npm run dev` (development), `npm run build` (production build), `npm start` (production server)
-
-## Contributing
-
-1. Fork the repo and create a feature branch
-2. Make your changes following the existing code style
-3. Open a Pull Request
-
-[Report bugs or request features](https://github.com/johnqherman/YouFoundMyBag.com/issues)
-
 ## FAQ
 
 <details>
@@ -88,7 +56,7 @@ No traditional account needed. We use magic links - just enter your email and cl
 <details>
 <summary><strong>Can I have multiple bags?</strong></summary>
 
-Absolutely. Create as many bags as you need and manage them all from your dashboard.
+Yes. The free tier supports 1 active bag; Pro supports up to 10.
 
 </details>
 
@@ -102,7 +70,7 @@ We have rate limiting, CAPTCHA protection, and the ability to disable bags or bl
 <details>
 <summary><strong>Is this free?</strong></summary>
 
-The core functionality is free and open source under the AGPL-3.0 license. Self-host it yourself or use the hosted version at [youfoundmybag.com](https://youfoundmybag.com).
+YouFoundMyBag has a free tier (1 bag, core features) and a Pro plan at $5/month or $45/year (up to 10 bags, custom QR colors, no branding). Sign up at [youfoundmybag.com](https://youfoundmybag.com).
 
 </details>
 
@@ -111,7 +79,7 @@ The core functionality is free and open source under the AGPL-3.0 license. Self-
 - [Tailwind CSS](https://tailwindcss.com/) for the utility-first styling
 - [BullMQ](https://docs.bullmq.io/) for reliable background job processing
 - [Mailgun](https://www.mailgun.com/) for transactional email delivery
-- [Cloudflare Turnstile](https://www.cloudflare.com/products/turnstile/) for privacy-friendly CAPTCHA
+- [qr-code-styling](https://github.com/kozakdenys/qr-code-styling) for styled QR code generation
 - All the open-source contributors who make projects like this possible
 
 ## License
