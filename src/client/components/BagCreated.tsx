@@ -18,6 +18,7 @@ import type QRCodeStyling from 'qr-code-styling';
 export default function BagCreated({
   bagData,
   onCreateAnother,
+  isPro,
 }: BagCreatedProps) {
   const [copied, setCopied] = useState(false);
   const qrInstanceRef = useRef<QRCodeStyling | null>(null);
@@ -117,12 +118,14 @@ export default function BagCreated({
             >
               <PrintIcon color="currentColor" /> Print QR Code
             </button>
-            <button
-              onClick={onCreateAnother}
-              className="btn-secondary w-full flex items-center justify-center gap-2"
-            >
-              <PlusIcon color="currentColor" /> Create Another
-            </button>
+            {isPro && (
+              <button
+                onClick={onCreateAnother}
+                className="btn-secondary w-full flex items-center justify-center gap-2"
+              >
+                <PlusIcon color="currentColor" /> Create Another
+              </button>
+            )}
           </div>
         </div>
       </div>

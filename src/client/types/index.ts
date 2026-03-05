@@ -318,6 +318,7 @@ export interface BrandIconProps {
 export interface BagCreatedProps {
   bagData: CreateBagResponse;
   onCreateAnother: () => void;
+  isPro?: boolean;
 }
 
 export interface RequestMagicLinkModalProps {
