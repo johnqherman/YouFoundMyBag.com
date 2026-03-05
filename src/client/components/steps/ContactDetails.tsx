@@ -13,6 +13,7 @@ export default function ContactDetails({
   removeContact,
   updateContact,
   getAvailableContactTypes,
+  emailLocked = false,
 }: ContactDetailsProps) {
   const contactsEndRef = useRef<HTMLDivElement>(null);
   const prevContactsLength = useRef(formData.contacts.length);
@@ -53,11 +54,15 @@ export default function ContactDetails({
               onChange({ owner_email: e.target.value.replace(/\s/g, '') })
             }
             required
-            className="input-field"
+            readOnly={emailLocked}
+            disabled={emailLocked}
+            className={`input-field${emailLocked ? ' opacity-60 cursor-not-allowed' : ''}`}
             maxLength={254}
           />
           <p className="text-xs text-regal-navy-600 mt-1.5">
-            Used to access your secure inbox
+            {emailLocked
+              ? 'Linked to your account email'
+              : 'Used to access your secure inbox'}
           </p>
         </div>
       )}

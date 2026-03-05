@@ -455,6 +455,7 @@ export interface ContactDetailsProps {
     'sms' | 'whatsapp' | 'email' | 'instagram' | 'telegram' | 'signal' | 'other'
   >;
   error?: string | null;
+  emailLocked?: boolean;
 }
 
 export interface ContactPreferenceProps {

@@ -421,6 +421,7 @@ export default function CreateBagForm({
             removeContact={removeContact}
             updateContact={updateContact}
             getAvailableContactTypes={getAvailableContactTypes}
+            emailLocked={!!initialEmail}
           />
         );
       case 4:
