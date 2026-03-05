@@ -13,8 +13,6 @@ const freeFeatures = [
   { text: 'Instant email notifications', included: true },
   { text: 'Privacy-protected contact relay', included: true },
   { text: 'Basic QR code design', included: true },
-  { text: 'Branded finder page', included: true },
-  { text: 'Standard support', included: true },
 ];
 
 const freeLimits = [
