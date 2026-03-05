@@ -190,7 +190,7 @@ function PrivacyFeatureItem({
       <span className="mt-0.5 text-medium-jungle-400 shrink-0">
         {feature.icon}
       </span>
-      <span className="text-regal-navy-200 text-sm leading-relaxed">
+      <span className="text-regal-navy-700 text-sm leading-relaxed">
         {feature.text}
       </span>
     </div>
@@ -451,7 +451,7 @@ export default function FeaturesPage() {
         </div>
       </section>
 
-      <section className="bg-regal-navy-900 text-white">
+      <section className="bg-regal-navy-50">
         <div
           ref={privacySectionRef}
           className="max-w-5xl mx-auto px-4 sm:px-6 py-16 sm:py-24"
@@ -460,13 +460,13 @@ export default function FeaturesPage() {
             className="text-center mb-14 sm:mb-20"
             style={fadeUp(privacySectionVisible)}
           >
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-regal-navy-800 border border-regal-navy-700 text-medium-jungle-400 mb-5">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-white border border-regal-navy-200 text-regal-navy-700 mb-5">
               <SecureIcon />
             </div>
-            <h2 className="font-display text-3xl sm:text-4xl text-white tracking-tight">
+            <h2 className="font-display text-3xl sm:text-4xl text-regal-navy-900 tracking-tight">
               Privacy &amp; security at every layer
             </h2>
-            <p className="mt-3 text-regal-navy-400 text-lg max-w-xl mx-auto">
+            <p className="mt-3 text-regal-navy-600 text-lg max-w-xl mx-auto">
               Your security isn&apos;t a feature — it&apos;s the foundation
               everything is built on.
             </p>
