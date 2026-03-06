@@ -508,11 +508,12 @@ export default function DashboardPage() {
                   )}
                   <button
                     onClick={() => setShowAccountSettings(true)}
-                    className="text-regal-navy-500 hover:text-regal-navy-900 transition-colors p-1"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-regal-navy-200 bg-white/60 text-regal-navy-600 text-sm font-medium shadow-sm hover:bg-regal-navy-100 hover:border-regal-navy-300 hover:text-regal-navy-900 transition-all duration-150"
                     title="Account settings"
                     aria-label="Account settings"
                   >
                     <BagSettingsIcon color="currentColor" />
+                    <span>Account</span>
                   </button>
                 </div>
               )}

@@ -10,6 +10,7 @@ import * as bagRepository from './repository.js';
 import * as conversationRepository from '../conversations/repository.js';
 import { emailValidationMiddleware } from '../../infrastructure/utils/email-validation.js';
 import { verifyOwnerSession } from '../auth/service.js';
+import * as authRepository from '../auth/repository.js';
 import { qrScanRateLimit, createBagRateLimit } from '../security/middleware.js';
 import { Bag } from '../types/index.js';
 import { hashForLookup } from '../../infrastructure/security/encryption.js';
@@ -85,6 +86,24 @@ router.post(
 
       const clientIp = req.ip || req.connection.remoteAddress || undefined;
       const result = await bagService.createBagWithQR(validatedData, clientIp);
+
+      if (validatedData.owner_email && validatedData.owner_name) {
+        try {
+          const emailHash = hashForLookup(validatedData.owner_email);
+          const planInfo = await billingService.resolvePlan(emailHash);
+          if (planInfo.plan === 'free') {
+            await authRepository.upsertOwnerName(
+              emailHash,
+              validatedData.owner_name
+            );
+          }
+        } catch (syncError) {
+          logger.warn(
+            'Failed to sync owner name to account settings:',
+            syncError
+          );
+        }
+      }
 
       res.status(201).json({
         success: true,

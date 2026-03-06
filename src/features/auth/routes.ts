@@ -370,9 +370,16 @@ router.patch(
       }
 
       const emailHash = hashForLookup(session.email);
+      const planInfo = await billingService.resolvePlan(emailHash);
+      const isFree = planInfo.plan === 'free';
       await Promise.all([
         authRepository.upsertOwnerName(emailHash, owner_name ?? null),
-        bagRepository.updateOwnerNameForEmail(session.email, owner_name ?? ''),
+        isFree
+          ? bagRepository.updateOwnerNameForEmail(
+              session.email,
+              owner_name ?? ''
+            )
+          : Promise.resolve(),
       ]);
       res.json({ success: true, message: 'Display name updated' });
     } catch (error) {
