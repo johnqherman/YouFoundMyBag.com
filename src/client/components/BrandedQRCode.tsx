@@ -347,13 +347,20 @@ export default function BrandedQRCode({
   }, [onInstanceReady]);
 
   return (
-    <img
-      ref={imgRef}
-      width={size}
-      height={size}
-      alt="QR code"
-      className={className}
-      draggable
-    />
+    <div
+      style={{ width: size, height: size }}
+      className={`bg-white ${className ?? ''}`}
+      role="img"
+      aria-label="QR code"
+    >
+      <img
+        ref={imgRef}
+        width={size}
+        height={size}
+        alt=""
+        className="block"
+        draggable
+      />
+    </div>
   );
 }
