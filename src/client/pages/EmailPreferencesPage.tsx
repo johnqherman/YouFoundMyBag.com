@@ -97,7 +97,7 @@ export default function EmailPreferencesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+      <div className="flex-1 bg-neutral-50 flex items-center justify-center">
         <LoadingSpinner />
       </div>
     );
@@ -105,7 +105,7 @@ export default function EmailPreferencesPage() {
 
   if (error && !preferences) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4">
+      <div className="flex-1 bg-neutral-50 flex items-center justify-center p-4">
         <Helmet>
           <title>Error - YouFoundMyBag.com</title>
         </Helmet>
@@ -120,7 +120,7 @@ export default function EmailPreferencesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 py-6 sm:py-12 px-4">
+    <div className="bg-neutral-50 py-6 sm:py-12 px-4">
       <Helmet>
         <title>Email Preferences - YouFoundMyBag.com</title>
       </Helmet>
