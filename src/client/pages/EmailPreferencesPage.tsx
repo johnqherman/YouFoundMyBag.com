@@ -1,17 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { SuccessIcon } from '../components/icons/AppIcons.js';
 import LoadingSpinner from '../components/LoadingSpinner.js';
-import { TIME_MS as t } from '../constants/timeConstants.js';
+import { useToast } from '../hooks/useToast.js';
 import type { EmailPreferences } from '../types/index.js';
 
 export default function EmailPreferencesPage() {
   const { token } = useParams<{ token: string }>();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
   const [preferences, setPreferences] = useState<EmailPreferences | null>(null);
 
   const loadPreferences = useCallback(async () => {
@@ -45,8 +44,6 @@ export default function EmailPreferencesPage() {
     if (!token) return;
 
     setSaving(true);
-    setError(null);
-    setSuccess(false);
 
     try {
       const response = await fetch(`/api/email-preferences/${token}`, {
@@ -61,11 +58,9 @@ export default function EmailPreferencesPage() {
 
       const data = await response.json();
       setPreferences(data.data);
-      setSuccess(true);
-
-      setTimeout(() => setSuccess(false), t.THREE_SECONDS);
+      toast.success('Preferences updated successfully');
     } catch (err) {
-      setError(
+      toast.error(
         err instanceof Error ? err.message : 'Failed to update preferences'
       );
     } finally {
@@ -77,7 +72,6 @@ export default function EmailPreferencesPage() {
     if (!token) return;
 
     setSaving(true);
-    setError(null);
 
     try {
       const response = await fetch(
@@ -93,9 +87,9 @@ export default function EmailPreferencesPage() {
 
       const data = await response.json();
       setPreferences(data.data);
-      setSuccess(true);
+      toast.success('Unsubscribed from all emails');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to unsubscribe');
+      toast.error(err instanceof Error ? err.message : 'Failed to unsubscribe');
     } finally {
       setSaving(false);
     }
@@ -139,19 +133,6 @@ export default function EmailPreferencesPage() {
             Manage your email notifications for{' '}
             <strong className="break-all">{preferences?.email}</strong>
           </p>
-
-          {success && (
-            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2 text-green-800">
-              <SuccessIcon size="medium" color="currentColor" />
-              <span>Your preferences have been updated successfully!</span>
-            </div>
-          )}
-
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">
-              {error}
-            </div>
-          )}
 
           <div className="space-y-6">
             <div className="pb-6 border-b border-regal-navy-200">

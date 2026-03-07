@@ -70,6 +70,7 @@ router.put('/:token', async (req, res): Promise<void> => {
       bag_created_enabled,
       conversation_notifications_enabled,
       reply_notifications_enabled,
+      system_updates_enabled,
     } = req.body;
 
     const preferences = await emailPreferencesService.updatePreferences(token, {
@@ -77,6 +78,7 @@ router.put('/:token', async (req, res): Promise<void> => {
       bag_created_enabled,
       conversation_notifications_enabled,
       reply_notifications_enabled,
+      system_updates_enabled,
     });
 
     res.json({
