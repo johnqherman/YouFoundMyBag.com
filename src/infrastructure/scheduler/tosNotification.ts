@@ -8,7 +8,7 @@ import { sendSystemUpdateEmail } from '../email/service.js';
 import { emailParagraph } from '../email/templates.js';
 import { config } from '../config/index.js';
 import { CURRENT_TERMS_VERSION } from '../../client/constants/legalConstants.js';
-import { TIME_MS as t } from 'client/constants/timeConstants.js';
+import { TIME_MS as t } from '../../client/constants/timeConstants.js';
 
 async function getAllOwnerEmails(): Promise<string[]> {
   const result = await pool.query(

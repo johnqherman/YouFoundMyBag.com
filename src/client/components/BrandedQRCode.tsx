@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import QRCodeStyling, { Options } from 'qr-code-styling';
-import { TIME_MS as t } from 'client/constants/timeConstants';
+import { TIME_MS as t } from '../constants/timeConstants.js';
 
 const DOWNLOAD_SIZE = 1024;
 const DOWNLOAD_PADDING = 48;
