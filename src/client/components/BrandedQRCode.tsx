@@ -63,19 +63,17 @@ async function loadLogoDataUrl(): Promise<string> {
   const cacheKey = 'plain';
   if (processedLogoCache.has(cacheKey))
     return processedLogoCache.get(cacheKey)!;
+  const response = await fetch('/qrcode-center.png');
+  const blob = await response.blob();
   return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      canvas.getContext('2d')!.drawImage(img, 0, 0);
-      const dataUrl = canvas.toDataURL('image/png');
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
       processedLogoCache.set(cacheKey, dataUrl);
       resolve(dataUrl);
     };
-    img.onerror = reject;
-    img.src = '/qrcode-center.png';
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
   });
 }
 
