@@ -73,7 +73,7 @@ export default function BasicInfo({
           message={
             <>
               <span className="sm:hidden">
-                Avoid sharing personal contact details
+                Avoid sharing personal contact details.
               </span>
               <span className="hidden sm:inline">
                 Avoid sharing personal contact details here.
