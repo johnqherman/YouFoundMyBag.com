@@ -698,7 +698,7 @@ export default function BagManagementModal({
       }
 
       const data = await response.json();
-      window.open(`/email-preferences/${data.token}`, '_blank');
+      window.location.href = `/email-preferences/${data.token}`;
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : 'Failed to open email preferences'

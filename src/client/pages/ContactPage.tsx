@@ -407,7 +407,8 @@ export default function ContactPage() {
                   <div className="flex gap-2.5 items-start">
                     <GitHubIcon />
                     <p className="text-sm text-regal-navy-600">
-                      YouFoundMyBag is open source.{' '}
+                      YouFoundMyBag is open source.
+                      <br />
                       <a
                         href="https://github.com/johnqherman/YouFoundMyBag.com"
                         target="_blank"
