@@ -463,7 +463,7 @@ export default function DashboardPage() {
                 </p>
               </div>
               {dashboardData.plan && (
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <span
                     className={`badge ${
                       dashboardData.plan.plan === 'pro'
@@ -503,7 +503,16 @@ export default function DashboardPage() {
                       disabled={upgradeLoading}
                       className="text-sm font-medium text-regal-navy-700 hover:text-regal-navy-900 underline underline-offset-2"
                     >
-                      {upgradeLoading ? 'Loading...' : 'Upgrade to Pro'}
+                      {upgradeLoading ? (
+                        'Loading...'
+                      ) : (
+                        <>
+                          <span className="sm:hidden">Upgrade</span>
+                          <span className="hidden sm:inline">
+                            Upgrade to Pro
+                          </span>
+                        </>
+                      )}
                     </button>
                   )}
                   <button
@@ -513,7 +522,7 @@ export default function DashboardPage() {
                     aria-label="Account settings"
                   >
                     <BagSettingsIcon color="currentColor" />
-                    <span>Account</span>
+                    <span className="hidden sm:inline">Account</span>
                   </button>
                 </div>
               )}
