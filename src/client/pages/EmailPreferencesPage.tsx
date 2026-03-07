@@ -109,7 +109,8 @@ export default function EmailPreferencesPage() {
               Email Preferences
             </h1>
             <p className="mt-5 text-lg text-regal-navy-600 max-w-2xl mx-auto leading-relaxed break-words">
-              Managing notifications for{' '}
+              Managing notifications for
+              <br className="sm:hidden" />{' '}
               <strong className="text-regal-navy-800 break-all">
                 {preferences?.email}
               </strong>
