@@ -137,7 +137,8 @@ export default function ContactPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    if (formData.message.trim().toLowerCase() === 'hello') {
+    const msg = formData.message.trim().toLowerCase();
+    if (msg === 'hello' || msg === 'hello bro' || msg === 'hi') {
       setEasterEgg('visible');
       setTimeout(() => setEasterEggText(true), 900);
       setTimeout(() => {
