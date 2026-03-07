@@ -162,16 +162,6 @@ export async function getBagCountForEmailHash(
   return result.rows[0]?.count || 0;
 }
 
-export async function getSubscriptionByStripeCustomerId(
-  stripeCustomerId: string
-): Promise<Subscription | null> {
-  const result = await pool.query(
-    'SELECT * FROM subscriptions WHERE stripe_customer_id = $1',
-    [stripeCustomerId]
-  );
-  return result.rows[0] || null;
-}
-
 export async function getEmailByEmailHash(
   emailHash: string
 ): Promise<string | null> {

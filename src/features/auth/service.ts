@@ -169,22 +169,6 @@ export async function deleteAccount(sessionToken: string): Promise<void> {
   await authRepository.deleteAccountData(email, emailHash);
 }
 
-export async function getOwnerDashboard(): Promise<{
-  bags: Array<{
-    id: string;
-    short_id: string;
-    owner_name?: string;
-    bag_name?: string;
-    status: 'active' | 'disabled' | 'over_limit';
-    created_at: string;
-    conversation_count: number;
-    unread_count: number;
-    latest_conversation?: string;
-  }>;
-}> {
-  return { bags: [] };
-}
-
 export async function generateFinderMagicLinkToken(
   email: string,
   conversationId: string,
@@ -312,14 +296,6 @@ export async function verifyFinderSession(
     finderEmail: session.email,
     conversationId: session.conversation_id,
   };
-}
-
-export function extractEmailFromConversationAccess(
-  conversationId: string,
-  ownerEmail?: string
-): string | null {
-  logger.info(`Extracting email for conversation: ${conversationId}`);
-  return ownerEmail || null;
 }
 
 export async function requestMagicLinkReissue(

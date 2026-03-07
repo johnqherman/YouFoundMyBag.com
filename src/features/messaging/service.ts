@@ -1,18 +1,5 @@
-import crypto from 'crypto';
-import { Request } from 'express';
 import { logger } from '../../infrastructure/logger/index.js';
 import { config } from '../../infrastructure/config/index.js';
-
-export function getClientIpHash(
-  req: Pick<Request, 'ip'> & { connection?: { remoteAddress?: string } }
-): string {
-  const clientIp = req.ip || req.connection?.remoteAddress || 'unknown';
-  return crypto
-    .createHash('sha256')
-    .update(clientIp)
-    .digest('hex')
-    .substring(0, 16);
-}
 
 export async function verifyTurnstile(
   token: string,

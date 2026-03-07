@@ -1,5 +1,4 @@
 import { validate } from 'deep-email-validator';
-import { z } from 'zod';
 import { Response, NextFunction } from 'express';
 import { logger } from '../logger/index.js';
 import {
@@ -8,14 +7,7 @@ import {
   RequestWithEmailValidation,
 } from '../types/index.js';
 
-export async function isValidEmail(email: string): Promise<boolean> {
-  const result = await validateEmail(email);
-  return result.valid;
-}
-
-export async function validateEmail(
-  email: string
-): Promise<EmailValidationResult> {
+async function validateEmail(email: string): Promise<EmailValidationResult> {
   const result: EmailValidationResult = {
     valid: false,
     warnings: [],
@@ -59,21 +51,6 @@ export async function validateEmail(
     return result;
   }
 }
-
-export const emailValidationSchema = z.string().refine(
-  async (email) => {
-    try {
-      return await isValidEmail(email);
-    } catch (error) {
-      logger.warn(
-        'Email validation check failed, falling back to basic validation:',
-        error
-      );
-      return typeof email === 'string' && email.length > 0;
-    }
-  },
-  { message: 'Please enter a valid email address' }
-);
 
 export const emailValidationMiddleware = (
   options: EmailValidationOptions = {}

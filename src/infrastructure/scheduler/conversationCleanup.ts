@@ -4,6 +4,7 @@ import {
   autoArchiveResolvedConversations,
   permanentlyDeleteConversations,
 } from '../../features/conversations/repository.js';
+import { deleteExpiredSessions } from '../../features/auth/repository.js';
 
 export async function runConversationCleanup(): Promise<void> {
   try {
@@ -16,6 +17,9 @@ export async function runConversationCleanup(): Promise<void> {
     logger.info(
       `Permanently deleted ${deletedCount} archived conversations past 6 months`
     );
+
+    await deleteExpiredSessions();
+    logger.info('Expired sessions purged');
 
     logger.info('Conversation cleanup task completed');
   } catch (error) {

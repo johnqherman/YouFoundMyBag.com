@@ -110,7 +110,10 @@ export interface EmailJobData {
     | 'magic_link_owner'
     | 'magic_link_finder'
     | 'new_message_notification'
-    | 'system_update';
+    | 'system_update'
+    | 'bag_created'
+    | 'billing_alert'
+    | 'magic_link_reissue';
   to: string;
   subject: string;
   html: string;

@@ -116,18 +116,6 @@ export async function verifyOwnerEmailForBags(
   return parseInt(result.rows[0].count) === bagIds.length;
 }
 
-export async function getSessionByConversation(
-  conversationId: string,
-  sessionType: string
-): Promise<OwnerSession | null> {
-  const result = await pool.query(
-    'SELECT * FROM owner_sessions WHERE conversation_id = $1 AND session_type = $2 AND expires_at > NOW() ORDER BY created_at DESC LIMIT 1',
-    [conversationId, sessionType]
-  );
-
-  return result.rows[0] || null;
-}
-
 export async function deleteAccountData(
   email: string,
   emailHash: string

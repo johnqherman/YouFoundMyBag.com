@@ -1,4 +1,3 @@
-import { randomUUID } from 'crypto';
 import { logger } from '../logger/index.js';
 import { config } from '../config/index.js';
 import { sendMail, getMailgunClient } from './mailgun.js';
@@ -40,7 +39,7 @@ function generateIdempotencyKey(
   ...parts: (string | undefined)[]
 ): string {
   const filteredParts = parts.filter((p) => p !== undefined);
-  return `email_${type}_${filteredParts.join('_')}_${randomUUID()}`;
+  return `email_${type}_${filteredParts.join('_')}`;
 }
 
 async function sendDirectEmail(
@@ -350,7 +349,8 @@ export async function sendBagCreated(params: BagCreatedParams): Promise<void> {
     preferencesUrl,
   });
 
-  await sendDirectEmail(email, subject, html, 'bag created email');
+  const idempotencyKey = generateIdempotencyKey('bag_created', email, shortId);
+  await queueEmail('bag_created', email, subject, html, idempotencyKey);
 }
 
 export async function sendSystemUpdateEmail(
@@ -414,13 +414,24 @@ export async function sendBillingAlertEmail(
     preferencesUrl,
   });
 
-  await sendDirectEmail(email, params.subject, html, 'billing alert email');
+  const idempotencyKey = generateIdempotencyKey(
+    'billing_alert',
+    email,
+    String(Date.now())
+  );
+  await queueEmail(
+    'billing_alert',
+    email,
+    params.subject,
+    html,
+    idempotencyKey
+  );
 }
 
 export async function sendMagicLinkReissue(
   params: ReissueParams
 ): Promise<void> {
-  const { userType, email, magicLinkToken, conversationId, bagIds } = params;
+  const { userType, email, magicLinkToken, conversationId } = params;
 
   let magicLink: string;
   let title: string;
@@ -458,22 +469,18 @@ export async function sendMagicLinkReissue(
     preferencesUrl,
   });
 
-  if (!getMailgunClient()) {
-    logger.error('Mailgun client not available');
-    throw new Error('Email service not configured');
-  }
-
-  try {
-    await sendMail({ to: email, subject, html });
-
-    const contextInfo =
-      userType === 'owner'
-        ? `for ${bagIds?.length || 0} bags`
-        : `for conversation ${conversationId}`;
-
-    logger.info(`Magic link reissue email sent to ${email} ${contextInfo}`);
-  } catch (error) {
-    logger.error(`Magic link reissue email failed to ${email}:`, error);
-    throw error;
-  }
+  const idempotencyKey = generateIdempotencyKey(
+    'magic_link_reissue',
+    userType,
+    email,
+    magicLinkToken
+  );
+  await queueEmail(
+    'magic_link_reissue',
+    email,
+    subject,
+    html,
+    idempotencyKey,
+    conversationId
+  );
 }

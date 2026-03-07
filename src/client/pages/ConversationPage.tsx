@@ -256,11 +256,10 @@ export default function ConversationPage() {
         if (!response.ok) {
           throw new Error('Failed to send reply before resolving');
         }
-
-        setReplyMessage('');
       }
 
       await api.resolveConversation(conversationId, token);
+      setReplyMessage('');
       scrollAfterLoad.current = true;
       await loadConversation();
     } catch (err) {

@@ -254,16 +254,6 @@ export async function updateBagAppearance(
   logger.info(`Updated appearance for bag ${bagId}`);
 }
 
-export async function getContactsByBagId(bagId: string): Promise<Contact[]> {
-  const result = await pool.query('SELECT * FROM contacts WHERE bag_id = $1', [
-    bagId,
-  ]);
-  return result.rows.map((contact) => ({
-    ...contact,
-    value: decryptField(contact.value) ?? '',
-  }));
-}
-
 export async function getBagId(shortId: string): Promise<string | null> {
   const result = await pool.query('SELECT id FROM bags WHERE short_id = $1', [
     shortId,

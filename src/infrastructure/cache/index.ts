@@ -186,24 +186,6 @@ export async function cacheExpire(
   await redisClient.expire(key, ttlSeconds);
 }
 
-export async function cacheHGet(
-  key: string,
-  field: string,
-  cacheType?: string
-): Promise<string | null> {
-  if (!redisClient) {
-    throw new Error('Redis client not initialized');
-  }
-
-  const value = await redisClient.hget(key, field);
-
-  if (value) {
-    logger.debug('Cache HGET', { key, field, cacheType });
-  }
-
-  return value;
-}
-
 export async function cacheHGetAll<T extends Record<string, string>>(
   key: string,
   cacheType: string

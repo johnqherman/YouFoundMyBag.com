@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const emailSchema = z.string().email().max(254);
 
-export const contactTypeSchema = z.enum([
+const contactTypeSchema = z.enum([
   'sms',
   'whatsapp',
   'email',
@@ -12,19 +12,19 @@ export const contactTypeSchema = z.enum([
   'other',
 ]);
 
-export const phoneSchema = z
+const phoneSchema = z
   .string()
   .min(10)
   .max(20)
   .regex(/^[+]?[\d\s\-().]+$/);
 
-export const telegramSchema = z
+const telegramSchema = z
   .string()
   .min(4)
   .max(31)
   .regex(/^[A-Za-z0-9_]{4,31}$/);
 
-export const contactSchema = z
+const contactSchema = z
   .object({
     type: contactTypeSchema,
     value: z.string().min(1).max(255),

@@ -14,9 +14,9 @@ import {
   CachedConversationMessage,
 } from '../../client/types/index.js';
 import {
-  cacheHGetAll,
   cacheHSet,
   cacheHIncrBy,
+  cacheExpire,
   cacheGet,
   cacheSet,
   cacheIncr,
@@ -133,19 +133,6 @@ export async function addMessage(
   await invalidateConversationCaches(conversationId);
 
   return messageResult.rows[0];
-}
-
-export async function getConversationsByBagId(
-  bagId: string
-): Promise<Conversation[]> {
-  const result = await pool.query(
-    'SELECT * FROM conversations WHERE bag_id = $1 ORDER BY last_message_at DESC',
-    [bagId]
-  );
-  return result.rows.map((row) => ({
-    ...row,
-    finder_email: decryptField(row.finder_email) ?? undefined,
-  }));
 }
 
 export async function getConversationsByOwnerEmail(
@@ -275,30 +262,6 @@ export async function getConversationsByOwnerEmail(
   });
 
   return threads;
-}
-
-export async function conversationExists(
-  conversationId: string
-): Promise<boolean> {
-  const cacheKey = `conversation:exists:${conversationId}`;
-  const cached = await cacheGet<boolean>(cacheKey, 'conversation_exists');
-
-  if (cached !== null) {
-    logger.debug('Conversation exists cache HIT', { conversationId });
-    return cached;
-  }
-
-  const result = await pool.query(
-    'SELECT EXISTS(SELECT 1 FROM conversations WHERE id = $1) as exists',
-    [conversationId]
-  );
-
-  const exists = result.rows[0]?.exists || false;
-
-  await cacheSet(cacheKey, exists, t.TEN_MINUTES, 'conversation_exists');
-
-  logger.debug('Conversation exists check from DB', { conversationId, exists });
-  return exists;
 }
 
 export async function getConversationById(
@@ -466,84 +429,24 @@ export async function updateConversationStatus(
   await invalidateConversationCaches(conversationId);
 }
 
-export async function getUnreadMessageCount(bagId: string): Promise<number> {
-  const cached = await cacheGet<number>(`unread:bag:${bagId}`, 'unread_count');
-  if (cached !== null && cached !== undefined) {
-    logger.debug('Unread count cache HIT', { bagId, count: cached });
-    return cached;
-  }
-
-  const result = await pool.query(
-    'SELECT get_unread_count_for_bag($1) as unread_count',
-    [bagId]
-  );
-
-  const count = result.rows[0].unread_count;
-
-  await cacheSet(`unread:bag:${bagId}`, count, t.ONE_HOUR, 'unread_count');
-  logger.debug('Unread count cache warmed from DB', { bagId, count });
-
-  return count;
-}
-
-export async function getNotificationCounters(conversationId: string): Promise<{
-  finder_notifications_sent: number;
-  owner_notifications_sent: number;
-}> {
-  const cached = await cacheHGetAll<Record<string, string>>(
-    `notifications:conversation:${conversationId}`,
-    'notification_counters'
-  );
-
-  if (
-    cached &&
-    cached.finder_sent !== undefined &&
-    cached.owner_sent !== undefined
-  ) {
-    logger.debug('Notification counters cache HIT', { conversationId });
-    return {
-      finder_notifications_sent: parseInt(cached.finder_sent),
-      owner_notifications_sent: parseInt(cached.owner_sent),
-    };
-  }
-
-  await cacheHSet(
-    `notifications:conversation:${conversationId}`,
-    'finder_sent',
-    '0',
-    'notification_counters'
-  );
-  await cacheHSet(
-    `notifications:conversation:${conversationId}`,
-    'owner_sent',
-    '0',
-    'notification_counters'
-  );
-  logger.debug('Notification counters initialized in Redis', {
-    conversationId,
-  });
-
-  return {
-    finder_notifications_sent: 0,
-    owner_notifications_sent: 0,
-  };
-}
-
 export async function incrementNotificationCounter(
   conversationId: string,
   recipientType: 'finder' | 'owner'
-): Promise<void> {
+): Promise<number> {
   const field = recipientType === 'finder' ? 'finder_sent' : 'owner_sent';
-  await cacheHIncrBy(
+  const newCount = await cacheHIncrBy(
     `notifications:conversation:${conversationId}`,
     field,
     1,
     'notification_counters'
   );
+  await cacheExpire(`notifications:conversation:${conversationId}`, t.ONE_WEEK);
   logger.debug('Notification counter incremented in Redis', {
     conversationId,
     recipientType,
+    newCount,
   });
+  return newCount;
 }
 
 export async function resetNotificationCounter(

@@ -2,7 +2,7 @@ import { MessageContext } from '../../features/types/index.js';
 import { lowercaseBagName } from './formatting.js';
 import { PersonalizationContext, NameInfo } from '../types/index.js';
 
-export function shouldPersonalize(context: MessageContext): boolean {
+function shouldPersonalize(context: MessageContext): boolean {
   return context !== 'initial';
 }
 
@@ -38,7 +38,7 @@ export function getContextualRecipientName(
   }
 }
 
-export function getContextualBagReference(
+function getContextualBagReference(
   names: NameInfo,
   context: MessageContext,
   includeArticle: boolean = false,
@@ -131,33 +131,6 @@ export function getContextualGreeting(
   return `📬 ${senderName} replied to your message!`;
 }
 
-export function getContextualDescription(
-  personalizationContext: PersonalizationContext,
-  names: NameInfo
-): string {
-  const { context, senderType } = personalizationContext;
-
-  if (context === 'initial') {
-    if (senderType === 'finder') {
-      const bagType = lowercaseBagName(names.bagName);
-      return `Great news! Someone found your ${bagType} and wants to return it. Click the secure link below to respond to the finder.`;
-    } else {
-      return 'The bag owner responded to your message. Click the secure link below to continue the conversation and arrange the bag return.';
-    }
-  }
-
-  const senderName = getContextualSenderName(senderType, names, context);
-
-  if (context === 'follow-up') {
-    const bagType = lowercaseBagName(names.bagName);
-    return senderType === 'finder'
-      ? `${senderName} sent you another message about your ${bagType}. Click the secure link below to view the message and respond.`
-      : `${senderName} sent you a follow-up message. Click the secure link below to continue the conversation.`;
-  }
-
-  return `${senderName} replied to your message. Click the secure link below to continue the conversation.`;
-}
-
 export function getContextualReplyPlaceholder(
   recipientType: 'finder' | 'owner',
   names: NameInfo,
@@ -185,4 +158,31 @@ export function formatConversationParticipant(
   } else {
     return names.ownerName || 'Owner';
   }
+}
+
+export function getContextualDescription(
+  personalizationContext: PersonalizationContext,
+  names: NameInfo
+): string {
+  const { context, senderType } = personalizationContext;
+
+  if (context === 'initial') {
+    if (senderType === 'finder') {
+      const bagType = lowercaseBagName(names.bagName);
+      return `Great news! Someone found your ${bagType} and wants to return it. Click the secure link below to respond to the finder.`;
+    } else {
+      return 'The bag owner responded to your message. Click the secure link below to continue the conversation and arrange the bag return.';
+    }
+  }
+
+  const senderName = getContextualSenderName(senderType, names, context);
+
+  if (context === 'follow-up') {
+    const bagType = lowercaseBagName(names.bagName);
+    return senderType === 'finder'
+      ? `${senderName} sent you another message about your ${bagType}. Click the secure link below to view the message and respond.`
+      : `${senderName} sent you a follow-up message. Click the secure link below to continue the conversation.`;
+  }
+
+  return `${senderName} replied to your message. Click the secure link below to continue the conversation.`;
 }

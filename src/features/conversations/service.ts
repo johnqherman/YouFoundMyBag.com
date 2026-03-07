@@ -1,5 +1,3 @@
-import crypto from 'crypto';
-import { Request } from 'express';
 import { logger } from '../../infrastructure/logger/index.js';
 import {
   StartConversationRequest,
@@ -23,16 +21,10 @@ import {
   generateFinderMagicLinkToken,
 } from '../auth/service.js';
 import * as conversationRepository from './repository.js';
-import {
-  getContextualSubject,
-  getContextualSenderName,
-} from '../../infrastructure/utils/personalization.js';
-import {
-  PersonalizationContext,
-  NameInfo,
-} from '../../infrastructure/types/index.js';
+import { getContextualSenderName } from '../../infrastructure/utils/personalization.js';
+import { NameInfo } from '../../infrastructure/types/index.js';
 
-export function analyzeMessageContext(
+function analyzeMessageContext(
   messages: ConversationMessage[],
   currentSenderType: 'finder' | 'owner'
 ): MessageContextInfo {
@@ -70,51 +62,6 @@ export function analyzeMessageContext(
     hasRecipientReplied,
     lastSenderType,
   };
-}
-
-async function shouldSendNotification(
-  conversationId: string,
-  senderType: 'finder' | 'owner'
-): Promise<boolean> {
-  const counters =
-    await conversationRepository.getNotificationCounters(conversationId);
-
-  const recipientCounter =
-    senderType === 'finder'
-      ? counters.owner_notifications_sent
-      : counters.finder_notifications_sent;
-
-  return recipientCounter < 2;
-}
-
-export function getMessageContextLabel(
-  context: MessageContext,
-  senderType: 'finder' | 'owner',
-  viewerType: 'finder' | 'owner'
-): string {
-  const isOwnMessage = senderType === viewerType;
-
-  if (context === 'initial') {
-    return isOwnMessage ? 'Your initial message' : 'Initial contact';
-  } else if (context === 'follow-up') {
-    return isOwnMessage ? 'Your follow-up' : 'Follow-up message';
-  } else {
-    return isOwnMessage ? 'Your reply' : 'Reply';
-  }
-}
-
-export function getNotificationSubject(
-  context: MessageContext,
-  senderType: 'finder' | 'owner',
-  names: NameInfo
-): string {
-  const personalizationContext: PersonalizationContext = {
-    context,
-    senderType,
-    recipientType: senderType === 'finder' ? 'owner' : 'finder',
-  };
-
-  return getContextualSubject(personalizationContext, names);
 }
 
 export async function startConversation(
@@ -234,9 +181,14 @@ export async function sendReply(
     replyData.message_content
   );
 
-  const shouldNotify = await shouldSendNotification(conversationId, senderType);
+  const recipientType = senderType === 'finder' ? 'owner' : 'finder';
+  const notificationCount =
+    await conversationRepository.incrementNotificationCounter(
+      conversationId,
+      recipientType
+    );
 
-  if (shouldNotify) {
+  if (notificationCount <= 2) {
     try {
       const names: NameInfo = {
         ownerName: conversationThread.bag.owner_name,
@@ -280,12 +232,6 @@ export async function sendReply(
           });
         }
       }
-
-      const recipientType = senderType === 'finder' ? 'owner' : 'finder';
-      await conversationRepository.incrementNotificationCounter(
-        conversationId,
-        recipientType
-      );
 
       logger.info(
         `Contextual ${messageContext.context} notification sent for conversation ${conversationId}`
@@ -388,17 +334,6 @@ export async function resolveConversation(
       `Skipped conversation resolved notification for conversation ${conversationId} - no finder email`
     );
   }
-}
-
-export function getClientIpHash(
-  req: Pick<Request, 'ip'> & { connection?: { remoteAddress?: string } }
-): string {
-  const clientIp = req.ip || req.connection?.remoteAddress || 'unknown';
-  return crypto
-    .createHash('sha256')
-    .update(clientIp)
-    .digest('hex')
-    .substring(0, 16);
 }
 
 export async function archiveConversation(
