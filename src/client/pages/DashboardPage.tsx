@@ -463,7 +463,7 @@ export default function DashboardPage() {
                 </p>
               </div>
               {dashboardData.plan && (
-                <div className="flex items-center justify-between sm:justify-start sm:gap-2 w-full sm:w-auto">
+                <div className="flex items-center justify-between sm:justify-start sm:gap-4 w-full sm:w-auto">
                   <span
                     className={`badge ${
                       dashboardData.plan.plan === 'pro'
