@@ -447,7 +447,7 @@ export default function DashboardPage() {
       <section className="relative overflow-hidden">
         <QrGridPattern />
         <div className="absolute inset-0 bg-gradient-to-b from-regal-navy-100/60 to-regal-navy-50/0 pointer-events-none" />
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 pt-10 sm:pt-14 pb-10 sm:pb-14">
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 pt-10 sm:pt-14 pb-2 sm:pb-14">
           <div className="animate-slideUp">
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
               <div>
@@ -463,7 +463,7 @@ export default function DashboardPage() {
                 </p>
               </div>
               {dashboardData.plan && (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-between sm:justify-start sm:gap-2 w-full sm:w-auto">
                   <span
                     className={`badge ${
                       dashboardData.plan.plan === 'pro'
