@@ -268,6 +268,7 @@ export default function BrandedQRCode({
 }: BrandedQRCodeProps) {
   const imgRef = useRef<HTMLImageElement>(null);
   const blobUrlRef = useRef<string | null>(null);
+  const [ready, setReady] = useState(false);
 
   const debouncedColorStart = useDebounce(colorStart, 300);
   const debouncedColorEnd = useDebounce(colorEnd, 300);
@@ -276,6 +277,10 @@ export default function BrandedQRCode({
     let cancelled = false;
 
     async function init() {
+      if (!debouncedColorStart) {
+        await fetch('/qrcode-center.png').catch(() => {});
+      }
+
       const imageUrl = debouncedColorStart
         ? await applyGradientToLogo(
             debouncedColorStart,
@@ -302,7 +307,10 @@ export default function BrandedQRCode({
       if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
       blobUrlRef.current = newBlobUrl;
 
-      if (imgRef.current) imgRef.current.src = newBlobUrl;
+      if (imgRef.current) {
+        imgRef.current.src = newBlobUrl;
+        setReady(true);
+      }
 
       if (onInstanceReady) onInstanceReady(downloadQr);
     }
@@ -359,6 +367,7 @@ export default function BrandedQRCode({
         height={size}
         alt=""
         className="block"
+        style={{ display: ready ? 'block' : 'none' }}
         draggable
       />
     </div>
