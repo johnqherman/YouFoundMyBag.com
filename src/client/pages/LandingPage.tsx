@@ -490,7 +490,7 @@ export default function LandingPage() {
                 </h1>
                 <p className="mt-6 text-lg sm:text-xl text-regal-navy-600 max-w-xl leading-relaxed">
                   Attach a QR code to your bags and valuables. When someone
-                  finds them, they reach you securely, without ever seeing your
+                  finds them, they reach you securely without ever seeing your
                   personal information.
                 </p>
                 <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
