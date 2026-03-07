@@ -7,10 +7,19 @@ const DOWNLOAD_PADDING = 48;
 const DOWNLOAD_BORDER_RADIUS = 36;
 const DOWNLOAD_BORDER_COLOR = '#e2e8f0'; // slate-200
 
+async function loadImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
 async function buildBorderedBlob(
-  qrInstance: QRCodeStyling
+  qrInstance: QRCodeStyling,
+  centerImageUrl: string
 ): Promise<Blob | null> {
-  await new Promise((r) => setTimeout(r, 300));
   const rawData = await qrInstance.getRawData('png');
   if (!rawData) return null;
 
@@ -20,12 +29,10 @@ async function buildBorderedBlob(
       : new Blob([rawData as BlobPart], { type: 'image/png' });
   const objectUrl = URL.createObjectURL(srcBlob);
 
-  const img = new Image();
-  await new Promise<void>((resolve, reject) => {
-    img.onload = () => resolve();
-    img.onerror = reject;
-    img.src = objectUrl;
-  });
+  const [qrImg, centerImg] = await Promise.all([
+    loadImage(objectUrl),
+    loadImage(centerImageUrl),
+  ]);
   URL.revokeObjectURL(objectUrl);
 
   const totalSize = DOWNLOAD_SIZE + DOWNLOAD_PADDING * 2;
@@ -46,11 +53,22 @@ async function buildBorderedBlob(
   ctx.stroke();
 
   ctx.drawImage(
-    img,
+    qrImg,
     DOWNLOAD_PADDING,
     DOWNLOAD_PADDING,
     DOWNLOAD_SIZE,
     DOWNLOAD_SIZE
+  );
+
+  const logoSize = Math.round(DOWNLOAD_SIZE * 0.2);
+  const centerX = DOWNLOAD_PADDING + DOWNLOAD_SIZE / 2;
+  const centerY = DOWNLOAD_PADDING + DOWNLOAD_SIZE / 2;
+  ctx.drawImage(
+    centerImg,
+    centerX - logoSize / 2,
+    centerY - logoSize / 2,
+    logoSize,
+    logoSize
   );
 
   return new Promise((resolve) =>
@@ -228,9 +246,10 @@ export async function printQR(qrInstance: QRCodeStyling): Promise<void> {
 
 export async function downloadQRWithBorder(
   qrInstance: QRCodeStyling,
+  centerImageUrl: string,
   filename: string
 ) {
-  const blob = await buildBorderedBlob(qrInstance);
+  const blob = await buildBorderedBlob(qrInstance, centerImageUrl);
   if (!blob) return;
 
   const link = document.createElement('a');
@@ -246,7 +265,7 @@ interface BrandedQRCodeProps {
   className?: string;
   colorStart?: string;
   colorEnd?: string;
-  onInstanceReady?: (instance: QRCodeStyling) => void;
+  onInstanceReady?: (instance: QRCodeStyling, centerImageUrl: string) => void;
 }
 
 function useDebounce<T>(value: T, delay: number): T {
@@ -277,11 +296,7 @@ export default function BrandedQRCode({
     let cancelled = false;
 
     async function init() {
-      if (!debouncedColorStart) {
-        await fetch('/qrcode-center.png').catch(() => {});
-      }
-
-      const imageUrl = debouncedColorStart
+      const centerImageUrl = debouncedColorStart
         ? await applyGradientToLogo(
             debouncedColorStart,
             debouncedColorEnd ?? debouncedColorStart
@@ -296,11 +311,11 @@ export default function BrandedQRCode({
           DOWNLOAD_SIZE,
           debouncedColorStart,
           debouncedColorEnd,
-          imageUrl
+          centerImageUrl
         )
       );
 
-      const blob = await buildBorderedBlob(downloadQr);
+      const blob = await buildBorderedBlob(downloadQr, centerImageUrl);
       if (cancelled || !blob) return;
 
       const newBlobUrl = URL.createObjectURL(blob);
@@ -312,7 +327,7 @@ export default function BrandedQRCode({
         setReady(true);
       }
 
-      if (onInstanceReady) onInstanceReady(downloadQr);
+      if (onInstanceReady) onInstanceReady(downloadQr, centerImageUrl);
     }
 
     init();
@@ -333,7 +348,7 @@ export default function BrandedQRCode({
     const cb = onInstanceReady;
 
     async function refreshDownload() {
-      const imageUrl = debouncedColorStart
+      const centerImageUrl = debouncedColorStart
         ? await applyGradientToLogo(
             debouncedColorStart,
             debouncedColorEnd ?? debouncedColorStart
@@ -345,10 +360,10 @@ export default function BrandedQRCode({
           DOWNLOAD_SIZE,
           debouncedColorStart,
           debouncedColorEnd,
-          imageUrl
+          centerImageUrl
         )
       );
-      cb(downloadQr);
+      cb(downloadQr, centerImageUrl);
     }
 
     refreshDownload();

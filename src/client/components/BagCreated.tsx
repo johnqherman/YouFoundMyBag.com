@@ -22,10 +22,15 @@ export default function BagCreated({
 }: BagCreatedProps) {
   const [copied, setCopied] = useState(false);
   const qrInstanceRef = useRef<QRCodeStyling | null>(null);
+  const qrCenterImageUrlRef = useRef<string>('/qrcode-center.png');
 
-  const handleQRInstanceReady = useCallback((instance: QRCodeStyling) => {
-    qrInstanceRef.current = instance;
-  }, []);
+  const handleQRInstanceReady = useCallback(
+    (instance: QRCodeStyling, centerImageUrl: string) => {
+      qrInstanceRef.current = instance;
+      qrCenterImageUrlRef.current = centerImageUrl;
+    },
+    []
+  );
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -41,6 +46,7 @@ export default function BagCreated({
     if (qrInstanceRef.current) {
       downloadQRWithBorder(
         qrInstanceRef.current,
+        qrCenterImageUrlRef.current,
         `youfoundmybag-${bagData.data.short_id}`
       );
     }

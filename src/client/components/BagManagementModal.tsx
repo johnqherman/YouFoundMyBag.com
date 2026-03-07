@@ -249,9 +249,15 @@ export default function BagManagementModal({
     isDelete: false,
   });
 
-  const handleQRInstanceReady = useCallback((instance: QRCodeStyling) => {
-    qrInstanceRef.current = instance;
-  }, []);
+  const qrCenterImageUrlRef = useRef<string>('/qrcode-center.png');
+
+  const handleQRInstanceReady = useCallback(
+    (instance: QRCodeStyling, centerImageUrl: string) => {
+      qrInstanceRef.current = instance;
+      qrCenterImageUrlRef.current = centerImageUrl;
+    },
+    []
+  );
 
   const handleClose = useCallback(() => {
     setActiveSection('qr');
@@ -462,6 +468,7 @@ export default function BagManagementModal({
 
     await downloadQRWithBorder(
       qrInstanceRef.current,
+      qrCenterImageUrlRef.current,
       `youfoundmybag-${qrData.short_id}`
     );
 
