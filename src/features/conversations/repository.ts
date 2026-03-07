@@ -266,14 +266,14 @@ export async function getConversationsByOwnerEmail(
 
 export async function getConversationById(
   conversationId: string
-): Promise<ConversationThread | null> {
+): Promise<{ thread: ConversationThread; ownerEmail?: string } | null> {
   const cached = await cacheGet<CachedConversationThread>(
     `conversation:thread:${conversationId}`,
     'conversation_thread'
   );
   if (cached) {
     logger.debug('Conversation thread cache HIT', { conversationId });
-    return {
+    const thread = {
       ...cached,
       conversation: {
         ...cached.conversation,
@@ -286,6 +286,10 @@ export async function getConversationById(
         message_content: decryptMessageContent(msg.message_content),
       })),
     };
+    const ownerEmail = cached.bag.owner_email_encrypted
+      ? (decryptField(cached.bag.owner_email_encrypted) ?? undefined)
+      : undefined;
+    return { thread, ownerEmail };
   }
 
   const result = await pool.query(
@@ -341,6 +345,8 @@ export async function getConversationById(
     },
   };
 
+  const ownerEmail = decryptField(row.owner_email) ?? undefined;
+
   const cacheData = {
     conversation: {
       id: row.id,
@@ -359,6 +365,7 @@ export async function getConversationById(
       owner_name: row.owner_name_override ?? row.owner_name,
       bag_name: row.bag_name,
       status: row.bag_status,
+      owner_email_encrypted: row.owner_email ?? null,
     },
   };
 
@@ -372,7 +379,7 @@ export async function getConversationById(
     conversationId,
   });
 
-  return thread;
+  return { thread, ownerEmail };
 }
 
 export async function markMessagesAsRead(

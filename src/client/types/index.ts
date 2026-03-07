@@ -234,6 +234,7 @@ export interface CachedConversationThread {
     owner_name?: string;
     bag_name?: string;
     status: 'active' | 'disabled' | 'over_limit';
+    owner_email_encrypted?: string | null;
   };
 }
 

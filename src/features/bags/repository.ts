@@ -233,8 +233,8 @@ export async function updateBagAppearance(
     show_branding: boolean | null;
   }
 ): Promise<void> {
-  await pool.query(
-    'UPDATE bags SET tag_color_start = $1, tag_color_end = $2, show_branding = $3, updated_at = NOW() WHERE id = $4',
+  const result = await pool.query(
+    'UPDATE bags SET tag_color_start = $1, tag_color_end = $2, show_branding = $3, updated_at = NOW() WHERE id = $4 RETURNING short_id',
     [
       appearance.tag_color_start,
       appearance.tag_color_end,
@@ -243,12 +243,9 @@ export async function updateBagAppearance(
     ]
   );
 
-  const bag = await pool.query('SELECT short_id FROM bags WHERE id = $1', [
-    bagId,
-  ]);
-  if (bag.rows[0]) {
-    await cacheDel(`bag:short:${bag.rows[0].short_id}`, 'bag');
-    await cacheDel(`bag:finder:${bag.rows[0].short_id}`, 'bag_finder');
+  if (result.rows[0]) {
+    await cacheDel(`bag:short:${result.rows[0].short_id}`, 'bag');
+    await cacheDel(`bag:finder:${result.rows[0].short_id}`, 'bag_finder');
   }
 
   logger.info(`Updated appearance for bag ${bagId}`);
@@ -279,16 +276,13 @@ export async function updateBagOwnerNameOverride(
   bagId: string,
   ownerNameOverride: string | null
 ): Promise<void> {
-  await pool.query(
-    'UPDATE bags SET owner_name_override = $1, updated_at = NOW() WHERE id = $2',
+  const result = await pool.query(
+    'UPDATE bags SET owner_name_override = $1, updated_at = NOW() WHERE id = $2 RETURNING short_id',
     [ownerNameOverride || null, bagId]
   );
-  const bag = await pool.query('SELECT short_id FROM bags WHERE id = $1', [
-    bagId,
-  ]);
-  if (bag.rows[0]) {
-    await cacheDel(`bag:short:${bag.rows[0].short_id}`, 'bag');
-    await cacheDel(`bag:finder:${bag.rows[0].short_id}`, 'bag_finder');
+  if (result.rows[0]) {
+    await cacheDel(`bag:short:${result.rows[0].short_id}`, 'bag');
+    await cacheDel(`bag:finder:${result.rows[0].short_id}`, 'bag_finder');
   }
   logger.info(`Updated owner name override for bag ${bagId}`);
 }

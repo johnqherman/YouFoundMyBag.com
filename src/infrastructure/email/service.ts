@@ -382,7 +382,18 @@ export async function sendSystemUpdateEmail(
     preferencesUrl,
   });
 
-  await sendDirectEmail(email, params.subject, html, 'system update email');
+  const idempotencyKey = generateIdempotencyKey(
+    'system_update',
+    email,
+    params.subject
+  );
+  await queueEmail(
+    'system_update',
+    email,
+    params.subject,
+    html,
+    idempotencyKey
+  );
 }
 
 export async function sendBillingAlertEmail(

@@ -330,12 +330,9 @@ export async function handleWebhookEvent(event: Stripe.Event): Promise<void> {
       );
 
       if (updated) {
-        await billingRepository.lockExcessBagsForEmailHash(
+        await billingRepository.lockAndDowngradeBagsToFree(
           updated.owner_email_hash,
           FREE_PLAN.bagLimit
-        );
-        await billingRepository.stripProFeaturesForEmailHash(
-          updated.owner_email_hash
         );
         await invalidateCachesForEmail(updated.owner_email_hash);
         logger.info('Subscription deleted, reverted to free', {

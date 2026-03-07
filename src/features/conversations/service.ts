@@ -155,11 +155,12 @@ export async function sendReply(
   replyData: SendReplyRequest,
   senderType: 'finder' | 'owner'
 ): Promise<ConversationMessage> {
-  const conversationThread =
+  const result =
     await conversationRepository.getConversationById(conversationId);
-  if (!conversationThread) {
+  if (!result) {
     throw new Error('Conversation not found');
   }
+  const { thread: conversationThread, ownerEmail } = result;
 
   if (conversationThread.conversation.status === 'resolved') {
     throw new Error('Cannot send messages in a resolved conversation');
@@ -213,24 +214,21 @@ export async function sendReply(
           context: messageContext.context,
           names,
         });
-      } else if (senderType === 'finder') {
-        const bag = await getBagByShortId(conversationThread.bag.short_id);
-        if (bag?.owner_email) {
-          const senderName = getContextualSenderName(
-            senderType,
-            names,
-            messageContext.context
-          );
-          await queueContextualOwnerNotification({
-            ownerEmail: bag.owner_email,
-            senderName,
-            message: replyData.message_content,
-            conversationId,
-            bagIds: [bag.id],
-            context: messageContext.context,
-            names,
-          });
-        }
+      } else if (senderType === 'finder' && ownerEmail) {
+        const senderName = getContextualSenderName(
+          senderType,
+          names,
+          messageContext.context
+        );
+        await queueContextualOwnerNotification({
+          ownerEmail,
+          senderName,
+          message: replyData.message_content,
+          conversationId,
+          bagIds: [conversationThread.conversation.bag_id],
+          context: messageContext.context,
+          names,
+        });
       }
 
       logger.info(
@@ -264,13 +262,13 @@ export async function getConversationThread(
   viewerType: 'finder' | 'owner',
   viewerEmail?: string
 ): Promise<ConversationThread | null> {
-  const thread =
+  const result =
     await conversationRepository.getConversationById(conversationId);
-  if (!thread) return null;
+  if (!result) return null;
+  const { thread, ownerEmail } = result;
 
   if (viewerType === 'owner') {
-    const bag = await getBagByShortId(thread.bag.short_id);
-    if (!bag || bag.owner_email !== viewerEmail) {
+    if (ownerEmail !== viewerEmail) {
       throw new Error('Access denied');
     }
   } else if (viewerType === 'finder') {
@@ -291,14 +289,14 @@ export async function resolveConversation(
   conversationId: string,
   ownerEmail: string
 ): Promise<void> {
-  const thread =
+  const result =
     await conversationRepository.getConversationById(conversationId);
-  if (!thread) {
+  if (!result) {
     throw new Error('Conversation not found');
   }
+  const { thread, ownerEmail: threadOwnerEmail } = result;
 
-  const bag = await getBagByShortId(thread.bag.short_id);
-  if (!bag || bag.owner_email !== ownerEmail) {
+  if (threadOwnerEmail !== ownerEmail) {
     throw new Error('Access denied');
   }
 
@@ -340,14 +338,14 @@ export async function archiveConversation(
   conversationId: string,
   ownerEmail: string
 ): Promise<void> {
-  const thread =
+  const result =
     await conversationRepository.getConversationById(conversationId);
-  if (!thread) {
+  if (!result) {
     throw new Error('Conversation not found');
   }
+  const { thread, ownerEmail: threadOwnerEmail } = result;
 
-  const bag = await getBagByShortId(thread.bag.short_id);
-  if (!bag || bag.owner_email !== ownerEmail) {
+  if (threadOwnerEmail !== ownerEmail) {
     throw new Error('Access denied');
   }
 
@@ -362,14 +360,14 @@ export async function restoreConversation(
   conversationId: string,
   ownerEmail: string
 ): Promise<void> {
-  const thread =
+  const result =
     await conversationRepository.getConversationById(conversationId);
-  if (!thread) {
+  if (!result) {
     throw new Error('Conversation not found');
   }
+  const { thread, ownerEmail: threadOwnerEmail } = result;
 
-  const bag = await getBagByShortId(thread.bag.short_id);
-  if (!bag || bag.owner_email !== ownerEmail) {
+  if (threadOwnerEmail !== ownerEmail) {
     throw new Error('Access denied');
   }
 

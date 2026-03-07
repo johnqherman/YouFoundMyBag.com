@@ -10,7 +10,7 @@ import {
 } from './index.js';
 
 export async function processEmailJob(job: Job<EmailJobData>): Promise<void> {
-  const { to, subject, html, type, idempotencyKey } = job.data;
+  const { to, subject, html, type, idempotencyKey, replyTo, text } = job.data;
 
   logger.info('Processing email job', {
     jobId: job.id,
@@ -38,7 +38,13 @@ export async function processEmailJob(job: Job<EmailJobData>): Promise<void> {
   }
 
   try {
-    const sendPromise = sendMail({ to, subject, html });
+    const sendPromise = sendMail({
+      to,
+      subject,
+      html,
+      ...(replyTo && { replyTo }),
+      ...(text && { text }),
+    });
 
     const timeoutPromise = new Promise<never>((_, reject) => {
       setTimeout(

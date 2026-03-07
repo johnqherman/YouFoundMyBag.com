@@ -1,5 +1,6 @@
 import { logger } from '../logger/index.js';
 import { pool } from '../database/index.js';
+import { decryptField } from '../security/encryption.js';
 import {
   getOrCreatePreferences,
   markTermsVersionNotified,
@@ -14,7 +15,9 @@ async function getAllOwnerEmails(): Promise<string[]> {
   const result = await pool.query(
     'SELECT DISTINCT owner_email FROM bags WHERE owner_email IS NOT NULL'
   );
-  return result.rows.map((row: { owner_email: string }) => row.owner_email);
+  return result.rows
+    .map((row: { owner_email: string }) => decryptField(row.owner_email))
+    .filter((email): email is string => email !== null);
 }
 
 export async function runTosNotifications(): Promise<void> {

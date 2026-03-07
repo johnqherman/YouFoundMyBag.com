@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { logger } from '../../infrastructure/logger/index.js';
-import { sendMail } from '../../infrastructure/email/mailgun.js';
+import { addEmailJob } from '../../infrastructure/queue/index.js';
 import { config } from '../../infrastructure/config/index.js';
 import { emailSchema } from '../../infrastructure/utils/validation.js';
 import {
@@ -80,30 +80,31 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
   );
 
   try {
-    logger.info(
-      `Contact form submission from ${email}: attempting to send emails`
-    );
+    logger.info(`Contact form submission from ${email}: queuing emails`);
+    const timestamp = Date.now();
     await Promise.all([
-      sendMail({
+      addEmailJob({
+        type: 'contact_form',
         to: contactEmail,
-        from: config.EMAIL_FROM,
-        replyTo: email,
         subject: `[YouFoundMyBag Contact] ${subjectLabel}: from ${name}`,
         html: internalHtml,
+        replyTo: email,
         text: `Contact form submission\n\nName: ${name}\nEmail: ${email}\nSubject: ${subjectLabel}\n\nMessage:\n${message}`,
+        idempotencyKey: `contact_internal_${name}_${email}_${subject}_${timestamp}`,
       }),
-      sendMail({
+      addEmailJob({
+        type: 'contact_form',
         to: email,
-        from: config.EMAIL_CONTACT,
         subject: `We received your message – YouFoundMyBag`,
         html: confirmationHtml,
         text: `Thanks for reaching out, ${name}!\n\nWe've received your message and will get back to you within 1–2 business days.\n\nYour message:\nSubject: ${subjectLabel}\n\n${message}\n\nThe YouFoundMyBag team`,
+        idempotencyKey: `contact_confirmation_${name}_${email}_${subject}_${timestamp}`,
       }),
     ]);
 
     res.json({ success: true });
   } catch (error) {
-    logger.error('Error sending contact email:', error);
+    logger.error('Error queuing contact email:', error);
     res.status(500).json({
       error: 'send_failed',
       message: 'Failed to send your message. Please try again later.',

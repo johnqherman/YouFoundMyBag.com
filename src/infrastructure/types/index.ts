@@ -113,13 +113,16 @@ export interface EmailJobData {
     | 'system_update'
     | 'bag_created'
     | 'billing_alert'
-    | 'magic_link_reissue';
+    | 'magic_link_reissue'
+    | 'contact_form';
   to: string;
   subject: string;
   html: string;
   idempotencyKey: string;
   conversationId?: string;
   bagShortId?: string;
+  replyTo?: string;
+  text?: string;
 }
 
 export interface CircuitBreakerState {

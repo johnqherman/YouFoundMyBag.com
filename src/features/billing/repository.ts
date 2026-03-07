@@ -1,4 +1,5 @@
-import { pool } from '../../infrastructure/database/index.js';
+import { pool, withTransaction } from '../../infrastructure/database/index.js';
+import { decryptField } from '../../infrastructure/security/encryption.js';
 import {
   cacheGet,
   cacheSet,
@@ -169,7 +170,7 @@ export async function getEmailByEmailHash(
     'SELECT owner_email FROM bags WHERE owner_email_hash = $1 AND owner_email IS NOT NULL LIMIT 1',
     [emailHash]
   );
-  return result.rows[0]?.owner_email || null;
+  return decryptField(result.rows[0]?.owner_email) || null;
 }
 
 export async function getBagShortIdsForEmailHash(
@@ -227,4 +228,38 @@ export async function stripProFeaturesForEmailHash(
     [emailHash]
   );
   logger.info('Stripped Pro features from bags', { emailHash });
+}
+
+export async function lockAndDowngradeBagsToFree(
+  emailHash: string,
+  keepCount: number
+): Promise<void> {
+  await withTransaction(async (client) => {
+    await client.query(
+      `UPDATE bags SET status = 'over_limit'
+       WHERE owner_email_hash = $1
+         AND status = 'active'
+         AND id NOT IN (
+           SELECT id FROM bags
+           WHERE owner_email_hash = $1
+           ORDER BY created_at ASC
+           LIMIT $2
+         )`,
+      [emailHash, keepCount]
+    );
+    await client.query(
+      `UPDATE bags
+       SET owner_name_override = NULL,
+           tag_color_start      = NULL,
+           tag_color_end        = NULL,
+           show_branding        = NULL
+       WHERE owner_email_hash = $1
+         AND status != 'over_limit'`,
+      [emailHash]
+    );
+  });
+  logger.info('Locked excess bags and stripped Pro features atomically', {
+    emailHash,
+    keepCount,
+  });
 }
