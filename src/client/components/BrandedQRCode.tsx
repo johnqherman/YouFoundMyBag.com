@@ -10,6 +10,7 @@ const DOWNLOAD_BORDER_COLOR = '#e2e8f0'; // slate-200
 async function buildBorderedBlob(
   qrInstance: QRCodeStyling
 ): Promise<Blob | null> {
+  await new Promise((r) => setTimeout(r, 300));
   const rawData = await qrInstance.getRawData('png');
   if (!rawData) return null;
 
@@ -58,24 +59,6 @@ async function buildBorderedBlob(
 }
 
 const processedLogoCache = new Map<string, string>();
-
-async function loadLogoDataUrl(): Promise<string> {
-  const cacheKey = 'plain';
-  if (processedLogoCache.has(cacheKey))
-    return processedLogoCache.get(cacheKey)!;
-  const response = await fetch('/qrcode-center.png');
-  const blob = await response.blob();
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = reader.result as string;
-      processedLogoCache.set(cacheKey, dataUrl);
-      resolve(dataUrl);
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-}
 
 async function applyGradientToLogo(
   colorStart: string,
@@ -298,7 +281,7 @@ export default function BrandedQRCode({
             debouncedColorStart,
             debouncedColorEnd ?? debouncedColorStart
           )
-        : await loadLogoDataUrl();
+        : '/qrcode-center.png';
 
       if (cancelled) return;
 
@@ -347,7 +330,7 @@ export default function BrandedQRCode({
             debouncedColorStart,
             debouncedColorEnd ?? debouncedColorStart
           )
-        : await loadLogoDataUrl();
+        : '/qrcode-center.png';
       const downloadQr = new QRCodeStyling(
         getQrOptions(
           url,
