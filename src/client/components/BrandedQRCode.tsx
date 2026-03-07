@@ -59,6 +59,26 @@ async function buildBorderedBlob(
 
 const processedLogoCache = new Map<string, string>();
 
+async function loadLogoDataUrl(): Promise<string> {
+  const cacheKey = 'plain';
+  if (processedLogoCache.has(cacheKey))
+    return processedLogoCache.get(cacheKey)!;
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      canvas.getContext('2d')!.drawImage(img, 0, 0);
+      const dataUrl = canvas.toDataURL('image/png');
+      processedLogoCache.set(cacheKey, dataUrl);
+      resolve(dataUrl);
+    };
+    img.onerror = reject;
+    img.src = '/qrcode-center.png';
+  });
+}
+
 async function applyGradientToLogo(
   colorStart: string,
   colorEnd: string
@@ -280,7 +300,7 @@ export default function BrandedQRCode({
             debouncedColorStart,
             debouncedColorEnd ?? debouncedColorStart
           )
-        : '/qrcode-center.png';
+        : await loadLogoDataUrl();
 
       if (cancelled) return;
 
@@ -329,7 +349,7 @@ export default function BrandedQRCode({
             debouncedColorStart,
             debouncedColorEnd ?? debouncedColorStart
           )
-        : '/qrcode-center.png';
+        : await loadLogoDataUrl();
       const downloadQr = new QRCodeStyling(
         getQrOptions(
           url,
