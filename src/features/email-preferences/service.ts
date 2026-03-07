@@ -17,6 +17,7 @@ export async function getPreferences(token: string) {
     conversation_notifications_enabled:
       preferences.conversation_notifications_enabled,
     reply_notifications_enabled: preferences.reply_notifications_enabled,
+    system_updates_enabled: preferences.system_updates_enabled,
   };
 }
 
@@ -27,6 +28,7 @@ export async function updatePreferences(
     bag_created_enabled?: boolean;
     conversation_notifications_enabled?: boolean;
     reply_notifications_enabled?: boolean;
+    system_updates_enabled?: boolean;
   }
 ) {
   const preferences = await repository.updatePreferences(token, updates);
@@ -40,6 +42,7 @@ export async function updatePreferences(
     conversation_notifications_enabled:
       preferences.conversation_notifications_enabled,
     reply_notifications_enabled: preferences.reply_notifications_enabled,
+    system_updates_enabled: preferences.system_updates_enabled,
   };
 }
 
@@ -49,7 +52,13 @@ export async function unsubscribeAll(token: string) {
 
 export async function shouldSendEmail(
   email: string,
-  emailType: 'bag_created' | 'conversation_notification' | 'reply_notification'
+  emailType:
+    | 'bag_created'
+    | 'conversation_notification'
+    | 'reply_notification'
+    | 'system_update'
 ): Promise<boolean> {
   return repository.shouldSendEmail(email, emailType);
 }
+
+export { markTermsVersionNotified } from './repository.js';

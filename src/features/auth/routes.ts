@@ -148,7 +148,7 @@ router.get(
           owner_name?: string;
           owner_name_override?: string;
           bag_name?: string;
-          status: 'active' | 'disabled';
+          status: 'active' | 'disabled' | 'over_limit';
           created_at: string;
           conversations: ConversationThread[];
           conversation_count: number;

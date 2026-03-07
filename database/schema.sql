@@ -11,7 +11,7 @@ CREATE TABLE public.bags (
   secure_messaging_enabled BOOLEAN DEFAULT TRUE,
   opt_out_timestamp TIMESTAMP WITH TIME ZONE,
   opt_out_ip_address INET,
-  status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'disabled')),
+  status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'disabled', 'over_limit')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   last_name_update TIMESTAMP WITH TIME ZONE,
@@ -177,6 +177,8 @@ CREATE TABLE public.email_preferences (
   bag_created_enabled BOOLEAN DEFAULT TRUE,
   conversation_notifications_enabled BOOLEAN DEFAULT TRUE,
   reply_notifications_enabled BOOLEAN DEFAULT TRUE,
+  system_updates_enabled BOOLEAN DEFAULT TRUE,
+  terms_version_notified VARCHAR(20) DEFAULT NULL,
   unsubscribed_at TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -214,7 +216,9 @@ CREATE OR REPLACE FUNCTION update_email_preferences (
   p_update_all_emails BOOLEAN,
   p_update_bag_created BOOLEAN,
   p_update_conversation BOOLEAN,
-  p_update_reply BOOLEAN
+  p_update_reply BOOLEAN,
+  p_system_updates_enabled BOOLEAN,
+  p_update_system_updates BOOLEAN
 ) RETURNS TABLE (
   id UUID,
   email VARCHAR(254),
@@ -225,7 +229,9 @@ CREATE OR REPLACE FUNCTION update_email_preferences (
   reply_notifications_enabled BOOLEAN,
   unsubscribed_at TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE,
-  updated_at TIMESTAMP WITH TIME ZONE
+  updated_at TIMESTAMP WITH TIME ZONE,
+  system_updates_enabled BOOLEAN,
+  terms_version_notified VARCHAR(20)
 ) AS $$
 BEGIN
   RETURN QUERY
@@ -247,6 +253,10 @@ BEGIN
       WHEN p_update_reply THEN p_reply_notifications_enabled
       ELSE ep.reply_notifications_enabled
     END,
+    system_updates_enabled = CASE
+      WHEN p_update_system_updates THEN p_system_updates_enabled
+      ELSE ep.system_updates_enabled
+    END,
     unsubscribed_at = CASE
       WHEN p_update_all_emails AND NOT p_all_emails_enabled THEN NOW()
       WHEN p_update_all_emails AND p_all_emails_enabled THEN NULL
@@ -264,7 +274,9 @@ BEGIN
     ep.reply_notifications_enabled,
     ep.unsubscribed_at,
     ep.created_at,
-    ep.updated_at;
+    ep.updated_at,
+    ep.system_updates_enabled,
+    ep.terms_version_notified;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -826,7 +838,9 @@ CREATE OR REPLACE FUNCTION get_or_create_email_preferences (p_email VARCHAR(254)
   reply_notifications_enabled BOOLEAN,
   unsubscribed_at TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE,
-  updated_at TIMESTAMP WITH TIME ZONE
+  updated_at TIMESTAMP WITH TIME ZONE,
+  system_updates_enabled BOOLEAN,
+  terms_version_notified VARCHAR(20)
 ) AS $$
 #variable_conflict use_column
 BEGIN

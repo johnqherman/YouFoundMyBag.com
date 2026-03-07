@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { CURRENT_TERMS_VERSION } from '../constants/legalConstants.js';
 
 function Section({
   title,
@@ -42,7 +43,7 @@ export default function PrivacyPage() {
               Privacy Policy
             </h1>
             <p className="mt-5 text-lg text-regal-navy-600 max-w-2xl mx-auto leading-relaxed">
-              Last updated: March 4, 2026
+              Last updated: {CURRENT_TERMS_VERSION}
             </p>
           </div>
         </div>
@@ -56,7 +57,7 @@ export default function PrivacyPage() {
                 YouFoundMyBag.com is built on a privacy-first foundation. We do
                 not track your browsing behavior, sell your data, or use
                 advertising. We collect only the information necessary to
-                operate the Service — nothing more.
+                operate the Service, and nothing more.
               </p>
             </Section>
 
@@ -64,8 +65,8 @@ export default function PrivacyPage() {
               <p>
                 <strong className="text-regal-navy-800">Bag owners</strong> must
                 provide an email address to create an account. You may
-                optionally add additional contact channels — such as phone,
-                WhatsApp, Telegram, Signal, Instagram, or a secondary email — to
+                optionally add additional contact channels (such as phone,
+                WhatsApp, Telegram, Signal, Instagram, or a secondary email) to
                 make it easier for finders to reach you. This information is
                 stored securely and is only surfaced to finders in the context
                 of an active bag retrieval.

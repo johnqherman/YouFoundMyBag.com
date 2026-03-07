@@ -305,13 +305,13 @@ const features = [
     icon: <SecureIcon />,
     title: 'Privacy-first',
     description:
-      'Your personal information is never shared with finders. Communication happens through our secure relay — your email, phone, and identity stay hidden.',
+      'Your personal information is never shared with finders. Communication happens through our secure relay. Your email, phone, and identity stay hidden.',
   },
   {
     icon: <QRCodeIcon />,
     title: 'Instant QR scanning',
     description:
-      'Any smartphone camera can scan the code — no app download needed. Works offline too. Just point and connect.',
+      'Any smartphone camera can scan the code. No app download needed.',
   },
   {
     icon: <MessageIcon />,
@@ -384,7 +384,7 @@ function PrivacySection() {
             Built around your privacy
           </h2>
           <p className="mt-3 text-regal-navy-600 text-lg max-w-xl mx-auto">
-            Your security isn&apos;t a feature — it&apos;s the foundation.
+            Your security isn&apos;t a feature, it&apos;s the foundation.
           </p>
         </div>
         <div className="divide-y divide-regal-navy-200/60">
@@ -490,7 +490,7 @@ export default function LandingPage() {
                 </h1>
                 <p className="mt-6 text-lg sm:text-xl text-regal-navy-600 max-w-xl leading-relaxed">
                   Attach a QR code to your bags and valuables. When someone
-                  finds them, they reach you securely — without ever seeing your
+                  finds them, they reach you securely, without ever seeing your
                   personal information.
                 </p>
                 <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">

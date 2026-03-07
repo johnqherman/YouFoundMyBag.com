@@ -60,9 +60,7 @@ function PaymentForm({ billingPeriod, onSuccess, onClose }: PaymentFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <p className="text-regal-navy-400 text-sm mb-4">
-          Pro plan &mdash; {proPrice}
-        </p>
+        <p className="text-regal-navy-400 text-sm mb-4">Pro plan: {proPrice}</p>
         <div className="relative min-h-[268px]">
           {!ready && (
             <div className="flex flex-col gap-4">

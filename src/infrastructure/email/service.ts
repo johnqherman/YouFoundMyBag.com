@@ -9,6 +9,8 @@ import {
   buildConversationResolvedEmail,
   buildBagCreatedEmail,
   buildReissueEmail,
+  buildSystemUpdateEmail,
+  buildBillingAlertEmail,
 } from './templates.js';
 import { secureEmailContent } from '../security/sanitization.js';
 import { lowercaseBagName } from '../utils/formatting.js';
@@ -349,6 +351,70 @@ export async function sendBagCreated(params: BagCreatedParams): Promise<void> {
   });
 
   await sendDirectEmail(email, subject, html, 'bag created email');
+}
+
+export async function sendSystemUpdateEmail(
+  email: string,
+  params: {
+    title: string;
+    bodyHtml: string;
+    ctaUrl?: string;
+    ctaText?: string;
+    subject: string;
+  }
+): Promise<void> {
+  const canSend = await shouldSendEmail(email, 'system_update');
+  if (!canSend) {
+    logger.info(
+      `Skipping system update email to ${email} - user has disabled this notification`
+    );
+    return;
+  }
+
+  const { htmlFooter } = await getEmailFooter(email);
+  const preferencesUrl = htmlFooter.match(/href="([^"]+)"/)?.[1] || '';
+
+  const html = buildSystemUpdateEmail({
+    title: params.title,
+    bodyHtml: params.bodyHtml,
+    ctaUrl: params.ctaUrl,
+    ctaText: params.ctaText,
+    preferencesUrl,
+  });
+
+  await sendDirectEmail(email, params.subject, html, 'system update email');
+}
+
+export async function sendBillingAlertEmail(
+  email: string,
+  params: {
+    title: string;
+    bodyHtml: string;
+    ctaUrl?: string;
+    ctaText?: string;
+    subject: string;
+  }
+): Promise<void> {
+  const canSend = await shouldSendEmail(email, 'system_update');
+  if (!canSend) {
+    logger.info(
+      `Skipping billing alert email to ${email} - user has disabled this notification`
+    );
+    return;
+  }
+
+  const { htmlFooter } = await getEmailFooter(email);
+  const preferencesUrl = htmlFooter.match(/href="([^"]+)"/)?.[1] || '';
+
+  const html = buildBillingAlertEmail({
+    title: params.title,
+    bodyHtml: params.bodyHtml,
+    ctaUrl: params.ctaUrl,
+    ctaText: params.ctaText,
+    preferencesUrl,
+  });
+
+  await sendDirectEmail(email, params.subject, html, 'billing alert email');
 }
 
 export async function sendMagicLinkReissue(

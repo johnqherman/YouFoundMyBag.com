@@ -264,6 +264,35 @@ export default function EmailPreferencesPage() {
                   </div>
                 </div>
               </label>
+
+              <label
+                className={`flex items-start gap-3 cursor-pointer ${
+                  !preferences?.all_emails_enabled
+                    ? 'opacity-50 pointer-events-none'
+                    : ''
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={preferences?.system_updates_enabled ?? true}
+                  onChange={(e) =>
+                    savePreferences({
+                      system_updates_enabled: e.target.checked,
+                    })
+                  }
+                  disabled={saving || !preferences?.all_emails_enabled}
+                  className="mt-1 w-5 h-5 text-blue-600 border-regal-navy-300 rounded focus:ring-2 focus:ring-blue-500"
+                />
+                <div className="flex-1">
+                  <div className="font-medium text-regal-navy-900">
+                    System updates
+                  </div>
+                  <div className="text-sm text-regal-navy-600 mt-1">
+                    Occasional emails about your account, billing, and important
+                    service changes
+                  </div>
+                </div>
+              </label>
             </div>
 
             <div className="pt-6 border-t border-regal-navy-200">

@@ -243,6 +243,40 @@ export function buildBagCreatedEmail(params: BagCreatedEmailParams): string {
   );
 }
 
+export function buildSystemUpdateEmail(params: {
+  title: string;
+  bodyHtml: string;
+  ctaUrl?: string;
+  ctaText?: string;
+  preferencesUrl: string;
+}): string {
+  return emailContainer(
+    emailHeader(params.title) +
+      params.bodyHtml +
+      (params.ctaUrl && params.ctaText
+        ? emailButton(params.ctaUrl, params.ctaText)
+        : '') +
+      emailFooter(params.preferencesUrl)
+  );
+}
+
+export function buildBillingAlertEmail(params: {
+  title: string;
+  bodyHtml: string;
+  ctaUrl?: string;
+  ctaText?: string;
+  preferencesUrl: string;
+}): string {
+  return emailContainer(
+    emailHeader(params.title) +
+      params.bodyHtml +
+      (params.ctaUrl && params.ctaText
+        ? emailButton(params.ctaUrl, params.ctaText)
+        : '') +
+      emailFooter(params.preferencesUrl)
+  );
+}
+
 export function buildReissueEmail(params: ReissueEmailParams): string {
   return emailContainer(
     emailHeader(params.title) +

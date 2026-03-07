@@ -9,9 +9,8 @@ import PaymentModal from '../components/PaymentModal.js';
 
 const freeFeatures = [
   { text: '1 active QR tag', included: true },
-  { text: 'Anonymous two-way messaging', included: true },
-  { text: 'Instant email notifications', included: true },
   { text: 'Privacy-protected contact relay', included: true },
+  { text: 'Instant email notifications', included: true },
   { text: 'Basic QR code design', included: true },
 ];
 
@@ -434,7 +433,7 @@ export default function PricingPage() {
             Protect what matters to you.
           </h2>
           <p className="mt-5 text-regal-navy-600 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
-            Create your first QR tag in seconds — no account required. Your
+            Create your first QR tag in seconds. No account required. Your
             personal information is never shared with finders.
           </p>
           <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">

@@ -115,7 +115,7 @@ export interface ConversationThread {
     short_id: string;
     owner_name?: string;
     bag_name?: string;
-    status: 'active' | 'disabled';
+    status: 'active' | 'disabled' | 'over_limit';
   };
 }
 
@@ -125,7 +125,7 @@ export interface OwnerDashboard {
     short_id: string;
     owner_name?: string;
     bag_name?: string;
-    status: 'active' | 'disabled';
+    status: 'active' | 'disabled' | 'over_limit';
     created_at: string;
     conversation_count: number;
     latest_conversation?: string;
@@ -170,7 +170,7 @@ export interface BagData {
   owner_message?: string;
   owner_email?: string;
   secure_messaging_enabled: boolean;
-  status: 'active' | 'disabled';
+  status: 'active' | 'disabled' | 'over_limit';
   created_at: string;
   updated_at: string;
   tag_color_start?: string | null;
@@ -186,7 +186,7 @@ export interface CachedBag {
   owner_message?: string;
   owner_email?: string;
   secure_messaging_enabled: boolean;
-  status: 'active' | 'disabled';
+  status: 'active' | 'disabled' | 'over_limit';
   created_at: Date;
   updated_at: Date;
   tag_color_start?: string | null;
@@ -231,7 +231,7 @@ export interface CachedConversationThread {
     short_id: string;
     owner_name?: string;
     bag_name?: string;
-    status: 'active' | 'disabled';
+    status: 'active' | 'disabled' | 'over_limit';
   };
 }
 
@@ -265,7 +265,7 @@ export interface DashboardData {
     owner_name?: string;
     owner_name_override?: string;
     bag_name?: string;
-    status: 'active' | 'disabled';
+    status: 'active' | 'disabled' | 'over_limit';
     created_at: string;
     conversation_count: number;
     unread_count: number;
@@ -281,6 +281,7 @@ export interface EmailPreferences {
   bag_created_enabled: boolean;
   conversation_notifications_enabled: boolean;
   reply_notifications_enabled: boolean;
+  system_updates_enabled: boolean;
 }
 
 export interface QRCodeData {
@@ -413,7 +414,7 @@ export interface BagManagementModalProps {
     owner_name?: string;
     owner_name_override?: string;
     bag_name?: string;
-    status: 'active' | 'disabled';
+    status: 'active' | 'disabled' | 'over_limit';
     owner_email?: string;
     conversation_count?: number;
   };

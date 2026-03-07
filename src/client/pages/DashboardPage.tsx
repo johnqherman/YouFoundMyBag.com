@@ -213,7 +213,7 @@ export default function DashboardPage() {
     owner_name?: string;
     owner_name_override?: string;
     bag_name?: string;
-    status: 'active' | 'disabled';
+    status: 'active' | 'disabled' | 'over_limit';
     owner_email?: string;
     conversation_count?: number;
   } | null>(null);
@@ -580,7 +580,9 @@ export default function DashboardPage() {
                         className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${
                           bag.status === 'active'
                             ? 'bg-medium-jungle-500'
-                            : 'bg-regal-navy-300'
+                            : bag.status === 'over_limit'
+                              ? 'bg-amber-400'
+                              : 'bg-regal-navy-300'
                         }`}
                       />
                       <div className="flex-1 min-w-0">

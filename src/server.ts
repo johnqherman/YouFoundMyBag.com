@@ -7,6 +7,7 @@ import { initializeDatabase } from './infrastructure/database/index.js';
 import { initializeCache, closeCache } from './infrastructure/cache/index.js';
 import { startBackgroundJobs } from './infrastructure/cache/sync-jobs.js';
 import { scheduleConversationCleanup } from './infrastructure/scheduler/conversationCleanup.js';
+import { runTosNotifications } from './infrastructure/scheduler/tosNotification.js';
 import {
   initializeQueues,
   initializeWorkers,
@@ -25,6 +26,7 @@ import { authRoutes } from './features/auth/routes.js';
 import { default as emailPreferencesRoutes } from './features/email-preferences/routes.js';
 import { billingRoutes, webhookHandler } from './features/billing/routes.js';
 import contactRoutes from './features/contact/routes.js';
+import { TIME_MS as t } from 'client/constants/timeConstants.js';
 
 const app = express();
 
@@ -139,6 +141,12 @@ async function startServer() {
       );
       logger.info(`Redis cache: ${config.REDIS_HOST}:${config.REDIS_PORT}`);
       logger.info('BullMQ queues and workers initialized');
+
+      setTimeout(() => {
+        runTosNotifications().catch((err) =>
+          logger.error('ToS notification task failed', { err })
+        );
+      }, t.TEN_SECONDS);
     });
   } catch (error) {
     logger.error('Failed to start server:', error);

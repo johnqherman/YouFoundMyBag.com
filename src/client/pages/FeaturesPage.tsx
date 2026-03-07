@@ -55,7 +55,7 @@ const qrFeatures = [
     icon: <CameraScanIcon />,
     title: 'Any smartphone works',
     description:
-      'Any modern smartphone camera can scan the code — iPhone, Android, no special app required.',
+      'Any modern smartphone camera can scan the code, no special app required.',
   },
   {
     icon: <FingerprintIcon />,
@@ -87,7 +87,7 @@ const privacyFeatures = [
 const messagingFeatures = [
   'Finders start the conversation just by scanning your tag',
   'Private two-way conversations with the finder',
-  'One-click sign in — no passwords to remember',
+  'One-click sign in, no passwords to remember',
   'Know when your message has been seen',
   'Mark conversations as resolved when your item is back',
   'Instant alerts for new messages and follow-ups',
@@ -113,7 +113,7 @@ const dashboardFeatures: { text: string; pro?: boolean }[] = [
 
 const emailFeatures = [
   'Instant alerts when someone finds your item',
-  'Magic link access — one click to respond',
+  'Magic link access: one click to respond',
   'Granular email preferences',
   'Unsubscribe anytime',
 ];
@@ -415,7 +415,7 @@ export default function FeaturesPage() {
             </h1>
             <p className="mt-5 text-lg text-regal-navy-600 max-w-2xl mx-auto leading-relaxed">
               Create a tag in seconds, get notified instantly, and communicate
-              with finders — without ever exposing your personal information.
+              with finders, without ever exposing your personal information.
             </p>
           </div>
         </div>
@@ -465,7 +465,7 @@ export default function FeaturesPage() {
               Privacy &amp; security at every layer
             </h2>
             <p className="mt-3 text-regal-navy-600 text-lg max-w-xl mx-auto">
-              Your security isn&apos;t a feature — it&apos;s the foundation
+              Your security isn&apos;t a feature, it&apos;s the foundation
               everything is built on.
             </p>
           </div>
@@ -532,7 +532,7 @@ export default function FeaturesPage() {
               Stay reachable. Stay anonymous.
             </h2>
             <p className="mt-3 text-regal-navy-600 text-lg max-w-xl mx-auto">
-              When someone finds your bag, they can message you directly — no
+              When someone finds your bag, they can message you directly. No
               phone number, no email, no personal details ever shared.
             </p>
           </div>
@@ -553,7 +553,7 @@ export default function FeaturesPage() {
                     </span>
                   </div>
                   <p className="text-sm text-medium-jungle-800 leading-relaxed">
-                    A finder scans your tag and starts a conversation — you
+                    A finder scans your tag and starts a conversation; you
                     respond from your dashboard. Both sides stay fully anonymous
                     throughout.
                   </p>
@@ -608,7 +608,7 @@ export default function FeaturesPage() {
           <div className="flex items-center gap-4 my-10 max-w-3xl mx-auto">
             <div className="flex-1 h-px bg-regal-navy-200/60" />
             <p className="text-xs font-medium tracking-widest uppercase text-regal-navy-400 whitespace-nowrap">
-              Or share a direct contact — your info will be visible to finders
+              Or share a direct contact - your info will be visible to finders
             </p>
             <div className="flex-1 h-px bg-regal-navy-200/60" />
           </div>
@@ -650,8 +650,8 @@ export default function FeaturesPage() {
                 Dashboard &amp; management
               </h2>
               <p className="mt-3 text-regal-navy-600 text-base leading-relaxed">
-                All your tags and conversations in one place — simple to manage,
-                always under your control.
+                All your tags and conversations in one place, simple to manage
+                and always under your control.
               </p>
             </div>
             <div className="lg:w-3/5">
@@ -770,7 +770,7 @@ export default function FeaturesPage() {
             Ready to protect what matters?
           </h2>
           <p className="mt-5 text-regal-navy-600 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
-            Create your first QR tag in seconds — no account required. Your
+            Create your first QR tag in seconds. No account required. Your
             personal information is never shared with finders.
           </p>
           <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">

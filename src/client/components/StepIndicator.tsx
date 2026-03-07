@@ -13,7 +13,7 @@ export default function StepIndicator({
         </span>
         <span className="text-sm text-regal-navy-500">
           {' '}
-          — {stepNames[currentStep - 1]}
+          : {stepNames[currentStep - 1]}
         </span>
       </div>
 
@@ -54,7 +54,9 @@ export default function StepIndicator({
                   />
                 </div>
 
-                <div className="hidden sm:block absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2.5 py-1 bg-regal-navy-900 text-white text-xs rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none shadow-soft-md">
+                <div
+                  className={`hidden sm:block absolute top-full mt-2 px-2.5 py-1 bg-regal-navy-900 text-white text-xs rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none shadow-soft-md ${index === 0 ? 'left-0' : index === stepNames.length - 1 ? 'right-0' : 'left-1/2 -translate-x-1/2'}`}
+                >
                   {name}
                 </div>
               </div>

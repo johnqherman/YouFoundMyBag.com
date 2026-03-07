@@ -106,7 +106,11 @@ export interface NameInfo {
 }
 
 export interface EmailJobData {
-  type: 'magic_link_owner' | 'magic_link_finder' | 'new_message_notification';
+  type:
+    | 'magic_link_owner'
+    | 'magic_link_finder'
+    | 'new_message_notification'
+    | 'system_update';
   to: string;
   subject: string;
   html: string;

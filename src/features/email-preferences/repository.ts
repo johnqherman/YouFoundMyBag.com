@@ -45,20 +45,22 @@ export async function updatePreferences(
     bag_created_enabled?: boolean;
     conversation_notifications_enabled?: boolean;
     reply_notifications_enabled?: boolean;
+    system_updates_enabled?: boolean;
   }
 ): Promise<EmailPreferences | null> {
   const hasUpdates =
     updates.all_emails_enabled !== undefined ||
     updates.bag_created_enabled !== undefined ||
     updates.conversation_notifications_enabled !== undefined ||
-    updates.reply_notifications_enabled !== undefined;
+    updates.reply_notifications_enabled !== undefined ||
+    updates.system_updates_enabled !== undefined;
 
   if (!hasUpdates) {
     return getPreferencesByToken(token);
   }
 
   const result = await pool.query(
-    'SELECT * FROM update_email_preferences($1, $2, $3, $4, $5, $6, $7, $8, $9)',
+    'SELECT * FROM update_email_preferences($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)',
     [
       token,
       updates.all_emails_enabled ?? false,
@@ -69,6 +71,8 @@ export async function updatePreferences(
       updates.bag_created_enabled !== undefined,
       updates.conversation_notifications_enabled !== undefined,
       updates.reply_notifications_enabled !== undefined,
+      updates.system_updates_enabled ?? false,
+      updates.system_updates_enabled !== undefined,
     ]
   );
 
@@ -84,9 +88,23 @@ export async function updatePreferences(
   return preferences;
 }
 
+export async function markTermsVersionNotified(
+  email: string,
+  version: string
+): Promise<void> {
+  await pool.query(
+    'UPDATE email_preferences SET terms_version_notified = $1 WHERE email = $2',
+    [version, email]
+  );
+}
+
 export async function shouldSendEmail(
   email: string,
-  emailType: 'bag_created' | 'conversation_notification' | 'reply_notification'
+  emailType:
+    | 'bag_created'
+    | 'conversation_notification'
+    | 'reply_notification'
+    | 'system_update'
 ): Promise<boolean> {
   let preferences: EmailPreferences | null = null;
 
@@ -128,6 +146,8 @@ export async function shouldSendEmail(
       return preferences.conversation_notifications_enabled;
     case 'reply_notification':
       return preferences.reply_notifications_enabled;
+    case 'system_update':
+      return preferences.system_updates_enabled;
     default:
       return true;
   }

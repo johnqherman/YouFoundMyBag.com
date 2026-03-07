@@ -4,6 +4,8 @@ import { logger } from '../../infrastructure/logger/index.js';
 import { hashForLookup } from '../../infrastructure/security/encryption.js';
 import { cacheDel } from '../../infrastructure/cache/index.js';
 import * as billingRepository from './repository.js';
+import { sendBillingAlertEmail } from '../../infrastructure/email/service.js';
+import { emailParagraph } from '../../infrastructure/email/templates.js';
 
 const stripe = config.STRIPE_SECRET_KEY
   ? new Stripe(config.STRIPE_SECRET_KEY)
@@ -266,6 +268,7 @@ export async function handleWebhookEvent(event: Stripe.Event): Promise<void> {
         status: 'active',
       });
 
+      await billingRepository.unlockOverLimitBagsForEmailHash(emailHash);
       await invalidateCachesForEmail(emailHash);
       logger.info('Checkout completed, plan set to pro', { emailHash });
       await notifyDiscord(
@@ -327,13 +330,41 @@ export async function handleWebhookEvent(event: Stripe.Event): Promise<void> {
       );
 
       if (updated) {
+        await billingRepository.lockExcessBagsForEmailHash(
+          updated.owner_email_hash,
+          FREE_PLAN.bagLimit
+        );
+        await billingRepository.stripProFeaturesForEmailHash(
+          updated.owner_email_hash
+        );
         await invalidateCachesForEmail(updated.owner_email_hash);
         logger.info('Subscription deleted, reverted to free', {
           subscriptionId: subscription.id,
         });
         await notifyDiscord(
-          `**Subscription canceled** \`${subscription.id}\` — reverted to free plan.`
+          `**Subscription canceled** \`${subscription.id}\` - reverted to free plan.`
         );
+
+        const email = await billingRepository.getEmailByEmailHash(
+          updated.owner_email_hash
+        );
+        if (email) {
+          await sendBillingAlertEmail(email, {
+            subject: 'Your YouFoundMyBag Pro subscription has been cancelled',
+            title: 'Subscription Cancelled',
+            bodyHtml:
+              emailParagraph(
+                "Your YouFoundMyBag Pro subscription has been cancelled. You've been moved back to the free plan."
+              ) +
+              emailParagraph(
+                "You can continue to use YouFoundMyBag for free with up to 1 bag tag. If you'd like to resubscribe to Pro and manage multiple bags, visit our pricing page."
+              ),
+            ctaUrl: `${config.FRONTEND_URL}/pricing`,
+            ctaText: 'View Pricing',
+          }).catch((err) =>
+            logger.error('Failed to send subscription cancelled email', { err })
+          );
+        }
       }
       break;
     }
@@ -359,8 +390,29 @@ export async function handleWebhookEvent(event: Stripe.Event): Promise<void> {
             subscriptionId,
           });
           await notifyDiscord(
-            `**Payment failed** for subscription \`${subscriptionId}\` — marked past_due.`
+            `**Payment failed** for subscription \`${subscriptionId}\` - marked past_due.`
           );
+
+          const email = await billingRepository.getEmailByEmailHash(
+            updated.owner_email_hash
+          );
+          if (email) {
+            await sendBillingAlertEmail(email, {
+              subject: 'Action required: Payment failed for YouFoundMyBag Pro',
+              title: 'Payment Failed',
+              bodyHtml:
+                emailParagraph(
+                  'We were unable to process your payment for YouFoundMyBag Pro. Your subscription is now past due.'
+                ) +
+                emailParagraph(
+                  'Please update your payment method to keep your Pro features active. If payment is not resolved, your subscription may be cancelled.'
+                ),
+              ctaUrl: `${config.FRONTEND_URL}/dashboard`,
+              ctaText: 'Update Payment Method',
+            }).catch((err) =>
+              logger.error('Failed to send payment failed email', { err })
+            );
+          }
         }
       }
       break;

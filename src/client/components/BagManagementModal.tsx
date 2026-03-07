@@ -175,7 +175,10 @@ export default function BagManagementModal({
   const isFree = !planInfo || planInfo.plan === 'free';
   const [activeSection, setActiveSection] = useState<SectionId>('qr');
   const [loading, setLoading] = useState(false);
-  const [bagStatus, setBagStatus] = useState<'active' | 'disabled'>(bag.status);
+  const [bagStatus, setBagStatus] = useState<
+    'active' | 'disabled' | 'over_limit'
+  >(bag.status);
+  const isOverLimit = bag.status === 'over_limit';
 
   useEffect(() => {
     setBagStatus(bag.status);
@@ -951,7 +954,7 @@ export default function BagManagementModal({
                                   : startTooLight
                                     ? 'Start color is too light'
                                     : 'End color is too light'}{' '}
-                                — low contrast on white may cause scan failures.
+                                - low contrast on white may cause scan failures.
                                 Use darker shades.
                               </p>
                             )}
@@ -1081,8 +1084,8 @@ export default function BagManagementModal({
                 </label>
                 {isFree ? (
                   <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-600 text-sm">
-                    Set a different name per bag — perfect for families.
-                    Requires Pro.{' '}
+                    Set a different name per bag. Perfect for families. Requires
+                    Pro.{' '}
                     <a
                       href="/pricing"
                       className="font-medium text-regal-navy-700 hover:text-regal-navy-900 underline underline-offset-2"
@@ -1283,31 +1286,39 @@ export default function BagManagementModal({
 
             <div className="space-y-4 sm:space-y-6">
               <div
-                className={`border-2 rounded-2xl p-6 ${bagStatus === 'active' ? 'bg-medium-jungle-50 border-medium-jungle-200' : 'bg-slate-50 border-slate-200'}`}
+                className={`border-2 rounded-2xl p-6 ${bagStatus === 'active' ? 'bg-medium-jungle-50 border-medium-jungle-200' : bagStatus === 'over_limit' ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-200'}`}
               >
                 <div className="flex items-center gap-4">
                   <div
-                    className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${bagStatus === 'active' ? 'bg-medium-jungle-100 text-medium-jungle-700' : 'bg-slate-200 text-slate-500'}`}
+                    className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${bagStatus === 'active' ? 'bg-medium-jungle-100 text-medium-jungle-700' : bagStatus === 'over_limit' ? 'bg-amber-100 text-amber-700' : 'bg-slate-200 text-slate-500'}`}
                   >
                     <StatusIcon color="currentColor" />
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-1">
                       <h3 className="text-xl font-bold text-slate-900">
-                        {bagStatus === 'active' ? 'Active' : 'Disabled'}
+                        {bagStatus === 'active'
+                          ? 'Active'
+                          : bagStatus === 'over_limit'
+                            ? 'Locked'
+                            : 'Disabled'}
                       </h3>
                       <span
-                        className={`badge ${bagStatus === 'active' ? 'badge-success' : 'badge-neutral'}`}
+                        className={`badge ${bagStatus === 'active' ? 'badge-success' : bagStatus === 'over_limit' ? 'badge-warning' : 'badge-neutral'}`}
                       >
                         {bagStatus === 'active'
                           ? 'Accepting messages'
-                          : 'Paused'}
+                          : bagStatus === 'over_limit'
+                            ? 'Plan limit exceeded'
+                            : 'Paused'}
                       </span>
                     </div>
                     <p className="text-sm text-slate-600">
                       {bagStatus === 'active'
                         ? 'Finders who scan your QR code can send you a message.'
-                        : 'Finders see a disabled notice and cannot message you.'}
+                        : bagStatus === 'over_limit'
+                          ? 'This bag is locked. Resubscribe to Pro to reactivate it.'
+                          : 'Finders see a disabled notice and cannot message you.'}
                     </p>
                   </div>
                 </div>
@@ -1317,10 +1328,48 @@ export default function BagManagementModal({
                 <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">
                   {bagStatus === 'active'
                     ? 'Disabling will'
-                    : 'Re-enabling will'}
+                    : bagStatus === 'over_limit'
+                      ? 'While locked'
+                      : 'Re-enabling will'}
                 </h3>
                 <div className="divide-y divide-slate-100">
-                  {bagStatus === 'active' ? (
+                  {bagStatus === 'over_limit' ? (
+                    <>
+                      <div className="flex items-start gap-3 py-3 first:pt-0">
+                        <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
+                          <AlertIcon
+                            color="currentColor"
+                            className="text-amber-700"
+                          />
+                        </div>
+                        <div className="flex-1 pt-0.5">
+                          <p className="text-sm font-medium text-slate-800">
+                            Finders cannot contact you
+                          </p>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            New contact attempts on this bag are blocked.
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3 py-3 last:pb-0">
+                        <div className="w-8 h-8 rounded-lg bg-regal-navy-100 flex items-center justify-center shrink-0">
+                          <BagIcon
+                            color="currentColor"
+                            className="text-regal-navy-700"
+                          />
+                        </div>
+                        <div className="flex-1 pt-0.5">
+                          <p className="text-sm font-medium text-slate-800">
+                            Editing is disabled
+                          </p>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            Resubscribe to Pro to edit this bag and restore
+                            access.
+                          </p>
+                        </div>
+                      </div>
+                    </>
+                  ) : bagStatus === 'active' ? (
                     <>
                       <div className="flex items-start gap-3 py-3 first:pt-0">
                         <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
@@ -1432,16 +1481,25 @@ export default function BagManagementModal({
                 </div>
               </div>
 
-              <button
-                onClick={() => setConfirmStatusToggle(true)}
-                className={`w-full px-6 py-4 font-semibold rounded-xl transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 ${
-                  bagStatus === 'active'
-                    ? 'bg-saffron-400 hover:bg-saffron-500 border border-saffron-600 text-saffron-950'
-                    : 'bg-regal-navy-600 hover:bg-regal-navy-700 text-white'
-                }`}
-              >
-                {bagStatus === 'active' ? 'Disable Bag' : 'Enable Bag'}
-              </button>
+              {bagStatus === 'over_limit' ? (
+                <a
+                  href="/pricing"
+                  className="block w-full px-6 py-4 font-semibold rounded-xl text-center bg-regal-navy-600 hover:bg-regal-navy-700 text-white transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
+                >
+                  Upgrade to Pro to Reactivate
+                </a>
+              ) : (
+                <button
+                  onClick={() => setConfirmStatusToggle(true)}
+                  className={`w-full px-6 py-4 font-semibold rounded-xl transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 ${
+                    bagStatus === 'active'
+                      ? 'bg-saffron-400 hover:bg-saffron-500 border border-saffron-600 text-saffron-950'
+                      : 'bg-regal-navy-600 hover:bg-regal-navy-700 text-white'
+                  }`}
+                >
+                  {bagStatus === 'active' ? 'Disable Bag' : 'Enable Bag'}
+                </button>
+              )}
             </div>
           </div>
         );
@@ -2264,8 +2322,8 @@ export default function BagManagementModal({
                         All conversations
                       </p>
                       <p className="text-xs text-cinnabar-700 mt-0.5">
-                        Every thread — active, resolved, and archived — is
-                        removed permanently.
+                        Every thread (active, resolved, and archived) is removed
+                        permanently.
                       </p>
                     </div>
                   </div>
@@ -2540,6 +2598,31 @@ export default function BagManagementModal({
                 />
               </svg>
             </button>
+
+            {isOverLimit && (
+              <div className="mb-6 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+                <AlertIcon
+                  color="currentColor"
+                  className="mt-0.5 shrink-0 text-amber-600"
+                />
+                <div>
+                  <p className="text-sm font-semibold text-amber-900">
+                    Bag locked: plan limit exceeded
+                  </p>
+                  <p className="text-xs text-amber-700 mt-0.5">
+                    This bag is locked because you have more bags than your
+                    current plan allows.{' '}
+                    <a
+                      href="/pricing"
+                      className="underline hover:text-amber-900"
+                    >
+                      Upgrade to Pro
+                    </a>{' '}
+                    to reactivate it.
+                  </p>
+                </div>
+              </div>
+            )}
 
             <AnimatePresence mode="wait">
               <motion.div

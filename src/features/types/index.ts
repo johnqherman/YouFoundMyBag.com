@@ -9,7 +9,7 @@ export interface Bag {
   secure_messaging_enabled: boolean;
   opt_out_timestamp?: Date;
   opt_out_ip_address?: string;
-  status: 'active' | 'disabled';
+  status: 'active' | 'disabled' | 'over_limit';
   created_at: Date;
   updated_at: Date;
   tag_color_start?: string | null;
@@ -61,6 +61,8 @@ export interface EmailPreferences {
   bag_created_enabled: boolean;
   conversation_notifications_enabled: boolean;
   reply_notifications_enabled: boolean;
+  system_updates_enabled: boolean;
+  terms_version_notified: string | null;
   unsubscribed_at: Date | null;
   created_at: Date;
   updated_at: Date;

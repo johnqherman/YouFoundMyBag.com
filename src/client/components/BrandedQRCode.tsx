@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import QRCodeStyling, { Options } from 'qr-code-styling';
+import { TIME_MS as t } from 'client/constants/timeConstants';
 
 const DOWNLOAD_SIZE = 1024;
 const DOWNLOAD_PADDING = 48;
@@ -235,7 +236,7 @@ export async function downloadQRWithBorder(
   link.download = `${filename}.png`;
   link.href = URL.createObjectURL(blob);
   link.click();
-  setTimeout(() => URL.revokeObjectURL(link.href), 10000);
+  setTimeout(() => URL.revokeObjectURL(link.href), t.TEN_SECONDS);
 }
 
 interface BrandedQRCodeProps {

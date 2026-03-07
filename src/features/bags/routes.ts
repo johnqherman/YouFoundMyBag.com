@@ -229,6 +229,12 @@ router.post(
       }
 
       const authReq = req as AuthenticatedRequest;
+      if (authReq.bag?.status === 'over_limit') {
+        res.status(403).json({
+          error: 'This bag is locked. Resubscribe to Pro to regain access.',
+        });
+        return;
+      }
       let isPro = false;
       if (authReq.ownerEmail) {
         const emailHash = hashForLookup(authReq.ownerEmail);
@@ -260,6 +266,14 @@ router.patch(
         return;
       }
 
+      const authReq = req as AuthenticatedRequest;
+      if (authReq.bag?.status === 'over_limit') {
+        res.status(403).json({
+          error: 'This bag is locked. Resubscribe to Pro to regain access.',
+        });
+        return;
+      }
+
       const { bag_name } = req.body;
 
       if (!bag_name || typeof bag_name !== 'string' || bag_name.length > 30) {
@@ -269,7 +283,6 @@ router.patch(
         return;
       }
 
-      const authReq = req as AuthenticatedRequest;
       let isPro = false;
       if (authReq.ownerEmail) {
         const emailHash = hashForLookup(authReq.ownerEmail);
@@ -314,6 +327,13 @@ router.patch(
       }
 
       const authReq = req as AuthenticatedRequest;
+      if (authReq.bag?.status === 'over_limit') {
+        res.status(403).json({
+          error: 'This bag is locked. Resubscribe to Pro to regain access.',
+        });
+        return;
+      }
+
       if (!authReq.ownerEmail) {
         res.status(401).json({ error: 'Authentication required' });
         return;
@@ -393,6 +413,13 @@ router.patch(
       }
 
       const authReq = req as AuthenticatedRequest;
+      if (authReq.bag?.status === 'over_limit') {
+        res.status(403).json({
+          error: 'This bag is locked. Resubscribe to Pro to regain access.',
+        });
+        return;
+      }
+
       if (authReq.ownerEmail) {
         const emailHash = hashForLookup(authReq.ownerEmail);
         const planInfo = await billingService.resolvePlan(emailHash);
@@ -473,6 +500,15 @@ router.patch(
         res.status(400).json({ error: 'Bag ID is required' });
         return;
       }
+
+      const authReq = req as AuthenticatedRequest;
+      if (authReq.bag?.status === 'over_limit') {
+        res.status(403).json({
+          error: 'This bag is locked. Resubscribe to Pro to regain access.',
+        });
+        return;
+      }
+
       const { status } = req.body;
 
       if (!['active', 'disabled'].includes(status)) {

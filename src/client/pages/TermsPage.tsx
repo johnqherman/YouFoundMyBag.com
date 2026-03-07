@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { CURRENT_TERMS_VERSION } from '../constants/legalConstants.js';
 
 function Section({
   title,
@@ -42,7 +43,7 @@ export default function TermsPage() {
               Terms of Service
             </h1>
             <p className="mt-5 text-lg text-regal-navy-600 max-w-2xl mx-auto leading-relaxed">
-              Last updated: March 4, 2026
+              Last updated: {CURRENT_TERMS_VERSION}
             </p>
           </div>
         </div>

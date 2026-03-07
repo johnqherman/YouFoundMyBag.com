@@ -172,6 +172,16 @@ export async function getSubscriptionByStripeCustomerId(
   return result.rows[0] || null;
 }
 
+export async function getEmailByEmailHash(
+  emailHash: string
+): Promise<string | null> {
+  const result = await pool.query(
+    'SELECT owner_email FROM bags WHERE owner_email_hash = $1 AND owner_email IS NOT NULL LIMIT 1',
+    [emailHash]
+  );
+  return result.rows[0]?.owner_email || null;
+}
+
 export async function getBagShortIdsForEmailHash(
   emailHash: string
 ): Promise<string[]> {
@@ -180,4 +190,51 @@ export async function getBagShortIdsForEmailHash(
     [emailHash]
   );
   return result.rows.map((row: { short_id: string }) => row.short_id);
+}
+
+export async function lockExcessBagsForEmailHash(
+  emailHash: string,
+  keepCount: number
+): Promise<void> {
+  await pool.query(
+    `UPDATE bags SET status = 'over_limit'
+     WHERE owner_email_hash = $1
+       AND status = 'active'
+       AND id NOT IN (
+         SELECT id FROM bags
+         WHERE owner_email_hash = $1
+         ORDER BY created_at ASC
+         LIMIT $2
+       )`,
+    [emailHash, keepCount]
+  );
+  logger.info('Locked excess bags for email hash', { emailHash, keepCount });
+}
+
+export async function unlockOverLimitBagsForEmailHash(
+  emailHash: string
+): Promise<void> {
+  await pool.query(
+    `UPDATE bags SET status = 'active'
+     WHERE owner_email_hash = $1
+       AND status = 'over_limit'`,
+    [emailHash]
+  );
+  logger.info('Unlocked over_limit bags for email hash', { emailHash });
+}
+
+export async function stripProFeaturesForEmailHash(
+  emailHash: string
+): Promise<void> {
+  await pool.query(
+    `UPDATE bags
+     SET owner_name_override = NULL,
+         tag_color_start      = NULL,
+         tag_color_end        = NULL,
+         show_branding        = NULL
+     WHERE owner_email_hash = $1
+       AND status != 'over_limit'`,
+    [emailHash]
+  );
+  logger.info('Stripped Pro features from bags', { emailHash });
 }

@@ -81,7 +81,7 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
 
   try {
     logger.info(
-      `Contact form submission from ${email} — attempting to send emails`
+      `Contact form submission from ${email}: attempting to send emails`
     );
     await Promise.all([
       sendMail({
@@ -97,7 +97,7 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
         from: config.EMAIL_CONTACT,
         subject: `We received your message – YouFoundMyBag`,
         html: confirmationHtml,
-        text: `Thanks for reaching out, ${name}!\n\nWe've received your message and will get back to you within 1–2 business days.\n\nYour message:\nSubject: ${subjectLabel}\n\n${message}\n\n— The YouFoundMyBag team`,
+        text: `Thanks for reaching out, ${name}!\n\nWe've received your message and will get back to you within 1–2 business days.\n\nYour message:\nSubject: ${subjectLabel}\n\n${message}\n\nThe YouFoundMyBag team`,
       }),
     ]);
 
