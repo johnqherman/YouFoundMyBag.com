@@ -26,7 +26,7 @@ import { authRoutes } from './features/auth/routes.js';
 import { default as emailPreferencesRoutes } from './features/email-preferences/routes.js';
 import { billingRoutes, webhookHandler } from './features/billing/routes.js';
 import contactRoutes from './features/contact/routes.js';
-import { TIME_MS as t } from 'client/constants/timeConstants.js';
+import { TIME_MS as t } from './client/constants/timeConstants.js';
 
 const app = express();
 
