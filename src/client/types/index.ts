@@ -1,3 +1,5 @@
+import type React from 'react';
+
 export interface CreateBagRequest {
   owner_name?: string;
   bag_name?: string;
@@ -366,7 +368,7 @@ export interface ContactInputProps {
 }
 
 export interface PrivacyWarningProps {
-  message: string;
+  message: React.ReactNode;
   variant?: 'light' | 'dark';
   className?: string;
 }

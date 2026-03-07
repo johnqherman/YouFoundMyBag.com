@@ -70,7 +70,16 @@ export default function BasicInfo({
           <span className="text-regal-navy-500 font-normal">(optional)</span>
         </label>
         <PrivacyWarning
-          message="Avoid sharing personal contact details here."
+          message={
+            <>
+              <span className="sm:hidden">
+                Avoid sharing personal contact details
+              </span>
+              <span className="hidden sm:inline">
+                Avoid sharing personal contact details here.
+              </span>
+            </>
+          }
           variant="light"
           className="mb-3"
         />
