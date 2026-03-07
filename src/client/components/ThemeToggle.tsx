@@ -46,15 +46,17 @@ export default function ThemeToggle() {
               ? 'rotate(90deg) scale(0.5)'
               : 'rotate(0deg) scale(1)',
           }}
-          fill="none"
+          fill="#f5c518"
           viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
+          stroke="rgba(0,0,0,0.45)"
+          strokeWidth={2.5}
+          paintOrder="stroke fill"
         >
+          <circle cx="12" cy="12" r="4" />
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
-            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707"
           />
         </svg>
         <svg
@@ -65,10 +67,10 @@ export default function ThemeToggle() {
               ? 'rotate(0deg) scale(1)'
               : 'rotate(-90deg) scale(0.5)',
           }}
-          fill="none"
+          fill="white"
           viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
+          stroke="white"
+          strokeWidth={1.5}
         >
           <path
             strokeLinecap="round"
