@@ -40,7 +40,7 @@
     "jsdom": "^28.1.0",
     "libphonenumber-js": "^1.12.36",
     "mailgun.js": "^12.7.0",
-    "motion": "^12.34.2",
+    "motion": "^12.35.2",
     "nanoid": "^5.0.4",
     "node-cron": "^4.2.1",
     "nodemailer": "^8.0.1",
