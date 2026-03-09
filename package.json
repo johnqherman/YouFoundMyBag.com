@@ -36,7 +36,7 @@
     "form-data": "^4.0.5",
     "helmet": "^8.1.0",
     "intl-tel-input": "^26.7.6",
-    "ioredis": "^5.9.1",
+    "ioredis": "^5.10.0",
     "jsdom": "^28.1.0",
     "libphonenumber-js": "^1.12.36",
     "mailgun.js": "^12.7.0",
