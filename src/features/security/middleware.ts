@@ -124,7 +124,7 @@ export const securityHeaders = helmet({
       styleSrc: ["'self'", 'https://fonts.googleapis.com'],
       imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
       fontSrc: ["'self'", 'https://fonts.gstatic.com'],
-      connectSrc: ["'self'", 'https://challenges.cloudflare.com'],
+      connectSrc: ["'self'", 'https://challenges.cloudflare.com', 'https://api.stripe.com', 'https://m.stripe.com', 'https://m.stripe.network'],
       frameSrc: ["'self'", 'https://challenges.cloudflare.com', 'https://js.stripe.com', 'https://m.stripe.network'],
       frameAncestors: ["'self'"],
       objectSrc: ["'none'"],
