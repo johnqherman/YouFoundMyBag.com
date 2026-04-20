@@ -120,10 +120,10 @@ export const securityHeaders = helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", 'https://challenges.cloudflare.com'],
-      styleSrc: ["'self'"],
+      scriptSrc: ["'self'", 'https://challenges.cloudflare.com', 'https://static.cloudflareinsights.com', "'sha256-FmgZrlgSCR6Q6Sy6aPz3NQd6FRGkPdquuu99F/K/aFI='"],
+      styleSrc: ["'self'", 'https://fonts.googleapis.com'],
       imgSrc: ["'self'", 'data:', 'https:'],
-      fontSrc: ["'self'"],
+      fontSrc: ["'self'", 'https://fonts.gstatic.com'],
       connectSrc: ["'self'", 'https://challenges.cloudflare.com'],
       frameSrc: ["'self'", 'https://challenges.cloudflare.com'],
       frameAncestors: ["'self'"],
