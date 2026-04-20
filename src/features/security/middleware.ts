@@ -85,23 +85,30 @@ export function qrScanRateLimit() {
 
     const rateLimitKey = `ratelimit:qr-scan:${shortId}`;
 
-    const count = await cacheIncr(rateLimitKey, 'qr-scan-ratelimit');
+    try {
+      const count = await cacheIncr(rateLimitKey, 'qr-scan-ratelimit');
 
-    if (count === 1) {
-      await cacheExpire(rateLimitKey, ts.ONE_HOUR);
-    }
+      if (count === 1) {
+        await cacheExpire(rateLimitKey, ts.ONE_HOUR);
+      }
 
-    if (count > 20) {
-      logger.warn('QR scan rate limit exceeded', {
+      if (count > 20) {
+        logger.warn('QR scan rate limit exceeded', {
+          shortId,
+          count,
+        });
+
+        return res.status(429).json({
+          error: 'Rate limit exceeded',
+          message:
+            'This QR code has been scanned too many times. Please try again later.',
+          retry_after: ts.ONE_HOUR,
+        });
+      }
+    } catch (err) {
+      logger.warn('qrScanRateLimit: Redis unavailable, skipping rate limit check', {
         shortId,
-        count,
-      });
-
-      return res.status(429).json({
-        error: 'Rate limit exceeded',
-        message:
-          'This QR code has been scanned too many times. Please try again later.',
-        retry_after: ts.ONE_HOUR,
+        error: err instanceof Error ? err.message : String(err),
       });
     }
 

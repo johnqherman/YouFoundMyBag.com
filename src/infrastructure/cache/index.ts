@@ -64,6 +64,9 @@ export async function initializeCache(): Promise<void> {
     redisClient.once('ready', () => {
       clearTimeout(timeout);
       logger.info('Redis cache initialized successfully');
+      redisClient!.on('error', (err: RedisError) => {
+        logger.error('Redis client error', { error: err.message, code: err.code });
+      });
       resolve();
     });
 

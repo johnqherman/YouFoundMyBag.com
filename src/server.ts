@@ -154,6 +154,22 @@ async function startServer() {
   }
 }
 
+process.on('uncaughtException', (error) => {
+  logger.error('Uncaught exception — process will exit', {
+    message: error.message,
+    stack: error.stack,
+  });
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason) => {
+  logger.error('Unhandled promise rejection — process will exit', {
+    reason: reason instanceof Error ? reason.message : String(reason),
+    stack: reason instanceof Error ? reason.stack : undefined,
+  });
+  process.exit(1);
+});
+
 process.on('SIGTERM', async () => {
   logger.info('SIGTERM received, shutting down gracefully');
   await closeQueues();
