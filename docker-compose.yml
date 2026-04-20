@@ -1,6 +1,10 @@
 services:
   app:
-    build: .
+    build:
+      context: .
+      args:
+        - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY}
+        - CLOUDFLARE_TURNSTILE_SITE_KEY=${CLOUDFLARE_TURNSTILE_SITE_KEY}
     restart: unless-stopped
     ports:
       - "127.0.0.1:3002:3002"
