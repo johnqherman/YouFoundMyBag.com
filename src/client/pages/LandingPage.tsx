@@ -485,7 +485,7 @@ export default function LandingPage() {
                 </p>
                 <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl text-regal-navy-900 leading-[1.1] tracking-tight">
                   Reunite with your{' '}
-                  <span className="text-regal-navy-600">lost belongings</span> —
+                  <span className="text-regal-navy-600">lost belongings</span>{' '}
                   without giving up your privacy
                 </h1>
                 <p className="mt-6 text-lg sm:text-xl text-regal-navy-600 max-w-xl leading-relaxed">
