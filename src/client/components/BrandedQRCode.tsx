@@ -166,7 +166,7 @@ function getQrOptions(
   return {
     width: size,
     height: size,
-    type: 'svg',
+    type: 'canvas',
     data: url,
     image: imageUrl ?? '/qrcode-center.png',
     dotsOptions: {
@@ -296,38 +296,42 @@ export default function BrandedQRCode({
     let cancelled = false;
 
     async function init() {
-      const centerImageUrl = debouncedColorStart
-        ? await applyGradientToLogo(
+      try {
+        const centerImageUrl = debouncedColorStart
+          ? await applyGradientToLogo(
+              debouncedColorStart,
+              debouncedColorEnd ?? debouncedColorStart
+            )
+          : '/qrcode-center.png';
+
+        if (cancelled) return;
+
+        const downloadQr = new QRCodeStyling(
+          getQrOptions(
+            url,
+            DOWNLOAD_SIZE,
             debouncedColorStart,
-            debouncedColorEnd ?? debouncedColorStart
+            debouncedColorEnd,
+            centerImageUrl
           )
-        : '/qrcode-center.png';
+        );
 
-      if (cancelled) return;
+        const blob = await buildBorderedBlob(downloadQr, centerImageUrl);
+        if (cancelled || !blob) return;
 
-      const downloadQr = new QRCodeStyling(
-        getQrOptions(
-          url,
-          DOWNLOAD_SIZE,
-          debouncedColorStart,
-          debouncedColorEnd,
-          centerImageUrl
-        )
-      );
+        const newBlobUrl = URL.createObjectURL(blob);
+        if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
+        blobUrlRef.current = newBlobUrl;
 
-      const blob = await buildBorderedBlob(downloadQr, centerImageUrl);
-      if (cancelled || !blob) return;
+        if (imgRef.current) {
+          imgRef.current.src = newBlobUrl;
+          setReady(true);
+        }
 
-      const newBlobUrl = URL.createObjectURL(blob);
-      if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
-      blobUrlRef.current = newBlobUrl;
-
-      if (imgRef.current) {
-        imgRef.current.src = newBlobUrl;
-        setReady(true);
+        if (onInstanceReady) onInstanceReady(downloadQr, centerImageUrl);
+      } catch (err) {
+        console.error('BrandedQRCode init failed', err);
       }
-
-      if (onInstanceReady) onInstanceReady(downloadQr, centerImageUrl);
     }
 
     init();
@@ -342,32 +346,6 @@ export default function BrandedQRCode({
       if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
     };
   }, []);
-
-  useEffect(() => {
-    if (!onInstanceReady) return;
-    const cb = onInstanceReady;
-
-    async function refreshDownload() {
-      const centerImageUrl = debouncedColorStart
-        ? await applyGradientToLogo(
-            debouncedColorStart,
-            debouncedColorEnd ?? debouncedColorStart
-          )
-        : '/qrcode-center.png';
-      const downloadQr = new QRCodeStyling(
-        getQrOptions(
-          url,
-          DOWNLOAD_SIZE,
-          debouncedColorStart,
-          debouncedColorEnd,
-          centerImageUrl
-        )
-      );
-      cb(downloadQr, centerImageUrl);
-    }
-
-    refreshDownload();
-  }, [onInstanceReady]);
 
   return (
     <div

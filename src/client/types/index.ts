@@ -14,7 +14,6 @@ export interface CreateBagResponse {
   data: {
     short_id: string;
     url: string;
-    qr_code: string;
     owner_name?: string;
     bag_name?: string;
     created_at: string;
@@ -285,12 +284,6 @@ export interface EmailPreferences {
   conversation_notifications_enabled: boolean;
   reply_notifications_enabled: boolean;
   system_updates_enabled: boolean;
-}
-
-export interface QRCodeData {
-  qr_code: string;
-  url: string;
-  short_id: string;
 }
 
 export type SectionId =

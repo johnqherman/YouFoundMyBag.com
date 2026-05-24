@@ -168,26 +168,6 @@ router.get('/:shortId', qrScanRateLimit(), async (req, res): Promise<void> => {
 });
 
 router.get(
-  '/:bagId/qr-code',
-  verifyBagOwnership,
-  async (req, res): Promise<void> => {
-    try {
-      const authReq = req as AuthenticatedRequest;
-      const bag = authReq.bag;
-      if (!bag) {
-        res.status(500).json({ error: 'Bag not found in request' });
-        return;
-      }
-      const qrData = await bagService.getBagQRCode(bag.short_id);
-      res.json({ success: true, data: qrData });
-    } catch (error) {
-      logger.error('Error getting QR code:', error);
-      res.status(500).json({ error: 'Failed to generate QR code' });
-    }
-  }
-);
-
-router.get(
   '/:bagId/rotation-cooldown',
   verifyBagOwnership,
   async (req, res): Promise<void> => {

@@ -32,7 +32,6 @@ import { formatPhoneNumber } from '../../infrastructure/utils/formatting.js';
 import { api } from '../utils/api.js';
 import { getMinLuminance, isColorTooLight } from '../utils/color.js';
 import type {
-  QRCodeData,
   SectionId,
   NavigationItem,
   BagManagementModalProps,
@@ -184,8 +183,7 @@ export default function BagManagementModal({
     setBagStatus(bag.status);
   }, [bag.status]);
 
-  const [qrData, setQrData] = useState<QRCodeData | null>(null);
-  const [qrLoading, setQrLoading] = useState(false);
+  const qrUrl = `${window.location.origin}/b/${bag.short_id}`;
 
   const [confirmRotate, setConfirmRotate] = useState(false);
   const [rotateLoading, setRotateLoading] = useState(false);
@@ -283,7 +281,6 @@ export default function BagManagementModal({
       setActiveSection('qr');
       setNewName(bag.bag_name || '');
       setOwnerNameOverride(bag.owner_name_override || '');
-      setQrData(null);
       setTagColorStart('');
       setTagColorEnd('');
       setShowBrandingOverride(null);
@@ -310,32 +307,6 @@ export default function BagManagementModal({
   const getAuthToken = () => {
     return localStorage.getItem('owner_session_token');
   };
-
-  const loadQRCode = useCallback(async () => {
-    setQrLoading(true);
-
-    try {
-      const token = getAuthToken();
-      const response = await fetch(`/api/bags/${bag.id}/qr-code`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to load QR code');
-      }
-
-      const data = await response.json();
-      setQrData(data.data);
-    } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : 'Failed to load QR code'
-      );
-    } finally {
-      setQrLoading(false);
-    }
-  }, [bag.id, toast]);
 
   const loadRotationCooldownInfo = useCallback(
     async (force = false) => {
@@ -422,7 +393,6 @@ export default function BagManagementModal({
     if (!isOpen) return;
 
     if (activeSection === 'qr') {
-      if (!qrData) loadQRCode();
       if (!isFree && !appearanceLoaded) loadAppearance();
     } else if (activeSection === 'name') {
       loadCooldownInfo();
@@ -434,8 +404,6 @@ export default function BagManagementModal({
   }, [
     activeSection,
     isOpen,
-    qrData,
-    loadQRCode,
     loadCooldownInfo,
     loadRotationCooldownInfo,
     isFree,
@@ -464,21 +432,19 @@ export default function BagManagementModal({
   if (!isOpen) return null;
 
   const downloadQR = async () => {
-    if (!qrData || !qrInstanceRef.current) return;
+    if (!qrInstanceRef.current) return;
 
     await downloadQRWithBorder(
       qrInstanceRef.current,
       qrCenterImageUrlRef.current,
-      `youfoundmybag-${qrData.short_id}`
+      `youfoundmybag-${bag.short_id}`
     );
 
     toast.success('QR code downloaded!');
   };
 
   const copyShortLink = () => {
-    if (!qrData) return;
-
-    navigator.clipboard.writeText(qrData.url);
+    navigator.clipboard.writeText(qrUrl);
     toast.success('Link copied to clipboard!');
   };
 
@@ -499,8 +465,6 @@ export default function BagManagementModal({
         throw new Error(errorData.error || 'Failed to rotate short ID');
       }
 
-      const data = await response.json();
-      setQrData(data.data);
       toast.success(
         'Short link rotated successfully! Old QR codes will no longer work for new finders.',
         { duration: 7000 }
@@ -770,16 +734,10 @@ export default function BagManagementModal({
               </p>
             </div>
 
-            {qrLoading ? (
-              <div className="flex flex-col items-center justify-center py-12 sm:py-16 text-slate-500">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 border-4 border-slate-200 border-t-regal-navy-600 rounded-full animate-spin mb-4" />
-                <p>Loading QR code...</p>
-              </div>
-            ) : qrData ? (
-              <div className="space-y-4 sm:space-y-6">
+            <div className="space-y-4 sm:space-y-6">
                 <div className="qr-code-container flex justify-center p-4 sm:p-8 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl sm:rounded-2xl border-2 border-slate-200">
                   <BrandedQRCode
-                    url={qrData.url}
+                    url={qrUrl}
                     size={320}
                     colorStart={tagColorStart || undefined}
                     colorEnd={tagColorEnd || undefined}
@@ -795,7 +753,7 @@ export default function BagManagementModal({
                   <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                     <input
                       type="text"
-                      value={qrData.url}
+                      value={qrUrl}
                       readOnly
                       className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 border border-slate-300 rounded-lg bg-white text-slate-900 font-mono text-xs sm:text-sm"
                     />
@@ -991,7 +949,6 @@ export default function BagManagementModal({
                   </button>
                 </div>
               </div>
-            ) : null}
           </div>
         );
 
